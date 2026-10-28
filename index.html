@@ -372,7 +372,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v605 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v606 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -6083,17 +6083,14 @@
 
     // 타점 목록 (도감용)
     const REVIEW_SETUPS = [
-      {key: "step_2", name: "거래량 폭발"},
-      {key: "step_2_alt", name: "상승 다이버전스 파동 전환"},
-      {key: "step_2_alt_db", name: "쌍바닥 즉시진입"},
-      {key: "step_2_alt_slow", name: "질질질 하락 반전"},
-      {key: "step_3_alt", name: "다이버 돌파 리테 롱"},
+      {key: "step_2_alt", name: "저점상승 돌파리테"},
+      {key: "step_2_alt_db", name: "쌍바닥"},
+      {key: "step_2_alt_slow", name: "질질질"},
+      {key: "step_3_alt", name: "저점상승 다이버"},
       {key: "step_3", name: "크트키"},
-      {key: "step_3_fast", name: "15M 다이버"},
+      {key: "step_3_fast", name: "다이버 롱"},
       {key: "step_3_type_d", name: "리테 롱"},
       {key: "step_3_type_e", name: "다이버 숏"},
-      {key: "step_3_type_e_long", name: "저점 상승 다이버전스 롱"},
-      {key: "step_3_alt_short", name: "다이버 붕괴 리테 숏"},
       {key: "step_3_type_f", name: "리테 숏"},
       {key: "step_3_type_g", name: "1강"}
     ];
@@ -6420,6 +6417,13 @@
         if (Array.isArray(arr)) {
           reviewDatabase.length = 0;
           arr.forEach(function(r) { reviewDatabase.push(r); });
+          // v606: 복기 분류 합치기 (없어진 분류의 기록을 합칠 분류로 이동)
+          let merged = 0;
+          reviewDatabase.forEach(function(r) {
+            if (r.setupKey === "step_3_type_e_long") { r.setupKey = "step_3_alt"; merged++; }
+            else if (r.setupKey === "step_3_alt_short") { r.setupKey = "step_3_type_f"; merged++; }
+          });
+          if (merged > 0) saveReviewsToStorage();
         }
       } catch (e) {}
     }
@@ -6711,6 +6715,9 @@
           let added = 0;
           arr.forEach(function(r) {
             if (r && r.id && r.setupKey) {
+              // v606: 없어진 복기 분류는 합칠 분류로 이동
+              if (r.setupKey === "step_3_type_e_long") r.setupKey = "step_3_alt";
+              else if (r.setupKey === "step_3_alt_short") r.setupKey = "step_3_type_f";
               if (!reviewDatabase.some(function(x) { return x.id === r.id; })) {
                 reviewDatabase.push(r);
                 added++;
@@ -9533,7 +9540,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v605 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v606 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
