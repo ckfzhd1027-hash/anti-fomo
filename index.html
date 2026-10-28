@@ -372,7 +372,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v606 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v607 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -5381,14 +5381,7 @@
         modal.classList.remove("flex");
       }
       stepHistory = [];
-      // v175: 진입 티켓을 닫으면 청산 관리 화면으로 전환 (롱/숏 방향 판별)
-      // ※ loadStep("step_1")이 currentStepKey를 덮기 전에 방향을 먼저 확정
-      var liqDir = "long";
-      try {
-        if (typeof Liquidation !== "undefined" && Liquidation.SHORT_KEYS.indexOf(currentStepKey) !== -1) liqDir = "short";
-      } catch (e) {}
       loadStep("step_1", false);
-      if (typeof Liquidation !== "undefined") Liquidation.show(liqDir);
     }
 
 
@@ -9540,7 +9533,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v606 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v607 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -9745,7 +9738,6 @@
 
 
 
-  <!-- [v175] 청산 관리 모듈 -->
   <script id="logic-chart-markers">
     // ===== 차트 마커 모듈 (v193) =====
     // 체크리스트 아이콘을 예시차트 이미지 위에 배치하고, 체크 시 해당 마커가 초록으로 점멸 + 유지됨.
@@ -10137,244 +10129,6 @@
     // 초기 렌더 (이미 그려진 슬롯 대상) + 화면 크기 변경 시 레이어 위치 재계산
     ChartMarkers.renderAll();
     window.addEventListener("resize", function() { ChartMarkers.renderAll(); });
-  </script>
-
-  <script id="logic-liquidation">
-    /* ==================== 청산 관리 (Liquidation Manager) ====================
-       진입 티켓을 닫으면 표시되는 청산 실행 화면.
-       - 상황 탭 5개 (전부 탭, 숫자 입력 없음)
-       - 각 탭 → OX 게이트 (X는 5초 강제 락다운, 포지션 종료의 X만 제외)
-       - O 처리: finish → 메인화면 복귀 / done → 완료 피드백 후 목록 복귀
-    */
-    const Liquidation = {
-      direction: "long",
-      currentGate: null,
-      SHORT_KEYS: ["step_3_type_e", "step_3_alt_short", "step_3_type_f"],
-
-      situations: [
-        {
-          key: "sl_hit", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-white"><path d="M7.86 3h8.28L21 7.86v8.28L16.14 21H7.86L3 16.14V7.86L7.86 3z"/><line x1="12" y1="7.5" x2="12" y2="12.5"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>', title: "SL 닿음",
-          btnClass: "from-red-500/25 to-red-600/10 border-red-500/50",
-          iconBg: "bg-red-500",
-          question: "SL에 닿았다. 기계적으로 전량 청산한다.",
-          oLabel: "전량 청산", oSub: "청산 완료 → 메인화면",
-          xLabel: "청산 안 함",
-          xReason: "🚨 SL을 무시하고 버티는 건 자살행위야. 진입 근거가 깨졌으면 기계적으로 잘라. 5초간 손 떼고 진정해.",
-          onO: "finish", onX: "lockdown"
-        },
-        {
-          key: "tp1_hit", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-white"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>', title: "TP1 도달",
-          btnClass: "from-emerald-500/25 to-emerald-600/10 border-emerald-500/50",
-          iconBg: "bg-emerald-500",
-          question: "TP1에서 1차 청산하고, TP2를 다음 저항대로 이동한다.",
-          oLabel: "1차 청산 완료", oSub: "TP2 = 다음 저항대",
-          xLabel: "안 함",
-          xReason: "🚨 TP1에서 1차 청산을 안 하는 건 탐욕이야. 계획대로 덜어내고 나머지로 다음 저항대를 노려. 5초간 손 떼.",
-          onO: "done", onX: "lockdown"
-        },
-        {
-          key: "r1_hit", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-white"><polyline points="3 17.5 9 11.5 13 15.5 21 6.5"/><polyline points="15.5 6.5 21 6.5 21 12"/></svg>', title: "+1R 도달",
-          btnClass: "from-amber-500/25 to-amber-600/10 border-amber-500/50",
-          iconBg: "bg-amber-500",
-          question: "수익 +1R 도달. SL을 본전으로 이동한다.",
-          oLabel: "본전 이동 완료", oSub: "SL → 진입가",
-          xLabel: "안 함",
-          xReason: "🚨 +1R에서 본전 스탑을 안 거는 건 공짜 보험을 버리는 거야. 5초간 손 떼고 원칙대로 해.",
-          onO: "done", onX: "lockdown"
-        },
-        {
-          key: "impulse", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-white"><path d="M13 2.5L4.8 13.2h6L9.6 21.5l8.6-11.2h-6.2L13 2.5z"/></svg>', title: "청산 충동 옴",
-          btnClass: "from-violet-500/25 to-violet-600/10 border-violet-500/50",
-          iconBg: "bg-violet-500",
-          question: "충동이다. 원칙대로 홀딩한다.",
-          oLabel: "원칙 유지", oSub: "차트로 복귀",
-          xLabel: "충동대로 청산",
-          xReason: "🚨 충동대로 청산하면 ANTI-FOMO를 쓰는 의미가 없어. SL·TP는 진입할 때 이미 정했어. 5초간 손 떼.",
-          onO: "done", onX: "lockdown"
-        },
-        {
-          key: "position_closed", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-white"><line x1="5" y1="22" x2="5" y2="3"/><path d="M5 3.5c4.5-2.2 9 2.2 13.5 0v8.6c-4.5 2.2-9-2.2-13.5 0"/></svg>', title: "포지션 종료",
-          btnClass: "from-slate-500/25 to-slate-600/10 border-slate-500/50",
-          iconBg: "bg-slate-500",
-          question: "포지션을 종료한다.",
-          oLabel: "종료", oSub: "메인화면으로 복귀",
-          xLabel: "취소",
-          xReason: "",
-          onO: "finish", onX: "back"
-        }
-      ],
-
-      show: function(direction) {
-        this.direction = direction === "short" ? "short" : "long";
-        var overlay = document.getElementById("liquidationOverlay");
-        if (!overlay) {
-          this.build();
-          overlay = document.getElementById("liquidationOverlay");
-        }
-        try {
-          localStorage.setItem("antifomo_last_mode", "liquidation");
-          localStorage.setItem("antifomo_liq_direction", this.direction);
-        } catch (e) {}
-        this.currentGate = null;
-        this.renderSituations();
-        var liqBodyEl = document.getElementById("liqBody");
-        if (liqBodyEl) liqBodyEl.scrollTop = 0;
-        overlay.classList.remove("hidden");
-        overlay.classList.add("flex");
-      },
-
-      hide: function() {
-        var overlay = document.getElementById("liquidationOverlay");
-        if (overlay) {
-          overlay.classList.add("hidden");
-          overlay.classList.remove("flex");
-        }
-        this.currentGate = null;
-      },
-
-      build: function() {
-        var overlay = document.createElement("div");
-        overlay.id = "liquidationOverlay";
-        overlay.className = "fixed inset-0 z-40 bg-[#05070c] hidden flex-col";
-        overlay.innerHTML =
-          '<div class="flex-none px-4 pt-[max(16px,env(safe-area-inset-top))] pb-3 border-b-2 border-slate-800 flex items-center justify-between">' +
-            '<div class="flex items-center gap-2">' +
-              '<span class="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_8px_#38bdf8]"></span>' +
-              '<span class="text-lg font-black tracking-tight text-white">청산 관리</span>' +
-              '<span id="liqDirBadge" class="text-[11px] font-black px-2 py-0.5 rounded-full"></span>' +
-            '</div>' +
-            '<button onclick="MainScreen.goHome()" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white flex items-center justify-center cursor-pointer" title="홈으로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M3.5 11L12 3.5L20.5 11"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.5"/><path d="M9.5 21v-6.5h5V21"/></svg></button>' +
-          '</div>' +
-          '<div class="px-4 pt-3">' +
-            '<div class="text-center text-[11px] font-bold text-slate-500 tracking-tight">SL=직전 지지대 · TP1=직전 저항대 · TP2=다음 저항대</div>' +
-          '</div>' +
-          '<div id="liqBody" class="flex-1 overflow-y-auto px-4 py-3"></div>' +
-          '<div class="flex-none px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2">' +
-            '<div class="text-center text-[10px] text-slate-600 font-bold">상황이 생기거나 충동이 오면 탭 하나 → O/X 하나, 총 2탭</div>' +
-          '</div>';
-        document.body.appendChild(overlay);
-        this.updateDirBadge();
-      },
-
-      updateDirBadge: function() {
-        var badge = document.getElementById("liqDirBadge");
-        if (!badge) return;
-        var isLong = this.direction === "long";
-        badge.className = "text-[11px] font-black px-2 py-0.5 rounded-full " + (isLong ? "bg-emerald-500 text-white" : "bg-rose-500 text-white");
-        badge.innerText = isLong ? "LONG" : "SHORT";
-      },
-
-      renderSituations: function() {
-        this.updateDirBadge();
-        var body = document.getElementById("liqBody");
-        if (!body) return;
-        var html = '<div class="space-y-3 max-w-md mx-auto">';
-        this.situations.forEach(function(s) {
-          html +=
-            '<button onclick="Liquidation.openGate(\'' + s.key + '\')" class="w-full text-left p-4 rounded-2xl bg-gradient-to-br ' + s.btnClass + ' border-2 hover:brightness-125 active:scale-[0.98] transition-all cursor-pointer">' +
-              '<div class="flex items-center gap-4">' +
-                '<div class="w-12 h-12 rounded-xl ' + s.iconBg + ' flex items-center justify-center text-2xl shrink-0">' + s.icon + '</div>' +
-                '<div class="flex-1">' +
-                  '<div class="text-lg font-black text-white mb-0.5">' + s.title + '</div>' +
-                  '<div class="text-xs text-slate-400 font-bold">' + s.question + '</div>' +
-                '</div>' +
-                '<div class="text-slate-500 text-xl">→</div>' +
-              '</div>' +
-            '</button>';
-        });
-        html += '</div>';
-        body.innerHTML = html;
-      },
-
-      getSituation: function(key) {
-        for (var i = 0; i < this.situations.length; i++) {
-          if (this.situations[i].key === key) return this.situations[i];
-        }
-        return null;
-      },
-
-      openGate: function(key) {
-        var s = this.getSituation(key);
-        if (!s) return;
-        this.currentGate = key;
-        if (typeof playBranchSound === "function") playBranchSound();
-        var body = document.getElementById("liqBody");
-        if (!body) return;
-        body.innerHTML =
-          '<div class="max-w-md mx-auto flex flex-col items-center pt-4">' +
-            '<div class="w-16 h-16 rounded-2xl ' + s.iconBg + ' flex items-center justify-center text-3xl mb-4">' + s.icon + '</div>' +
-            '<div class="text-xl font-black text-white text-center mb-1">' + s.title + '</div>' +
-            '<p class="text-sm font-bold text-slate-300 text-center leading-relaxed mb-8 px-2">' + s.question + '</p>' +
-            '<div class="w-full space-y-3">' +
-              '<button onclick="Liquidation.answerGate(true)" class="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-white font-black text-lg shadow-2xl cursor-pointer transition-all">' +
-                '<div>O · ' + s.oLabel + '</div>' +
-                '<div class="text-xs font-bold text-emerald-100 mt-0.5">' + s.oSub + '</div>' +
-              '</button>' +
-              '<button onclick="Liquidation.answerGate(false)" class="w-full py-4 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-700 hover:from-rose-400 hover:to-rose-600 active:scale-[0.98] text-white font-black text-lg shadow-2xl cursor-pointer transition-all">' +
-                '<div>X · ' + s.xLabel + '</div>' +
-                '<div class="text-xs font-semibold text-rose-100 mt-0.5">' + (s.onX === "lockdown" ? "5초 강제 락다운" : "상황 목록으로 돌아가기") + '</div>' +
-              '</button>' +
-              '<button onclick="Liquidation.backToList()" class="w-full py-2 text-slate-500 text-sm font-bold hover:text-slate-300 cursor-pointer">← 상황 목록으로</button>' +
-            '</div>' +
-          '</div>';
-      },
-
-      answerGate: function(ok) {
-        var s = this.getSituation(this.currentGate);
-        if (!s) return;
-        if (ok) {
-          if (typeof playReadySound === "function") playReadySound();
-          if (s.onO === "finish") {
-            this.finishToReview();
-          } else {
-            var body = document.getElementById("liqBody");
-            if (body) {
-              body.innerHTML =
-                '<div class="max-w-md mx-auto flex flex-col items-center pt-16">' +
-                  '<div class="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center text-3xl mb-4">✓</div>' +
-                  '<div class="text-lg font-black text-white">완료</div>' +
-                  '<div class="text-sm font-bold text-slate-400 mt-1">' + s.oSub + '</div>' +
-                '</div>';
-            }
-            var self = this;
-            setTimeout(function() { self.backToList(); }, 1200);
-          }
-        } else {
-          if (s.onX === "lockdown") {
-            this.lockdown(s.xReason);
-          } else {
-            this.backToList();
-          }
-        }
-      },
-
-      backToList: function() {
-        this.currentGate = null;
-        this.renderSituations();
-      },
-
-      // v183: 청산 종료 후 복기 자동 연결 제거 (사용자 지시) — 메인화면으로 복귀
-      finishToReview: function() {
-        this.hide();
-        try {
-          localStorage.removeItem("antifomo_last_mode");
-          localStorage.removeItem("antifomo_liq_direction");
-        } catch (e) {}
-        if (typeof MainScreen !== "undefined") MainScreen.show();
-      },
-
-      lockdown: function(reason) {
-        if (typeof playAlertSiren === "function") playAlertSiren();
-        var reasonEl = document.getElementById("warningDetailReason");
-        if (reasonEl) reasonEl.innerText = reason;
-        var w = document.getElementById("warningModal");
-        if (w) {
-          w.classList.remove("hidden");
-          w.classList.add("flex");
-        }
-        if (typeof startEmergencyLockdown === "function") startEmergencyLockdown(5);
-      }
-    };
   </script>
 
   <!-- [6] 경고 모달 및 캐릭터 로직 -->
