@@ -372,7 +372,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v618 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v619 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9139,7 +9139,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v618 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v619 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -12600,8 +12600,8 @@ const StepGuide = (() => {
     s += HL(192, 54);
     return svgWrap(s);
   }
-  function sceneBreakVol() {
-    // 채널 돌파 + 거래량 폭발, 몸통 다양화: 채널 안에서 하락 2개(중간8·도지1)·상승 2개(장대13·짧은4)·하락 2개(장대16·도지1)·상승 2개(중간9·도지2)로 오가다 돌파 3개(장대20·중간8·도지1)로 상단을 뚫고, 눌림(중간9) 후 상승 2개(짧은4·도지1). 돌파 자리 거래량 막대가 가장 크게 터짐. 강조: 돌파 종가
+  function sceneBreakVolLong() {
+    // v619 롱 버전 (상단 돌파). 채널 돌파 + 거래량 폭발, 몸통 다양화: 채널 안에서 하락 2개(중간8·도지1)·상승 2개(장대13·짧은4)·하락 2개(장대16·도지1)·상승 2개(중간9·도지2)로 오가다 돌파 3개(장대20·중간8·도지1)로 상단을 뚫고, 눌림(중간9) 후 상승 2개(짧은4·도지1). 돌파 자리 거래량 막대가 가장 크게 터짐. 강조: 돌파 종가
     let s = GRID();
     s += '<line x1="10" y1="62" x2="190" y2="62" stroke="#475569" stroke-width="1" opacity="0.6"/>';
     s += LDash(10, 28, 190, 16, VIOLET, 0.05, 0.15);
@@ -12635,7 +12635,50 @@ const StepGuide = (() => {
     s += V(164, 10, SLATE, STAG[11][0], STAG[11][1]);
     s += V(178, 11, SLATE, STAG[12][0], STAG[12][1]);
     s += V(192, 9, SLATE, STAG[13][0], STAG[13][1]);
-    return svgWrap(s);
+    return s;
+  }
+  function sceneBreakVolShort() {
+    // v619 숏 버전 (하단 돌파, 롱의 상하 거울상: y'=90-y, 색 반전, 거래량은 동일)
+    let s = GRID();
+    s += '<line x1="10" y1="28" x2="190" y2="28" stroke="#475569" stroke-width="1" opacity="0.6"/>';
+    s += LDash(10, 30, 190, 42, VIOLET, 0.05, 0.15);
+    s += LDash(10, 62, 190, 74, VIOLET, 0.05, 0.15);
+    s += C(10, 46, 54, 44, 56, GREEN, STAG[0][0], STAG[0][1]);
+    s += C(24, 45, 46, 40, 50, GREEN, STAG[1][0], STAG[1][1]);
+    s += C(38, 45, 58, 42, 60, RED, STAG[2][0], STAG[2][1]);
+    s += C(52, 58, 62, 54, 64, RED, STAG[3][0], STAG[3][1]);
+    s += C(66, 46, 62, 42, 64, GREEN, STAG[4][0], STAG[4][1]);
+    s += C(80, 45, 46, 40, 50, GREEN, STAG[5][0], STAG[5][1]);
+    s += C(94, 45, 54, 42, 56, RED, STAG[6][0], STAG[6][1]);
+    s += C(108, 54, 56, 50, 60, RED, STAG[7][0], STAG[7][1]);
+    s += C(122, 56, 76, 54, 80, RED, STAG[8][0], STAG[8][1]);
+    s += C(136, 76, 84, 74, 86, RED, STAG[9][0], STAG[9][1]);
+    s += C(150, 84, 85, 80, 88, RED, STAG[10][0], STAG[10][1]);
+    s += C(164, 76, 85, 72, 88, GREEN, STAG[11][0], STAG[11][1]);
+    s += C(178, 76, 80, 74, 82, RED, STAG[12][0], STAG[12][1]);
+    s += C(192, 80, 81, 76, 84, RED, STAG[13][0], STAG[13][1]);
+    s += HL(122, 76);
+    s += V(10, 8, SLATE, STAG[0][0], STAG[0][1]);
+    s += V(24, 10, SLATE, STAG[1][0], STAG[1][1]);
+    s += V(38, 9, SLATE, STAG[2][0], STAG[2][1]);
+    s += V(52, 11, SLATE, STAG[3][0], STAG[3][1]);
+    s += V(66, 10, SLATE, STAG[4][0], STAG[4][1]);
+    s += V(80, 12, SLATE, STAG[5][0], STAG[5][1]);
+    s += V(94, 11, SLATE, STAG[6][0], STAG[6][1]);
+    s += V(108, 10, SLATE, STAG[7][0], STAG[7][1]);
+    s += V(122, 24, AMBER, STAG[8][0], STAG[8][1]);
+    s += V(136, 14, SLATE, STAG[9][0], STAG[9][1]);
+    s += V(150, 12, SLATE, STAG[10][0], STAG[10][1]);
+    s += V(164, 10, SLATE, STAG[11][0], STAG[11][1]);
+    s += V(178, 11, SLATE, STAG[12][0], STAG[12][1]);
+    s += V(192, 9, SLATE, STAG[13][0], STAG[13][1]);
+    return s;
+  }
+  function sceneBreakVol() {
+    // v619: 롱·숏 5초씩 번갈아 반복 (10초 이산 토글, 내부 5초 루프와 동기)
+    const d2 = (parseFloat(DUR) * 2) + 's';
+    function tog(a, b) { return '<animate attributeName="opacity" values="' + a + ';' + b + '" keyTimes="0;0.5" calcMode="discrete" dur="' + d2 + '" repeatCount="indefinite"/>'; }
+    return svgWrap('<g opacity="1">' + tog(1, 0) + sceneBreakVolLong() + '</g><g opacity="0">' + tog(0, 1) + sceneBreakVolShort() + '</g>');
   }
   const PREVIEW = { 0: sceneSR(), 3: sceneFib(), 4: sceneCandles(), 5: sceneDraw(), 6: sceneRebound(), 7: sceneBreakVol() };
 
