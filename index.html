@@ -372,7 +372,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v613 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v614 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1043,7 +1043,7 @@
     <div id="warningContent" class="w-full flex flex-col items-center gap-3 my-auto">
     <div class="w-full flex items-center justify-center">
       <div class="flex items-center space-x-2.5 bg-red-950/95 border-2 border-red-500 px-5 py-2 rounded-full shadow-2xl">
-        <i class="ph-fill ph-warning-octagon text-2xl sm:text-3xl text-yellow-300 animate-bounce"></i>
+        <i class="ph-bold ph-warning-octagon text-2xl sm:text-3xl text-yellow-300 animate-bounce"></i>
         <span class="text-sm sm:text-base font-black uppercase tracking-tight text-red-100 font-mono">
           EMERGENCY LOCKDOWN
         </span>
@@ -1060,7 +1060,7 @@
 
       <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#0c0d14] border-4 border-yellow-400 shadow-[0_0_35px_rgba(250,204,21,0.6)] p-0.5 flex items-center justify-center overflow-hidden cursor-pointer group" onclick="document.getElementById('characterFileInput').click()" title="터치하여 원본 사진 등록/변경">
         <div id="characterDisplayArea" class="w-full h-full rounded-xl overflow-hidden flex items-center justify-center bg-black">
-          <img src="image_2.png" alt="경고 캐릭터" class="w-full h-full object-cover rounded-xl" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWEwOTBhIi8+PHRleHQgeD0iNTAiIHk9IjUwIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSI4IiBmaWxsPSIjZmRhNGFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjMiPmltYWdlXzIucG5nPC90ZXh0Pjwvc3ZnPg==';"/>
+          <div class="w-full h-full flex items-center justify-center bg-black rounded-xl text-4xl">📷</div>
         </div>
         <input type="file" id="characterFileInput" accept="image/*" class="hidden" onchange="handleCharacterUpload(event)"/>
         <span class="absolute inset-0 rounded-xl border-2 border-yellow-300 animate-ping opacity-30 pointer-events-none"></span>
@@ -9146,7 +9146,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v613 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v614 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
