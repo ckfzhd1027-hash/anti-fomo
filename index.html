@@ -320,6 +320,8 @@
   0%, 100% { box-shadow: 0 0 0 2px var(--alarm-color, #facc15), 0 0 12px 2px var(--alarm-color, #facc15); }
   50% { box-shadow: 0 0 0 2px transparent, 0 0 0 0 transparent; }
 }
+/* v609: 복기 번호별 보기 — 숫자 가운데 보정 (측정: 숫자가 0.06em 아래로 치우침) */
+.num-badge-num { transform: translateY(-0.06em); }
 </style>
 </head>
 <body id="appBody" class="bg-slate-50 dark:bg-[#080b11] text-slate-900 dark:text-white flex flex-col h-full select-none transition-colors duration-300">
@@ -372,7 +374,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v608 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v609 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -6175,6 +6177,7 @@
       h += '</button>';
       h += '<button onclick="deleteReview(\'' + r.id + '\')" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/70 text-white text-[10px] flex items-center justify-center cursor-pointer">×</button>';
       h += '<button onclick="openReviewCountEdit(\'' + r.id + '\')" class="absolute top-0.5 left-0.5 px-1.5 h-5 rounded-full bg-black/70 text-white text-[10px] font-black flex items-center justify-center cursor-pointer">수정</button>';
+      h += '<button onclick="openNumberedReview(\'' + r.id + '\')" class="absolute bottom-1 right-1 px-1.5 h-5 rounded-full bg-amber-500/90 text-white text-[10px] font-black flex items-center justify-center cursor-pointer">번호별</button>';
       h += '</div>';
       return h;
     }
@@ -6753,6 +6756,102 @@
         window._currentReviewIdx = idx >= 0 ? idx : 0;
         openChartLightboxWithSrc(original, originals, idx >= 0 ? idx : 0);
       }
+    }
+    // v609: 복기 번호별 보기 — 진입티켓 체크 내용 그대로, 번호 색은 차트 동그라미 색
+    // 4번은 라이트모드에서 하양이 안 보여서 slate-700/다크모드 하양으로 나눔 (나머지는 라이트·다크 공통)
+    const TICKET_CHECKS = [
+      {group: "거래량 폭발 검증", n: 1, cls: "border-red-500 text-red-500", text: "직전 캔들 평균 대비 5배 이상 폭발"},
+      {group: "거래량 폭발 검증", n: 2, cls: "border-green-500 text-green-500", text: "거래량 지표 기준선 상향 돌파 확인"},
+      {group: "거래량 폭발 검증", n: 3, cls: "border-yellow-500 text-yellow-500", text: "15m 거래량 장대 가속화 확인"},
+      {group: "상승 다이버전스 파동 전환", n: 4, cls: "border-slate-700 dark:border-white text-slate-700 dark:text-white", text: "15분봉 이상 RSI 상승 다이버전스 확정"},
+      {group: "상승 다이버전스 파동 전환", n: 5, cls: "border-blue-500 text-blue-500", text: "저점 올림(HL) 파동 전환 구조 확인"},
+      {group: "돌파 리테스트 타점 컨펌", n: 6, cls: "border-orange-500 text-orange-500", text: "주변 평균보다 압도적인 거래량으로 수평 돌파 컨펌"},
+      {group: "돌파 리테스트 타점 컨펌", n: 7, cls: "border-purple-500 text-purple-500", text: "수평 리테스트 음봉 확인 후 양봉 컨펌"},
+      {group: "돌파 리테스트 타점 컨펌", n: 8, cls: "border-red-500 text-red-500", text: "다음 봉 '밑꼬리' 진입 & 이전 양봉 하단 스탑로스(SL)"},
+      {group: "돌파 리테스트 타점 컨펌", n: 9, cls: "border-green-500 text-green-500", text: "손익비 1:1 이상 확보"}
+    ];
+    function openNumberedReview(id) {
+      const r = reviewDatabase.find(function(x) { return x.id === id; });
+      if (!r) return;
+      closeNumberedReview();
+      const setup = REVIEW_SETUPS.find(function(x) { return x.key === r.setupKey; });
+      const badge = reviewBadgeHtml(r, 'text-emerald-600 dark:text-emerald-400', 'text-red-500');
+      let h = '<div class="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center p-4" style="z-index:120" onclick="if(event.target===this)closeNumberedReview()">';
+      h += '<div class="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">';
+      h += '<div class="flex items-center gap-2 mb-3"><span class="font-black text-slate-800 dark:text-slate-100 text-sm flex-1 min-w-0">' + (setup ? setup.name : r.setupKey) + '</span>' + badge + '<button onclick="closeNumberedReview()" class="w-7 h-7 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 font-black cursor-pointer">×</button></div>';
+      let curGroup = '';
+      TICKET_CHECKS.forEach(function(c) {
+        if (c.group !== curGroup) {
+          curGroup = c.group;
+          h += '<div class="flex items-center gap-1.5 mt-4 mb-2"><span class="w-2 h-2 bg-amber-400 rounded-[2px]"></span><span class="text-[13px] font-black text-amber-500 dark:text-amber-400">' + curGroup + '</span></div>';
+        }
+        const img = (r.numImages && r.numImages[c.n]) || null;
+        h += '<div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3 mb-2">';
+        h += '<div class="flex items-center gap-2.5">';
+        h += '<span class="shrink-0 w-8 h-8 rounded-full border-2 ' + c.cls + ' text-[17px] font-black flex items-center justify-center"><span class="num-badge-num">' + c.n + '</span></span>';
+        h += '<span class="flex-1 min-w-0 text-[14px] font-extrabold text-slate-800 dark:text-slate-100 leading-snug">' + c.text + '</span>';
+        if (img) h += '<button onclick="removeNumImage(\'' + r.id + '\',' + c.n + ')" class="shrink-0 w-6 h-6 rounded-full bg-black/60 text-white text-xs flex items-center justify-center cursor-pointer">×</button>';
+        else h += '<button onclick="triggerNumImageUpload(\'' + r.id + '\',' + c.n + ')" class="shrink-0 text-[11px] font-black text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-600 rounded-lg px-2 py-1 cursor-pointer">+ 이미지</button>';
+        h += '</div>';
+        if (img) h += '<button onclick="openNumImageLightbox(\'' + r.id + '\',' + c.n + ')" class="w-full cursor-pointer block"><img src="' + img.price + '" class="w-full rounded-lg mt-2.5" alt="' + c.n + '번 이미지"></button>';
+        h += '</div>';
+      });
+      h += '</div></div>';
+      const wrap = document.createElement('div');
+      wrap.id = 'numberedReviewModal';
+      wrap.innerHTML = h;
+      document.body.appendChild(wrap);
+    }
+    function closeNumberedReview() {
+      try { const m = document.getElementById("numberedReviewModal"); if (m) m.remove(); } catch (e) {}
+    }
+    function triggerNumImageUpload(reviewId, n) {
+      window.__numTarget = {id: reviewId, n: n};
+      let input = document.getElementById("numImageInput");
+      if (!input) {
+        input = document.createElement("input");
+        input.type = "file";
+        input.id = "numImageInput";
+        input.accept = "image/*";
+        input.style.display = "none";
+        input.onchange = handleNumImageSelect;
+        document.body.appendChild(input);
+      }
+      input.value = "";
+      input.click();
+    }
+    function handleNumImageSelect(e) {
+      const files = e.target.files;
+      const t = window.__numTarget;
+      if (!files || !files.length || !t) return;
+      const r = reviewDatabase.find(function(x) { return x.id === t.id; });
+      if (!r) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const original = ev.target.result;
+        compressImage(original, function(compressed) {
+          if (!r.numImages) r.numImages = {};
+          r.numImages[t.n] = {price: compressed, priceOriginal: original};
+          saveReviewsToStorage();
+          openNumberedReview(t.id);
+        });
+      };
+      reader.readAsDataURL(files[0]);
+    }
+    function removeNumImage(reviewId, n) {
+      const r = reviewDatabase.find(function(x) { return x.id === reviewId; });
+      if (!r || !r.numImages) return;
+      delete r.numImages[n];
+      saveReviewsToStorage();
+      openNumberedReview(reviewId);
+    }
+    function openNumImageLightbox(reviewId, n) {
+      const r = reviewDatabase.find(function(x) { return x.id === reviewId; });
+      if (!r || !r.numImages || !r.numImages[n]) return;
+      const img = r.numImages[n];
+      const src = img.priceOriginal || img.price;
+      closeNumberedReview(); // 라이트박스(z-50)가 번호 모달(z-120) 뒤에 가려지지 않게 먼저 닫음
+      openChartLightboxWithSrc(src, [src], 0);
     }
     // ---- 스터디: 필터 + 퀴즈 ----
     function renderReviewStudy() {
@@ -9533,7 +9632,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v608 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v609 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
