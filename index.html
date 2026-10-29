@@ -372,7 +372,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v610 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v612 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -5693,7 +5693,8 @@
       {key: "step_3_type_d", name: "리테 롱"},
       {key: "step_3_type_e", name: "다이버 숏"},
       {key: "step_3_type_f", name: "리테 숏"},
-      {key: "step_3_type_g", name: "1강"}
+      {key: "step_3_type_g", name: "1강"},
+      {key: "npc_manual", name: "npc 메뉴얼"}
     ];
 
     let currentReviewTab = 'encyclopedia';
@@ -6378,6 +6379,7 @@
     function drawNumberedTicket(canvas) {
       if (!canvas) return;
       const W = 900, PAD = 48, BADGE_R = 22, GAP = 20;
+      const ROW_GAP = 36, GROUP_GAP = 40, GROUP_H = 60; // v612: 내용 간 위아래 간격 확대
       const BG = '#0b1220', TITLE_C = '#f1f5f9', GROUP_C = '#fbbf24', TEXT_C = '#e2e8f0';
       const FONT = 'Pretendard, -apple-system, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
       const GROUP_FS = 28, TEXT_FS = 30, TEXT_LH = 40;
@@ -6403,10 +6405,10 @@
       });
       let h = PAD + 110;
       rows.forEach(function(r) {
-        if (r.group) h += 82;
-        else h += Math.max(BADGE_R * 2, r.lines.length * TEXT_LH) + 24;
+        if (r.group) h += GROUP_GAP + GROUP_H;
+        else h += Math.max(BADGE_R * 2, r.lines.length * TEXT_LH) + ROW_GAP;
       });
-      h = h - 24 + PAD;
+      h = h - ROW_GAP + PAD;
       canvas.width = W; canvas.height = h;
       const ctx = canvas.getContext('2d');
       ctx.fillStyle = BG; ctx.fillRect(0, 0, W, h);
@@ -6420,13 +6422,13 @@
       ctx.textBaseline = 'middle';
       rows.forEach(function(r) {
         if (r.group) {
-          y += 30;
+          y += GROUP_GAP;
           ctx.textAlign = 'left';
           ctx.fillStyle = GROUP_C;
           ctx.fillRect(PAD, y - 6, 12, 12);
           ctx.font = '900 ' + GROUP_FS + 'px ' + FONT;
           ctx.fillText(r.text, PAD + 22, y);
-          y += 52;
+          y += GROUP_H;
         } else {
           const rowH = Math.max(BADGE_R * 2, r.lines.length * TEXT_LH);
           const cy = y + rowH / 2;
@@ -6442,7 +6444,7 @@
             const startY = cy - (r.lines.length - 1) * TEXT_LH / 2;
             r.lines.forEach(function(ln, i) { ctx.fillText(ln, tx, startY + i * TEXT_LH); });
           }
-          y += rowH + 24;
+          y += rowH + ROW_GAP;
         }
       });
     }
@@ -9238,7 +9240,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v610 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v612 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
