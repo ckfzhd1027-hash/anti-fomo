@@ -372,7 +372,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v615 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v616 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9056,14 +9056,7 @@
         return;
       }
 
-      if (currentStepKey === "step_1") {
-        // v537: 1단계 체크박스 화면 X는 팝업을 띄우지 않음. 최종 단계면 OKX 쿨타임만 남기고 메인 화면으로 돌아가 중단. (1단계만 유지)
-        if (window.OkxGate) OkxGate.onFinalReject();
-        try { if (typeof playRejectBlip === "function") playRejectBlip(); } catch (e) {}
-        if (typeof MainScreen !== "undefined" && MainScreen.show) MainScreen.show();
-        return;
-      }
-      // v556: 1단계 외는 v536 원복 — 경고 팝업 + 사이렌 + 화면 흔들림 + 5초 잠금
+      // v616: 전 단계 동일 — 경고 팝업 + 사이렌 + 화면 흔들림 + 5초 잠금 (1단계 X도 경고 표시, 사용자 지시 2026-10-29)
       playAlertSiren();
       if (window.OkxGate) OkxGate.onFinalReject();
       const body = document.getElementById("appBody");
@@ -9146,7 +9139,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v615 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v616 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
