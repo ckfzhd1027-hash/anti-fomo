@@ -372,7 +372,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v621 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v622 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -4849,6 +4849,8 @@
         if (d.volRev === "short") return "short";
         // v621: 채널 하단 + 1H/4H 과매도(ltf yes, 하나만 돼도) → 롱 추천. 돌파(brk)는 제외(채널 안 하단만).
         if (d.pos === "bottom" && d.predDiv === "long" && !d.brk) return "long";
+        // v622: 채널 상단 + 1H/4H 과매수(ltf yes, 하나만 돼도) → 숏 추천. 돌파(brk)는 제외(채널 안 상단만). v621 하단 롱의 대칭.
+        if (d.pos === "top" && d.predDiv === "short" && !d.brk) return "short";
         if (d.div === "bottom" && d.pos !== "top") return "long";
         if (d.div === "top" && d.pos !== "bottom") return "short";
         // v472: 예측 다이버는 방향이 아님 — updateBranchRecommendation에서 추가 표시로만 처리 (아래 참조)
@@ -9141,7 +9143,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v621 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v622 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
