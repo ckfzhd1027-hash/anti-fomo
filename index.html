@@ -372,7 +372,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v619 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v621 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -4847,6 +4847,8 @@
         // v459: 거래량 전환 최우선 (사용자 결정) — 다이버·상하단 사건보다 먼저
         if (d.volRev === "long") return "long";
         if (d.volRev === "short") return "short";
+        // v621: 채널 하단 + 1H/4H 과매도(ltf yes, 하나만 돼도) → 롱 추천. 돌파(brk)는 제외(채널 안 하단만).
+        if (d.pos === "bottom" && d.predDiv === "long" && !d.brk) return "long";
         if (d.div === "bottom" && d.pos !== "top") return "long";
         if (d.div === "top" && d.pos !== "bottom") return "short";
         // v472: 예측 다이버는 방향이 아님 — updateBranchRecommendation에서 추가 표시로만 처리 (아래 참조)
@@ -9139,7 +9141,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v619 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v621 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -12639,25 +12641,26 @@ const StepGuide = (() => {
   }
   function sceneBreakVolShort() {
     // v619 숏 버전 (하단 돌파, 롱의 상하 거울상: y'=90-y, 색 반전, 거래량은 동일)
+    // v620: 가격 부분만 12 위로 (하락채널이 거래량 막대와 겹치지 않게, 거래량은 그대로)
     let s = GRID();
-    s += '<line x1="10" y1="28" x2="190" y2="28" stroke="#475569" stroke-width="1" opacity="0.6"/>';
-    s += LDash(10, 30, 190, 42, VIOLET, 0.05, 0.15);
-    s += LDash(10, 62, 190, 74, VIOLET, 0.05, 0.15);
-    s += C(10, 46, 54, 44, 56, GREEN, STAG[0][0], STAG[0][1]);
-    s += C(24, 45, 46, 40, 50, GREEN, STAG[1][0], STAG[1][1]);
-    s += C(38, 45, 58, 42, 60, RED, STAG[2][0], STAG[2][1]);
-    s += C(52, 58, 62, 54, 64, RED, STAG[3][0], STAG[3][1]);
-    s += C(66, 46, 62, 42, 64, GREEN, STAG[4][0], STAG[4][1]);
-    s += C(80, 45, 46, 40, 50, GREEN, STAG[5][0], STAG[5][1]);
-    s += C(94, 45, 54, 42, 56, RED, STAG[6][0], STAG[6][1]);
-    s += C(108, 54, 56, 50, 60, RED, STAG[7][0], STAG[7][1]);
-    s += C(122, 56, 76, 54, 80, RED, STAG[8][0], STAG[8][1]);
-    s += C(136, 76, 84, 74, 86, RED, STAG[9][0], STAG[9][1]);
-    s += C(150, 84, 85, 80, 88, RED, STAG[10][0], STAG[10][1]);
-    s += C(164, 76, 85, 72, 88, GREEN, STAG[11][0], STAG[11][1]);
-    s += C(178, 76, 80, 74, 82, RED, STAG[12][0], STAG[12][1]);
-    s += C(192, 80, 81, 76, 84, RED, STAG[13][0], STAG[13][1]);
-    s += HL(122, 76);
+    s += '<line x1="10" y1="16" x2="190" y2="16" stroke="#475569" stroke-width="1" opacity="0.6"/>';
+    s += LDash(10, 18, 190, 30, VIOLET, 0.05, 0.15);
+    s += LDash(10, 50, 190, 62, VIOLET, 0.05, 0.15);
+    s += C(10, 34, 42, 32, 44, GREEN, STAG[0][0], STAG[0][1]);
+    s += C(24, 33, 34, 28, 38, GREEN, STAG[1][0], STAG[1][1]);
+    s += C(38, 33, 46, 30, 48, RED, STAG[2][0], STAG[2][1]);
+    s += C(52, 46, 50, 42, 52, RED, STAG[3][0], STAG[3][1]);
+    s += C(66, 34, 50, 30, 52, GREEN, STAG[4][0], STAG[4][1]);
+    s += C(80, 33, 34, 28, 38, GREEN, STAG[5][0], STAG[5][1]);
+    s += C(94, 33, 42, 30, 44, RED, STAG[6][0], STAG[6][1]);
+    s += C(108, 42, 44, 38, 48, RED, STAG[7][0], STAG[7][1]);
+    s += C(122, 44, 64, 42, 68, RED, STAG[8][0], STAG[8][1]);
+    s += C(136, 64, 72, 62, 74, RED, STAG[9][0], STAG[9][1]);
+    s += C(150, 72, 73, 68, 76, RED, STAG[10][0], STAG[10][1]);
+    s += C(164, 64, 73, 60, 76, GREEN, STAG[11][0], STAG[11][1]);
+    s += C(178, 64, 68, 62, 70, RED, STAG[12][0], STAG[12][1]);
+    s += C(192, 68, 69, 64, 72, RED, STAG[13][0], STAG[13][1]);
+    s += HL(122, 64);
     s += V(10, 8, SLATE, STAG[0][0], STAG[0][1]);
     s += V(24, 10, SLATE, STAG[1][0], STAG[1][1]);
     s += V(38, 9, SLATE, STAG[2][0], STAG[2][1]);
