@@ -372,7 +372,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v628 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v630 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -564,24 +564,6 @@
           <div id="candleZoomChart" class="relative flex-1 min-h-0 mt-1 overflow-hidden"></div>
           <div id="candleZoomStatus" class="hidden mt-1"><span id="candleZoomStatusText" class="text-[11px] font-black text-red-500"></span> <button onclick="event.stopPropagation(); CandleZoom.retry();" class="flex-none px-2 py-0.5 rounded-md bg-white/20 text-[11px] font-black">다시 시도</button></div>
         </div>
-      </div>
-    </div>
-
-    <div id="channelTracker" class="mt-1 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-[#111726] px-3 py-2.5 shadow-md">
-      <div class="flex items-center justify-between gap-2">
-        <span class="text-xs font-black tracking-tight text-slate-700 dark:text-slate-100">채널선 추적</span>
-        <span id="chTrackCount" class="text-[11px] font-black text-slate-500 dark:text-slate-400">뒤집기 0회</span>
-      </div>
-      <p id="chTrackStatus" class="mt-1 text-[12px] font-bold leading-snug text-slate-700 dark:text-slate-200">현재: 상단선 = 저항, 하단선 = 지지 (원래 채널)</p>
-      <p id="chTrackGuide" class="mt-0.5 text-[11px] font-bold leading-snug text-slate-500 dark:text-slate-400">일봉 몸통이 선 밖에서 마감하면 아래 버튼을 눌러 선 역할을 뒤집어. 꼬리만 삐져나온 건 돌파 아님.</p>
-      <div class="mt-2 flex gap-2">
-        <button type="button" onclick="ChannelTrack.flip('top')" class="flex-1 py-2.5 rounded-xl bg-red-100 dark:bg-red-950 border-2 border-red-400 text-red-700 dark:text-red-200 text-xs font-black cursor-pointer btn-touch">일봉 몸통 상단선 밖 마감</button>
-        <button type="button" onclick="ChannelTrack.flip('bottom')" class="flex-1 py-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-950 border-2 border-emerald-500 text-emerald-700 dark:text-emerald-200 text-xs font-black cursor-pointer btn-touch">일봉 몸통 하단선 밖 마감</button>
-      </div>
-      <div class="mt-1.5 flex items-center justify-between gap-2">
-        <button type="button" onclick="ChannelTrack.undo()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-[11px] font-black text-slate-600 dark:text-slate-300 cursor-pointer btn-touch">되돌리기</button>
-        <span id="chTrackHistory" class="flex-1 text-right text-[11px] font-bold text-slate-500 dark:text-slate-400">뒤집기 기록: 없음</span>
-        <button type="button" onclick="ChannelTrack.reset()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-[11px] font-black text-slate-600 dark:text-slate-300 cursor-pointer btn-touch">기록 지우기</button>
       </div>
     </div>
 
@@ -9190,7 +9172,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v628 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v630 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -10382,6 +10364,23 @@ window.FlowSync = (function(){
       <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-2xl max-h-[92vh] overflow-y-auto">
         <h3 class="text-lg font-black text-slate-800 dark:text-white mb-1">장세 선언</h3>
         <p id="regimeDeclareDesc" class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">아래 질문에 답하면 지금 장세가 자동으로 유도·선언됩니다. 선언은 8시간(4H봉 2개) 동안 유효하고, 채널 이탈이 확정되면 재선언해야 합니다.</p>
+        <div id="channelTracker" class="mb-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 py-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-black tracking-tight text-slate-700 dark:text-slate-100">채널선 추적</span>
+            <span id="chTrackCount" class="text-[11px] font-black text-slate-500 dark:text-slate-400">뒤집기 0회</span>
+          </div>
+          <p id="chTrackStatus" class="mt-1 text-[12px] font-bold leading-snug text-slate-700 dark:text-slate-200">현재: 상단선 = 저항, 하단선 = 지지 (원래 채널)</p>
+          <p id="chTrackGuide" class="mt-0.5 text-[11px] font-bold leading-snug text-slate-500 dark:text-slate-400">일봉 몸통이 선 밖에서 마감하면 아래 버튼을 눌러 선 역할을 뒤집어. 꼬리만 삐져나온 건 돌파 아님.</p>
+          <div class="mt-2 flex gap-2">
+            <button type="button" onclick="ChannelTrack.flip('top')" class="flex-1 py-2.5 rounded-xl bg-red-100 dark:bg-red-950 border-2 border-red-400 text-red-700 dark:text-red-200 text-xs font-black cursor-pointer btn-touch">일봉 몸통 상단선 밖 마감</button>
+            <button type="button" onclick="ChannelTrack.flip('bottom')" class="flex-1 py-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-950 border-2 border-emerald-500 text-emerald-700 dark:text-emerald-200 text-xs font-black cursor-pointer btn-touch">일봉 몸통 하단선 밖 마감</button>
+          </div>
+          <div class="mt-1.5 flex items-center justify-between gap-2">
+            <button type="button" onclick="ChannelTrack.undo()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-[11px] font-black text-slate-600 dark:text-slate-300 cursor-pointer btn-touch">되돌리기</button>
+            <span id="chTrackHistory" class="flex-1 text-right text-[11px] font-bold text-slate-500 dark:text-slate-400">뒤집기 기록: 없음</span>
+            <button type="button" onclick="ChannelTrack.reset()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-[11px] font-black text-slate-600 dark:text-slate-300 cursor-pointer btn-touch">기록 지우기</button>
+          </div>
+        </div>
         <div id="regimeWizardViz" class="mb-3 h-28 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-hidden"></div>
         <div id="regimeWizard"></div>
         <div id="regimeDerivedBox" class="hidden mt-1 mb-4 px-3 py-3 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600">
@@ -10513,7 +10512,7 @@ window.FlowSync = (function(){
           const isB3 = state.div === "bottom";
           const gh3 = 24, gx3 = 70, GS3 = 1.3;
           const zo3 = state.divPos === "bottom" ? (HH * 2 / 3) : (state.divPos === "top" ? -(HH * 2 / 3) : 0);
-          const gy3 = Math.max(2, Math.min(64 - gh3 * GS3 - 2, cx(97) + zo3 - (gh3 * GS3) / 2));
+          const gy3 = isB3 ? Math.max(2, cx(97) + zo3 - (gh3 * GS3) / 2 + 4) : Math.max(2, Math.min(64 - gh3 * GS3 - 2, cx(97) + zo3 - (gh3 * GS3) / 2));
           const wD = isB3 ? [[1, 1], [9, 9], [17, 3], [33, 13]] : [[1, 10], [9, 4], [17, 8], [33, 1]];
           const wPts = wD.map(function (w) { return pt(gx3 + w[0] * GS3 / FX, gy3 + w[1] * GS3); });
           const wX0 = parseFloat(wPts[0].split(",")[0]) / FX, wX1 = parseFloat(wPts[wPts.length - 1].split(",")[0]) / FX;
@@ -10552,7 +10551,7 @@ window.FlowSync = (function(){
           const gx = 70, gh = 24, GS = 1.3;
           const cyC = cx(97);
           const zo = state.divPos === "bottom" ? (HH * 2 / 3) : (state.divPos === "top" ? -(HH * 2 / 3) : 0);
-          const gy = Math.max(2, Math.min(64 - gh * GS - 2, cyC + zo - (gh * GS) / 2));
+          const gy = isB ? Math.max(2, cyC + zo - (gh * GS) / 2 + 4) : Math.max(2, Math.min(64 - gh * GS - 2, cyC + zo - (gh * GS) / 2));
           // 가격·RSI를 위아래 밴드로 분리하고 RSI 극값 차이를 확실히 벌린다 (v350): 상승 다이버는 RSI 첫 저점이 두 번째보다 확실히 아래, 하락 다이버는 RSI 첫 고점이 두 번째보다 확실히 위
           const pD = isB ? "M1,1 L9,9 L17,3 L33,13" : "M1,10 L9,4 L17,8 L33,1";
           const iD = isB ? "M9,22 L33,17" : "M9,17 L33,22";
@@ -10867,7 +10866,7 @@ window.FlowSync = (function(){
           qs.push({ key: "evt", title: "가장 최근에 채널 상하단에서 무슨 일이 있었나?", hint: "직전 움직임 기록용이다 — 선언 결과(방향·위치)는 바뀌지 않고, 경위와 애니메이션에만 남는다.", options: [{ v: "none", t: "없음 — 아직 닿지 않았다" }, { v: "top_touch", t: "상단 — 닿고 밀렸다" }, { v: "top_fake", t: "상단 — 뚫었다가 재진입 (가짜 돌파)" }, { v: "bottom_touch", t: "하단 — 닿고 반등했다" }, { v: "bottom_fake", t: "하단 — 뚫었다가 재진입 (가짜 돌파)" }] });
         }
         qs.push({ key: "div", title: "채널 상하단에서의 최근 고점·저점 이후에 생긴 다이버를 본다", hint: "", options: [{ v: "none", t: "없음" }, { v: "bottom", t: "상승 다이버" }, { v: "top", t: "하락 다이버" }] });
-        qs.push({ key: "wait", title: "상승추세 이탈 후 1강이 나왔는가?", hint: "상승추세 이탈 이후에 1강이 나왔는지가 기준이다. 이탈 전 1강은 해당 안 됨. 아직 안 나왔으면 대기 중으로 답한다.", options: [{ v: "na", t: "이탈 없음 — 대기 해당 없음" }, { v: "waiting", t: "아직 안 나왔다 — 1강 대기 중" }, { v: "done", t: "나왔다 — 대기 해제" }] });
+        qs.push({ key: "wait", title: "리테 숏 이후 1강이 나왔는가?", hint: "상단 닿고 내려와 하락 돌파 리테 숏을 한 뒤, 1강을 기다리는 구간이 기준이다. 그 구간이 아니면 해당 없음으로 답한다.", options: [{ v: "na", t: "리테 숏 이후 구간 아님 — 대기 해당 없음" }, { v: "waiting", t: "아직 안 나왔다 — 1강 대기 중" }, { v: "done", t: "나왔다 — 대기 해제" }] });
         if (wiz.wait === "done") {
           qs.push({ key: "second", title: "1강 뒤 두번째 장대의 거래량이 줄었는가?", hint: "1강 다음에 나온 두번째 장대(큰 봉)의 거래량이 1강보다 줄었을 때만 다이버 준비가 열린다. 안 줄면 다이버 준비 안 함.", options: [{ v: "yes", t: "줄었다 — 다이버 준비 가능" }, { v: "no", t: "안 줄었다 — 다이버 준비 안 함" }] });
           qs.push({ key: "oversold", title: "1강 자리가 과매도 상태인가?", hint: "1강이 나온 자리가 과매도 상태여야 1강이 유효하다. (앱이 자동 판정하지 않음 — 사용자가 보는 과매도 기준.)", options: [{ v: "yes", t: "과매도다" }, { v: "no", t: "아니다" }] });
