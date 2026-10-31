@@ -372,7 +372,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v622 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v628 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -564,6 +564,24 @@
           <div id="candleZoomChart" class="relative flex-1 min-h-0 mt-1 overflow-hidden"></div>
           <div id="candleZoomStatus" class="hidden mt-1"><span id="candleZoomStatusText" class="text-[11px] font-black text-red-500"></span> <button onclick="event.stopPropagation(); CandleZoom.retry();" class="flex-none px-2 py-0.5 rounded-md bg-white/20 text-[11px] font-black">다시 시도</button></div>
         </div>
+      </div>
+    </div>
+
+    <div id="channelTracker" class="mt-1 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-[#111726] px-3 py-2.5 shadow-md">
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-xs font-black tracking-tight text-slate-700 dark:text-slate-100">채널선 추적</span>
+        <span id="chTrackCount" class="text-[11px] font-black text-slate-500 dark:text-slate-400">뒤집기 0회</span>
+      </div>
+      <p id="chTrackStatus" class="mt-1 text-[12px] font-bold leading-snug text-slate-700 dark:text-slate-200">현재: 상단선 = 저항, 하단선 = 지지 (원래 채널)</p>
+      <p id="chTrackGuide" class="mt-0.5 text-[11px] font-bold leading-snug text-slate-500 dark:text-slate-400">일봉 몸통이 선 밖에서 마감하면 아래 버튼을 눌러 선 역할을 뒤집어. 꼬리만 삐져나온 건 돌파 아님.</p>
+      <div class="mt-2 flex gap-2">
+        <button type="button" onclick="ChannelTrack.flip('top')" class="flex-1 py-2.5 rounded-xl bg-red-100 dark:bg-red-950 border-2 border-red-400 text-red-700 dark:text-red-200 text-xs font-black cursor-pointer btn-touch">일봉 몸통 상단선 밖 마감</button>
+        <button type="button" onclick="ChannelTrack.flip('bottom')" class="flex-1 py-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-950 border-2 border-emerald-500 text-emerald-700 dark:text-emerald-200 text-xs font-black cursor-pointer btn-touch">일봉 몸통 하단선 밖 마감</button>
+      </div>
+      <div class="mt-1.5 flex items-center justify-between gap-2">
+        <button type="button" onclick="ChannelTrack.undo()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-[11px] font-black text-slate-600 dark:text-slate-300 cursor-pointer btn-touch">되돌리기</button>
+        <span id="chTrackHistory" class="flex-1 text-right text-[11px] font-bold text-slate-500 dark:text-slate-400">뒤집기 기록: 없음</span>
+        <button type="button" onclick="ChannelTrack.reset()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-[11px] font-black text-slate-600 dark:text-slate-300 cursor-pointer btn-touch">기록 지우기</button>
       </div>
     </div>
 
@@ -2543,9 +2561,9 @@
           { title: "평행 채널 / 박스권 상하단 레벨", desc: "채널 하단 지지 및 상단 저항 경계선 파악", botCapable: false, hidden: true, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="20" x2="19" y2="7" /><circle cx="6" cy="20" r="2.2" class="fill-slate-100 dark:fill-[#0d121c]" stroke="currentColor" stroke-width="2" /><circle cx="19" cy="7" r="2.2" class="fill-slate-100 dark:fill-[#0d121c]" stroke="currentColor" stroke-width="2" /><line x1="12" y1="24" x2="23" y2="13" /><circle cx="17.5" cy="18.5" r="2.2" class="fill-slate-100 dark:fill-[#0d121c]" stroke="currentColor" stroke-width="2" /></svg>` },
           { title: "피보나치 황금구간 중첩 (0.382 ~ 0.618)", desc: "과거 매물대와 되돌림 비율 일치 여부 체크", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="7" x2="24" y2="7" /><line x1="4" y1="11.5" x2="20" y2="11.5" /><circle cx="21.5" cy="11.5" r="2" class="fill-slate-100 dark:fill-[#0d121c]" stroke="currentColor" stroke-width="2" /><line x1="4" y1="16.5" x2="24" y2="16.5" /><circle cx="6.5" cy="21" r="2" class="fill-slate-100 dark:fill-[#0d121c]" stroke="currentColor" stroke-width="2" /><line x1="8.5" y1="21" x2="24" y2="21" /></svg>` },
           { title: "타임프레임별 캔들 상태 (4H / 1H / 15m)", desc: "봉 마감 여부, 꼬리 길이 및 캔들 속도 관찰", botCapable: false, iconSvg: `<i class="ph-bold ph-chart-bar text-base"></i>` },
-          { title: "15m봉 사선·수평·채널 작도 완료", desc: "돌파 판단용 15m봉 사선·수평선·채널 작도 확인", botCapable: false, iconSvg: `<i class="ph-bold ph-chart-line-up text-base"></i>` },
+          { title: "15m봉 사선·수평 작도 완료", desc: "돌파 판단용 15m봉 사선·수평선 작도 확인", botCapable: false, iconSvg: `<i class="ph-bold ph-chart-line-up text-base"></i>` },
           { title: "반등캔들 흐름 파악", desc: "채널 안에서 반등할 때마다 캔들이 짧아지고 예전만큼 위까지 못 올라오면 반등 힘이 빠진 것 — 채널 이탈 임박 신호로 본다", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="7" y1="20" x2="7" y2="8" /><line x1="14" y1="20" x2="14" y2="12" /><line x1="21" y1="20" x2="21" y2="16" /></svg>` },
-          { title: "15m채널 상하단에서 돌파하는 거래량 유무 확인", desc: "다시 채널 안쪽으로 돌아올 거면 거래량이 적어야 하는데, 돌파 자리에서 거래량이 가장 많이 터지면 진짜 돌파로 본다", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="7" y1="20" x2="7" y2="16" /><line x1="14" y1="20" x2="14" y2="6" /><line x1="21" y1="20" x2="21" y2="16" /></svg>` }
+          { title: "돌파 자리 거래량 평일 1주일 평균 이상 확인", desc: "돌파 자리에서 거래량이 직전 평일 1주일 추세전환 평균 이상 터지면 진짜 돌파로 본다. 평균에 못 미치면 되돌림(가짜 돌파)로 본다", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="7" y1="20" x2="7" y2="16" /><line x1="14" y1="20" x2="14" y2="6" /><line x1="21" y1="20" x2="21" y2="16" /></svg>` }
         ]
       },
 
@@ -4844,13 +4862,12 @@
         if (typeof Regime === "undefined" || Regime.needsDeclaration()) return null;
         const d = Regime._data();
         if (!d) return null;
-        // v459: 거래량 전환 최우선 (사용자 결정) — 다이버·상하단 사건보다 먼저
-        if (d.volRev === "long") return "long";
-        if (d.volRev === "short") return "short";
-        // v621: 채널 하단 + 1H/4H 과매도(ltf yes, 하나만 돼도) → 롱 추천. 돌파(brk)는 제외(채널 안 하단만).
-        if (d.pos === "bottom" && d.predDiv === "long" && !d.brk) return "long";
-        // v622: 채널 상단 + 1H/4H 과매수(ltf yes, 하나만 돼도) → 숏 추천. 돌파(brk)는 제외(채널 안 상단만). v621 하단 롱의 대칭.
-        if (d.pos === "top" && d.predDiv === "short" && !d.brk) return "short";
+        // v625: 1강 대기 — 상승추세 이탈 후 1강 나올 때까지 롱·숏 전면 금지 (1강만 예외)
+        if (d.wait === "waiting") return "wait";
+        // v623: 채널 하단 + 돌파 아님 → 롱 추천 (예측 조건 제거, 채널 위치 기준).
+        if (d.pos === "bottom" && !d.brk) return "long";
+        // v623: 채널 상단 + 돌파 아님 → 숏 추천 (예측 조건 제거, 채널 위치 기준). 하단 롱의 대칭.
+        if (d.pos === "top" && !d.brk) return "short";
         if (d.div === "bottom" && d.pos !== "top") return "long";
         if (d.div === "top" && d.pos !== "bottom") return "short";
         // v472: 예측 다이버는 방향이 아님 — updateBranchRecommendation에서 추가 표시로만 처리 (아래 참조)
@@ -5000,11 +5017,11 @@
       modal.querySelectorAll(".rec-blink-long, .rec-blink-short").forEach(function (el) { el.classList.remove("rec-blink-long", "rec-blink-short"); });
       modal.querySelectorAll(".rec-dim").forEach(function (el) { el.classList.remove("rec-dim"); });
       modal.querySelectorAll('button[onclick^="handleBranchSelect"]').forEach(function (btn) { btn.classList.remove("relative"); });
+      modal.querySelectorAll('button[onclick^="handleBranchSelect"]').forEach(function (btn) { btn.disabled = false; });
       const banner = document.getElementById("branchRecBanner");
       const dir = branchRecommendation();
       // v472: 예측 다이버 유형 (방향을 바꾸지 않음 — 역방향 다이버에만 주의 뱃지, 정방향 유지)
       let predType = null;
-      try { const dd = (typeof Regime !== "undefined" && Regime._data()) ? Regime._data() : null; if (dd) { if (dd.predDiv === "long") predType = "C"; else if (dd.predDiv === "short") predType = "E"; } } catch (e) {}
       const lightPred = function () {
         if (!predType) return;
         const pb = modal.querySelector('button[onclick*="handleBranchSelect(\'' + predType + '\')"]');
@@ -5018,6 +5035,21 @@
         pb.appendChild(badge);
       };
       if (!dir) { if (banner) banner.classList.add("hidden"); lightPred(); return; }
+      if (dir === "wait") {
+        if (banner) {
+          banner.textContent = "⏸ 1강 대기 중 — 1강 외 진입 금지";
+          banner.className = "w-full max-w-md rounded-2xl border-2 px-4 py-2.5 text-center font-black text-sm sm:text-base tracking-tight mb-1 bg-amber-100 dark:bg-amber-950 border-amber-500 text-amber-700 dark:text-amber-200";
+        }
+        modal.querySelectorAll('button[onclick^="handleBranchSelect"]').forEach(function (btn) {
+          const m = (btn.getAttribute("onclick") || "").match(/'(\w)'/);
+          const L = m ? m[1] : "";
+          if (!L) return;
+          if (L !== "G") { btn.disabled = true; btn.classList.add("rec-dim"); }
+          else { btn.disabled = false; btn.classList.remove("rec-dim"); }
+        });
+        lightPred();
+        return;
+      }
       let bHidden = false;
       try { bHidden = typeof Regime !== "undefined" && Regime.hidesTypeB(); } catch (e) {}
       const longNames = bHidden ? ["다이버 롱", "리테 롱", "1강"] : ["크트키", "다이버 롱", "리테 롱", "1강"];
@@ -5055,6 +5087,15 @@
       });
       // v472: 예측 다이버 유형이 기존 방향 그룹에 없으면 주의 뱃지만 추가 (방향·배너는 그대로)
       if (predType && letters.indexOf(predType) < 0) lightPred();
+      // v626: 1강 연쇄 미완료 시 다이버 롱(C) 잠금 (1강 나왔으나 두번째 장대 미감소 또는 과매도 아님 — 구 선언 미답변은 제외)
+      try {
+        const dd2 = (typeof Regime !== "undefined" && Regime._data()) ? Regime._data() : null;
+        const chainIncomplete = dd2 && dd2.wait === "done" && dd2.second != null && dd2.oversold != null && (dd2.second !== "yes" || dd2.oversold !== "yes");
+        if (chainIncomplete) {
+          const cb = modal.querySelector('button[onclick*="handleBranchSelect(\'C\')"]');
+          if (cb) { cb.disabled = true; cb.classList.add("rec-dim"); cb.classList.remove("rec-blink-long", "rec-blink-short"); cb.querySelectorAll("[data-rec-chip]").forEach(function (el) { el.remove(); }); }
+        }
+      } catch (e) {}
     }
 
 
@@ -5146,6 +5187,8 @@
     function confirmGang1Gate() {
       if (!(gang1Checks[0] && gang1Checks[1] && gang1Checks[2] && gang1Checks[3] && gang1Checks[4] && gang1Checks[5])) return;
       closeGang1Gate();
+      // v625: 1강 확인으로 대기 해제 (장세 선언의 wait를 done으로 — 이후 분기·타점 잠금 해제)
+      try { if (typeof Regime !== "undefined" && Regime.setWait) Regime.setWait("done"); } catch (e) {}
       // v395: 스텝 페이지를 거치지 않고 진입티켓으로 직행 — 티켓이 1강 기준으로 만들어지도록 스텝 상태만 넘긴다
       if (currentStepKey && currentStepKey !== "step_3_type_g") stepHistory.push(currentStepKey);
       currentStepKey = "step_3_type_g";
@@ -5163,6 +5206,10 @@
       try {
         if (branchType === "B" && typeof Regime !== "undefined" && Regime.hidesTypeB()) return;
       } catch (e) {}
+      // v625: 1강 대기 중에는 1강(G) 외 선택 불가 (버튼 disabled와 별개로 호출 자체를 차단)
+      try { if (typeof Regime !== "undefined" && Regime._data() && Regime._data().wait === "waiting" && branchType !== "G") return; } catch (e) {}
+      // v626: 1강 연쇄 미완료 시 다이버 롱(C) 선택 차단 (구 선언 미답변은 제외)
+      try { const dd3 = (typeof Regime !== "undefined" && Regime._data()) ? Regime._data() : null; if (dd3 && dd3.wait === "done" && dd3.second != null && dd3.oversold != null && (dd3.second !== "yes" || dd3.oversold !== "yes") && branchType === "C") return; } catch (e) {}
       closeBranchModal();
       if (branchType === "B" && !window.__divGatePassed) {
         let kept = false;
@@ -9143,7 +9190,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v622 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v628 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -10820,13 +10867,10 @@ window.FlowSync = (function(){
           qs.push({ key: "evt", title: "가장 최근에 채널 상하단에서 무슨 일이 있었나?", hint: "직전 움직임 기록용이다 — 선언 결과(방향·위치)는 바뀌지 않고, 경위와 애니메이션에만 남는다.", options: [{ v: "none", t: "없음 — 아직 닿지 않았다" }, { v: "top_touch", t: "상단 — 닿고 밀렸다" }, { v: "top_fake", t: "상단 — 뚫었다가 재진입 (가짜 돌파)" }, { v: "bottom_touch", t: "하단 — 닿고 반등했다" }, { v: "bottom_fake", t: "하단 — 뚫었다가 재진입 (가짜 돌파)" }] });
         }
         qs.push({ key: "div", title: "채널 상하단에서의 최근 고점·저점 이후에 생긴 다이버를 본다", hint: "", options: [{ v: "none", t: "없음" }, { v: "bottom", t: "상승 다이버" }, { v: "top", t: "하락 다이버" }] });
-        // v495: 과매도 질문을 전환 질문보다 먼저 물음 — 거래량 없으면 전환 질문 건너뜀
-        if (wizNeedsLtf()) {
-          const pd = wizPredDivDir();
-          qs.push({ key: "ltf", title: "의미있는 " + (pd === "long" ? "지지선" : "저항선") + "에서 초장대 거래량이 터진 시점에 긴 시간 프레임(4H/1H)이 " + (pd === "long" ? "과매도" : "과매수") + "에 들어갔나?", hint: "", options: [{ v: "yes", t: (pd === "long" ? "과매도에 들어갔다" : "과매수에 들어갔다") }, { v: "no", t: "초장대 거래량이 발생하지 않았고, 안 들어갔다" }] });
-        }
-        if (wiz.ltf !== "no") {
-          qs.push({ key: "volRev", title: "거래량 압도적 폭발 후 추세전환이 있었나?", hint: "주변에 이미 터진 봉들보다도 압도적으로 큰 거래량(클라이맥스)이 터진 뒤, 전고점·전저점을 한 번 갱신해 추세가 뒤집힌 경우만 답한다. 직전 평균 대비 평일 추세반전 최소충족 거래량 이상이 아니라 주변 터진 봉들 대비 압도적인 수준이어야 한다.", options: [{ v: "none", t: "추세전환 없음" }, { v: "long", t: "상승 전환 — 압도적 거래량 후 전고·전저 상승" }, { v: "short", t: "하락 전환 — 압도적 거래량 후 전고·전저 하락" }] });
+        qs.push({ key: "wait", title: "상승추세 이탈 후 1강이 나왔는가?", hint: "상승추세 이탈 이후에 1강이 나왔는지가 기준이다. 이탈 전 1강은 해당 안 됨. 아직 안 나왔으면 대기 중으로 답한다.", options: [{ v: "na", t: "이탈 없음 — 대기 해당 없음" }, { v: "waiting", t: "아직 안 나왔다 — 1강 대기 중" }, { v: "done", t: "나왔다 — 대기 해제" }] });
+        if (wiz.wait === "done") {
+          qs.push({ key: "second", title: "1강 뒤 두번째 장대의 거래량이 줄었는가?", hint: "1강 다음에 나온 두번째 장대(큰 봉)의 거래량이 1강보다 줄었을 때만 다이버 준비가 열린다. 안 줄면 다이버 준비 안 함.", options: [{ v: "yes", t: "줄었다 — 다이버 준비 가능" }, { v: "no", t: "안 줄었다 — 다이버 준비 안 함" }] });
+          qs.push({ key: "oversold", title: "1강 자리가 과매도 상태인가?", hint: "1강이 나온 자리가 과매도 상태여야 1강이 유효하다. (앱이 자동 판정하지 않음 — 사용자가 보는 과매도 기준.)", options: [{ v: "yes", t: "과매도다" }, { v: "no", t: "아니다" }] });
         }
         if (wizNeedsFlip()) {
           qs.push({ key: "flip", title: "전환이 확정됐나?", hint: "리테스트에서 지지·저항 전환이 확인되고, 새 고점·저점 갱신까지 된 경우만 확정으로 본다.", options: [{ v: "confirmed", t: "확인됐다 — 전환 확정" }, { v: "pending", t: "아직 — 이탈 직후다" }] });
@@ -10869,10 +10913,10 @@ window.FlowSync = (function(){
         return wizPredDivDir() != null; // v495: ltf가 먼저이므로 volRev 조건 제거
       }
       function wizDerive() {
-        if (!wiz || !wiz.chan || !wiz.div) return null;
+        if (!wiz || !wiz.chan || !wiz.div || !wiz.wait) return null;
+        if (wiz.wait === "done" && !wiz.second) return null;
+        if (wiz.wait === "done" && !wiz.oversold) return null;
         if (wiz.div !== "none" && !wiz.divPos) return null;
-        if (!wiz.volRev && wiz.ltf !== "no") return null; // v495: ltf=no면 volRev 건너뛰고 없음으로 간주
-        if (wizNeedsLtf() && !wiz.ltf) return null;
         let dir = null, pos = null, viz = null;
         if (wiz.chan === "no") { dir = "box"; pos = "mid"; viz = { slope: "none", event: "none", flip: null, side: null }; }
         else if (!wiz.slope || !wiz.loc) return null;
@@ -10903,7 +10947,7 @@ window.FlowSync = (function(){
         if (!dir || !pos) return null;
         if (wiz.loc === "inside" && !wiz.evt) return null;
         const evt = (wiz.loc === "inside" && wiz.evt && wiz.evt !== "none") ? wiz.evt : null;
-        const volRev = (wiz.volRev && wiz.volRev !== "none") ? wiz.volRev : null;
+        const volRev = null; // v625: volRev 문항 폐지 — 항상 없음
         const brk = wiz.loc === "top" ? "up" : (wiz.loc === "bottom" ? "down" : null); // v465: brk 문항 폐지, 위치(loc)에서 유도
         const evtFakeSide = evt === "top_fake" ? "top" : (evt === "bottom_fake" ? "bottom" : null);
         if (evtFakeSide) viz = { slope: viz.slope, event: "fakeout", flip: null, side: evtFakeSide, pos: pos };
@@ -10912,8 +10956,7 @@ window.FlowSync = (function(){
         if (out.div === "bottom" && out.pos === "top") { out.divExhausted = "bottom"; out.divExhaustedPos = out.divPos; out.div = "none"; note = "상승 다이버는 상단 도달로 소진 처리했습니다."; }
         if (out.div === "top" && out.pos === "bottom") { out.divExhausted = "top"; out.divExhaustedPos = out.divPos; out.div = "none"; note = "하락 다이버는 하단 도달로 소진 처리했습니다."; }
         if (out.div === "none") out.divPos = null;
-        const predDir = wizPredDivDir();
-        const predDiv = (wiz.ltf === "yes" && predDir) ? predDir : null;
+        const predDiv = null; // v625: ltf 문항 폐지 — 예측 다이버 없음
         let path = "";
         if (wiz.chan === "no") path = "채널 없음";
         else {
@@ -10936,7 +10979,11 @@ window.FlowSync = (function(){
         if (predDiv) path += " · 예측 다이버 " + (predDiv === "long" ? "롱" : "숏");
         if (volRev) path += " · 거래량 폭발 " + (volRev === "long" ? "상승 전환" : "하락 전환");
         if (brk) path += " · " + (brk === "up" ? "상방 돌파 후 밖에 있음" : "하방 돌파 후 밖에 있음");
-        return { decl: out, note: note, path: path, viz: viz, evt: evt, volRev: volRev, brk: brk, predDiv: predDiv };
+        if (wiz.wait === "waiting") path += " · 1강 대기 중";
+        else if (wiz.wait === "done") path += " · 1강 나옴";
+        if (wiz.wait === "done" && wiz.second === "yes") path += " · 두번째 장대 감소";
+        if (wiz.wait === "done" && wiz.oversold === "yes") path += " · 1강 자리 과매도";
+        return { decl: out, note: note, path: path, viz: viz, evt: evt, volRev: volRev, brk: brk, predDiv: predDiv, wait: wiz.wait || null, second: wiz.second || null, oversold: wiz.oversold || null };
       }
 
       function wizAnswerLabel(q, v) {
@@ -11184,6 +11231,9 @@ window.FlowSync = (function(){
               if ((data.brk || null) !== (r.brk || null)) { const bl = function (v) { return v === "up" ? "상방 돌파" : (v === "down" ? "하방 돌파" : "없음"); }; parts.push("돌파 " + bl(data.brk) + " → " + bl(r.brk)); }
               if ((data.divExhausted || null) !== (r.decl.divExhausted || null)) { const xl = function (v) { return v === "bottom" ? "상승 소진" : (v === "top" ? "하락 소진" : "없음"); }; parts.push("다이버 소진 " + xl(data.divExhausted) + " → " + xl(r.decl.divExhausted)); }
               if ((data.predDiv || null) !== (r.predDiv || null)) { const pl = function (v) { return v === "long" ? "예측 롱" : (v === "short" ? "예측 숏" : "없음"); }; parts.push("예측 다이버 " + pl(data.predDiv) + " → " + pl(r.predDiv)); }
+              if ((data.wait || null) !== (r.wait || null)) { const wl = function (v) { return v === "waiting" ? "대기 중" : (v === "done" ? "나옴" : "해당 없음"); }; parts.push("1강 " + wl(data.wait) + " → " + wl(r.wait)); }
+              if ((data.second || null) !== (r.second || null)) { const sl = function (v) { return v === "yes" ? "감소" : (v === "no" ? "안 줄음" : "해당 없음"); }; parts.push("두번째 장대 " + sl(data.second) + " → " + sl(r.second)); }
+              if ((data.oversold || null) !== (r.oversold || null)) { const ol = function (v) { return v === "yes" ? "과매도" : (v === "no" ? "아님" : "해당 없음"); }; parts.push("1강 자리 과매도 " + ol(data.oversold) + " → " + ol(r.oversold)); }
               diffTxt = parts.length ? "이전: " + parts.join(" · ") : "이전 선언과 동일 — 유효 시간만 갱신됩니다";
             }
             dd.textContent = diffTxt;
@@ -11256,7 +11306,7 @@ window.FlowSync = (function(){
       function confirmDeclare() {
         const r = wizDerive();
         if (!r) return;
-        data = { dir: r.decl.dir, div: r.decl.div, divPos: r.decl.divPos || null, pos: r.decl.pos, path: r.path, viz: r.viz, evt: r.evt, volRev: r.volRev || null, brk: r.brk || null, divExhausted: r.decl.divExhausted || null, divExhaustedPos: r.decl.divExhaustedPos || null, predDiv: r.predDiv || null, ts: Date.now() };
+        data = { dir: r.decl.dir, div: r.decl.div, divPos: r.decl.divPos || null, pos: r.decl.pos, path: r.path, viz: r.viz, evt: r.evt, volRev: r.volRev || null, brk: r.brk || null, divExhausted: r.decl.divExhausted || null, divExhaustedPos: r.decl.divExhaustedPos || null, predDiv: r.predDiv || null, wait: r.wait || null, second: r.second || null, oversold: r.oversold || null, ts: Date.now() };
         save();
         try { window.__waitPick = false; } catch (e) {} // v503: 장세 재선언 시 대기 선택 해제
         const cb = pendingCb;
@@ -11389,7 +11439,8 @@ window.FlowSync = (function(){
         confirmFriction: confirmFriction,
         cancelFriction: cancelFriction,
         renderBar: renderBar,
-        _data: function () { return data; }
+        _data: function () { return data; },
+        setWait: function (v) { if (!data) return; data.wait = v; save(); }
       };
     })();
 
@@ -13217,6 +13268,49 @@ window.StepGuide = StepGuide;
         }
       })();
       return { open: open, pick: pick, next: next, prev: prev, closeSpeed: closeSpeed, closeSlides: closeSlides };
+    })();
+  </script>
+  <script>
+    // v627: 채널선 추적 (선 역할 상태 기계 — 가격 저장소가 아님)
+    (function () {
+      const KEY = "antifomo_channel_v1";
+      let state = { flips: [] };
+      try { const raw = localStorage.getItem(KEY); if (raw) { const p = JSON.parse(raw); if (p && Array.isArray(p.flips)) state = p; } } catch (e) {}
+      function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+      function statusText() {
+        const last = state.flips.length ? state.flips[state.flips.length - 1] : null;
+        if (!last) return "현재: 상단선 = 저항, 하단선 = 지지 (원래 채널)";
+        if (last === "bottom") return "현재: 새 상단 = 뚫린 하단선 (저항), 새 하단 = 새로 그은 평행선 필요";
+        return "현재: 새 하단 = 뚫린 상단선 (지지), 새 상단 = 새로 그은 평행선 필요";
+      }
+      function guideText() {
+        const last = state.flips.length ? state.flips[state.flips.length - 1] : null;
+        if (!last) return "일봉 몸통이 선 밖에서 마감하면 아래 버튼을 눌러 선 역할을 뒤집어. 꼬리만 삐져나온 건 돌파 아님.";
+        if (last === "bottom") return "뚫린 하단선이 새 상단 저항선이 됐어. 그 선 리테 숏 대기 + 1강 대기 (장세 재선언에서 대기 중으로).";
+        return "뚫린 상단선이 새 하단 지지선이 됐어. 그 선 리테 롱 대기.";
+      }
+      function historyText() {
+        if (!state.flips.length) return "뒤집기 기록: 없음";
+        const names = state.flips.map(function (f) { return f === "bottom" ? "하단선 이탈" : "상단선 돌파"; });
+        return "뒤집기 기록: " + names.join(" → ");
+      }
+      function render() {
+        const st = document.getElementById("chTrackStatus");
+        const gd = document.getElementById("chTrackGuide");
+        const ct = document.getElementById("chTrackCount");
+        const hi = document.getElementById("chTrackHistory");
+        if (st) st.textContent = statusText();
+        if (gd) gd.textContent = guideText();
+        if (ct) ct.textContent = "뒤집기 " + state.flips.length + "회";
+        if (hi) hi.textContent = historyText();
+      }
+      window.ChannelTrack = {
+        flip: function (side) { if (side !== "top" && side !== "bottom") return; state.flips.push(side); save(); render(); },
+        undo: function () { if (!state.flips.length) return; state.flips.pop(); save(); render(); },
+        reset: function () { state.flips = []; save(); render(); },
+        render: render
+      };
+      render();
     })();
   </script>
 </body>
