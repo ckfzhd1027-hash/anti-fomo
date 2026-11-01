@@ -428,7 +428,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v655 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v656 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9247,7 +9247,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v655 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v656 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13041,6 +13041,8 @@ window.StepGuide = StepGuide;
      다음 박스를 숨기는 게 아니라, 다음 박스 데이터는 그대로 두고 화면에 들어가는 공간만 한 박스분으로 맞춘다.
      체크박스 구역(main)이 한 박스보다 크면, 그 차이만큼 장세박스 높이를 키워서 main을 한 박스분으로 줄인다.
      전체화면·장세박스 숨김 상태에서는 동작하지 않는다. */
+  // v656: 1단계 장세박스 크기는 고정값, 절대불변 — 1단계에서 체크박스 하나만 보이게 처음 한 번 맞춘 높이를 저장하고, 그 뒤에는 체크·스크롤·예시·화면 크기 변경에도 다시 계산하지 않는다
+  var __regimeFixedH_step1 = null;
   function fitRegimeToOneBox(boxEl) {
     try {
       const rb = document.getElementById("regimeBar");
@@ -13048,6 +13050,11 @@ window.StepGuide = StepGuide;
       if (!rb || !main || !boxEl) return;
       if (document.body.classList.contains("posanim-full")) return;
       if (rb.offsetParent === null) return;
+      if (typeof currentStepKey !== "undefined" && currentStepKey === "step_1" && __regimeFixedH_step1) {
+        rb.style.paddingBottom = "";
+        rb.style.height = __regimeFixedH_step1 + "px";
+        return;
+      }
       rb.style.paddingBottom = "";
       rb.style.height = "";
       const mainRect = main.getBoundingClientRect();
@@ -13057,6 +13064,7 @@ window.StepGuide = StepGuide;
       const excess = mainRect.height - need;
       if (excess > 0) {
         rb.style.height = (rb.offsetHeight + excess) + "px";
+        if (typeof currentStepKey !== "undefined" && currentStepKey === "step_1") __regimeFixedH_step1 = rb.offsetHeight;
       }
     } catch (e) {}
   }
