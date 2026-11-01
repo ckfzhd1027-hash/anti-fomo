@@ -299,6 +299,8 @@
     body[data-current-step="step_1"] #boxListContainer [id^="box-item-"] { min-height: 112px; } /* v556: 1단계 작업 전수 롤백 — min-height는 1단계에만, 다른 단계는 v536처럼 내용 높이 */
     body[data-current-step="step_1"] #stickyCheckBar { bottom: calc(152px + env(safe-area-inset-bottom, 0px)) !important; } /* v556: 152px 상단은 1단계에만, 다른 단계는 JS bottom(30px/OX+38) */
     body[data-current-step="step_1"] #regimeBar { margin-bottom: 4px; } /* v556: 1단계만 mb-1 유지, 다른 단계는 mb-2.5(v536) */
+    /* v657: 1단계 장세박스 높이 고정값 300px — 앱에서 계산하지 않는다. 사진(2:27, 1단계 0/6) 기준: 원래 장세박스 약 226px, 보이는 구역 약 206px, 첫 체크박스 약 124px, 남는 공간 약 74px을 더한 값. !important라 앱의 높이 계산이 덮지 못한다. */
+    body[data-current-step="step_1"] #regimeBar:not(.hidden) { height: 300px !important; }
 
 /* v575: 15분 봉 마감 5초 전부터 점멸 (카운트다운), 바뀔 때 한 번 더 강조 */
 @keyframes candleBlinkPulse {
@@ -428,7 +430,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v656 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v657 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9247,7 +9249,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v656 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v657 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13041,20 +13043,15 @@ window.StepGuide = StepGuide;
      다음 박스를 숨기는 게 아니라, 다음 박스 데이터는 그대로 두고 화면에 들어가는 공간만 한 박스분으로 맞춘다.
      체크박스 구역(main)이 한 박스보다 크면, 그 차이만큼 장세박스 높이를 키워서 main을 한 박스분으로 줄인다.
      전체화면·장세박스 숨김 상태에서는 동작하지 않는다. */
-  // v656: 1단계 장세박스 크기는 고정값, 절대불변 — 1단계에서 체크박스 하나만 보이게 처음 한 번 맞춘 높이를 저장하고, 그 뒤에는 체크·스크롤·예시·화면 크기 변경에도 다시 계산하지 않는다
-  var __regimeFixedH_step1 = null;
+  // v657: 1단계는 앱에서 계산하지 않는다. 높이는 CSS 고정값 300px이 담당한다. 이 함수는 1단계에서는 아무것도 하지 않는다.
   function fitRegimeToOneBox(boxEl) {
     try {
+      if (typeof currentStepKey !== "undefined" && currentStepKey === "step_1") return;
       const rb = document.getElementById("regimeBar");
       const main = document.querySelector("main");
       if (!rb || !main || !boxEl) return;
       if (document.body.classList.contains("posanim-full")) return;
       if (rb.offsetParent === null) return;
-      if (typeof currentStepKey !== "undefined" && currentStepKey === "step_1" && __regimeFixedH_step1) {
-        rb.style.paddingBottom = "";
-        rb.style.height = __regimeFixedH_step1 + "px";
-        return;
-      }
       rb.style.paddingBottom = "";
       rb.style.height = "";
       const mainRect = main.getBoundingClientRect();
@@ -13064,7 +13061,6 @@ window.StepGuide = StepGuide;
       const excess = mainRect.height - need;
       if (excess > 0) {
         rb.style.height = (rb.offsetHeight + excess) + "px";
-        if (typeof currentStepKey !== "undefined" && currentStepKey === "step_1") __regimeFixedH_step1 = rb.offsetHeight;
       }
     } catch (e) {}
   }
