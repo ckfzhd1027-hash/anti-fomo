@@ -467,7 +467,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v681 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v683 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9350,7 +9350,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v681 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v683 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -11954,11 +11954,11 @@ const CandleBox = (function () {
   function priceFor(y, range, H) { return range.min + (1 - y / H) * (range.max - range.min); }
   function fixWick(c) { const top = Math.max(c.o, c.c), bot = Math.min(c.o, c.c); if (c.h < top) c.h = top; if (c.l > bot) c.l = bot; }
   function miniHtml(chain, fillCol, fillN) { // v585: 거래량 채움 제거 — fillCol/fillN은 더 이상 쓰지 않음 (호출부 유지)
-    if (!chain) return [0, 1, 2, 3].map(function () { return /* v563: 봉 4개, 65px 높이에 맞춤 */ '<div class="flex flex-col items-center justify-end h-[65px]"><div class="w-2.5 h-10 rounded-sm border border-dashed border-slate-500 opacity-50"></div></div>'; }).join("");
+    if (!chain) return [0, 1, 2, 3].map(function () { return /* v683: 봉 4개, 73px 높이에 맞춤 (65에서 8 확대, 경고 줄 떠도 안 잘림) */ '<div class="flex flex-col items-center justify-end h-[73px]"><div class="w-2.5 h-10 rounded-sm border border-dashed border-slate-500 opacity-50"></div></div>'; }).join("");
     let mn = Infinity, mx = -Infinity;
     chain.forEach(function (c) { if (c.l < mn) mn = c.l; if (c.h > mx) mx = c.h; });
     if (!(mx > mn)) { mx = mn + 1; }
-    const H = 65; /* v563: 상단 바 제거분(17px)만큼 확대 (48 -> 65) */
+    const H = 73; /* v683: 65에서 8 확대 (경고 줄 떠도 안 잘리는 선, 장세박스 224px 고정 유지) */
     const y = function (p) { return (1 - (p - mn) / (mx - mn)) * H; };
     return chain.map(function (c, i) {
       const col = c.c >= c.o ? "#22c55e" : "#ef4444";
@@ -11966,7 +11966,7 @@ const CandleBox = (function () {
       const bot = y(Math.min(c.o, c.c));
       const whTop = y(c.h);
       const whBot = y(c.l);
-      return '<div style="position:relative; height:65px; width:16px;">'
+      return '<div style="position:relative; height:73px; width:16px;">'
         + '<div style="position:absolute; left:50%; width:2px; margin-left:-1px; top:' + whTop + 'px; height:' + Math.max(1, whBot - whTop) + 'px; background:' + col + ';"></div>'
         + '<div style="position:absolute; left:50%; width:10px; margin-left:-5px; border-radius:2px; top:' + top + 'px; height:' + Math.max(1, bot - top) + 'px; background:' + col + ';"></div>'
         + '</div>';
