@@ -299,10 +299,10 @@
     :root { --v537-shift: 56px; } /* 빨간 표시 길이 근사값: 화면 높이의 약 6~7% */
     #regimeBar { padding-bottom: 0; } /* v541: 장세박스 하단 여백 제거 — 박스 공간 확보, 테두리 잘림 방지 */
     body[data-current-step="step_1"] #boxListContainer [id^="box-item-"] { min-height: 112px; } /* v556: 1단계 작업 전수 롤백 — min-height는 1단계에만, 다른 단계는 v536처럼 내용 높이 */
-    body[data-current-step="step_1"] #stickyCheckBar { bottom: calc(152px + env(safe-area-inset-bottom, 0px)) !important; } /* v556: 152px 상단은 1단계에만, 다른 단계는 JS bottom(30px/OX+38) */
+    /* v663: 다음 체크 팝업 1단계 고정 152px 삭제 — 원래 동적방식으로 복원한다. */
     body[data-current-step="step_1"] #regimeBar { margin-bottom: 4px; } /* v556: 1단계만 mb-1 유지, 다른 단계는 mb-2.5(v536) */
-    /* v659: 1단계 장세박스 높이 고정값 244px — 앱에서 계산하지 않는다. 사진(3:03, 1단계 0/6, v658 220px) 기준: 첫 체크박스는 온전히 보였지만 다음 박스 윗부분이 O/X 위에 약 24px 삐져나와 있었다. 제목이 안 보여도 삐져나온 건 보이는 거라, 220px에 24px 더한 값. !important라 앱의 높이 계산이 덮지 못한다. */
-    body[data-current-step="step_1"] #regimeBar:not(.hidden) { height: 244px !important; }
+    /* v663: 장세박스 높이 고정값 244px, 모든 단계에서 절대고정 — 앱에서 계산하지 않는다. v659까지는 1단계에만 적용돼서 3단계 사진(3:20)에서 장세박스가 커졌었다. 사용자가 말하기 전까지는 어떤 단계에서도 바꾸지 않는다. !important라 앱의 높이 계산이 덮지 못한다. */
+    #regimeBar:not(.hidden) { height: 244px !important; }
 
 /* v575: 15분 봉 마감 5초 전부터 점멸 (카운트다운), 바뀔 때 한 번 더 강조 */
 @keyframes candleBlinkPulse {
@@ -432,7 +432,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v662 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v663 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -4730,9 +4730,15 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         if (!b) return;
         const main = document.querySelector("main");
         const footer = document.getElementById("oxFloat");
-        /* v662: 다음 체크 팝업 아래 위치는 O/X 높이를 매번 재지 않고 고정값으로 한다. O/X 높이는 128px 고정이므로, 팝업 아래를 140px로 고정하면 O/X 위에 붙고, 2단계에서 가운데로 올라가지 않는다. 1단계는 CSS 152px !important가 이 값을 덮는다. */
+        const gate = document.getElementById("oxGate");
+        /* v663: 원래 동적방식으로 복원 — O/X 박스가 화면에 보이기 시작할 때만 팝업을 위로 올린다. O/X가 아직 안 보이면 아래 30px에 붙어 있고, O/X 위쪽이 화면 아래에서 보이기 시작하면 팝업 아래가 O/X 위쪽+12px이 되어 O/X 위에 붙는다. O/X 존재 여부로 재던 v556 방식과, 고정값이던 v662 방식을 둘 다 버린다. */
         if (footer && footer.dataset.shown === "1") b.style.bottom = "calc(88px + env(safe-area-inset-bottom, 0px))";
-        else b.style.bottom = "calc(140px + env(safe-area-inset-bottom, 0px))";
+        else if (gate && gate.style.display !== "none" && gate.offsetHeight > 0) {
+          const gr = gate.getBoundingClientRect();
+          const vh = window.innerHeight || document.documentElement.clientHeight;
+          if (gr.top < vh) b.style.bottom = ((vh - gr.top + 12) + "px");
+          else b.style.bottom = "calc(30px + env(safe-area-inset-bottom, 0px))";
+        } else b.style.bottom = "calc(30px + env(safe-area-inset-bottom, 0px))";
         const idx = firstUnchecked();
         let show = false;
         if (idx >= 0 && main && currentStepKey && stepDatabase[currentStepKey]) {
@@ -9249,7 +9255,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v662 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v663 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13043,10 +13049,10 @@ window.StepGuide = StepGuide;
      다음 박스를 숨기는 게 아니라, 다음 박스 데이터는 그대로 두고 화면에 들어가는 공간만 한 박스분으로 맞춘다.
      체크박스 구역(main)이 한 박스보다 크면, 그 차이만큼 장세박스 높이를 키워서 main을 한 박스분으로 줄인다.
      전체화면·장세박스 숨김 상태에서는 동작하지 않는다. */
-  // v657: 1단계는 앱에서 계산하지 않는다. 높이는 CSS 고정값 300px이 담당한다. 이 함수는 1단계에서는 아무것도 하지 않는다.
+  // v663: 모든 단계에서 앱에서 계산하지 않는다. 높이는 CSS 고정값 244px이 담당한다. 이 함수는 아무것도 하지 않는다.
   function fitRegimeToOneBox(boxEl) {
     try {
-      if (typeof currentStepKey !== "undefined" && currentStepKey === "step_1") return;
+      return;
       const rb = document.getElementById("regimeBar");
       const main = document.querySelector("main");
       if (!rb || !main || !boxEl) return;
