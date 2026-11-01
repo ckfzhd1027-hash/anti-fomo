@@ -157,6 +157,8 @@
     #regimeBar:not(.hidden) { display:flex; flex-direction:column; }
     /* v650: 아래쪽 정렬은 설명 칩 줄만 한다. 채널 아이콘·채널 그림 줄은 위에 그대로 둔다. */
     #regimeChipRow { margin-top:auto; }
+    /* v661: 장세박스 가운데 줄(아이콘·하락 채널·채널 그림)을 아래로 내려 위아래 여백이 같게 한다. 봉 박스와의 간격(가운데 줄 위쪽 여백)과 칩과의 간격(칩 줄 위쪽 여백)이 반반이 되도록 가운데 줄에 위쪽 자동 여백을 둔다. 박스 크기는 244px 그대로 안 바꾼다. */
+    #regimeDescRow { margin-top:auto; }
     .regime-bar.regime-up { border-color:#10b981; background:linear-gradient(135deg, rgba(16,185,129,.22), rgba(16,185,129,.07)); }
     .regime-bar.regime-down { border-color:#f43f5e; background:linear-gradient(135deg, rgba(244,63,94,.20), rgba(244,63,94,.06)); }
     .regime-bar.regime-flat { border-color:#64748b; background:linear-gradient(135deg, rgba(100,116,139,.18), rgba(100,116,139,.06)); }
@@ -369,7 +371,7 @@
 .posanim-chart-shrink { animation:posanimChartShrink .30s ease; transform-origin:center; }
 @keyframes posanimChartGrow { from { transform:scale(.35); opacity:.3; } to { transform:scale(1); opacity:1; } }
 @keyframes posanimChartShrink { from { transform:scale(1); opacity:1; } to { transform:scale(.35); opacity:.3; } }
-#regimeBar.posanim-regime-hl { box-shadow:0 0 0 3px #f59e0b !important; }
+/* v660: 장세박스 채널 눌러 애니메이션으로 넘어갈 때 주황 테두리 효과 삭제 */
 .posanim-marker { cursor:pointer; }
 /* v645: 애니메이션 화면 전환 시 화면 전체가 기존 애니메이션 화면으로 바뀐다 — 단계 체크·OX·다음 체크 바를 다 숨기고 애니메이션 슬롯만 남긴다 */
 body.posanim-full main { display:none !important; }
@@ -430,7 +432,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v659 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v662 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -4728,11 +4730,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         if (!b) return;
         const main = document.querySelector("main");
         const footer = document.getElementById("oxFloat");
-        const gate = document.getElementById("oxGate");
-        const gateShown = !!(gate && gate.style.display !== "none" && gate.offsetHeight > 0);
-        if (footer && footer.dataset.shown === "1") b.style.bottom = (footer.offsetHeight + 38) + "px";
-        else if (gateShown) b.style.bottom = (gate.offsetHeight + 38) + "px"; /* v556: 다른 단계에서 푸터 표시 중 스티키가 푸터에 겹치지 않게 */
-        else b.style.bottom = "30px";
+        /* v662: 다음 체크 팝업 아래 위치는 O/X 높이를 매번 재지 않고 고정값으로 한다. O/X 높이는 128px 고정이므로, 팝업 아래를 140px로 고정하면 O/X 위에 붙고, 2단계에서 가운데로 올라가지 않는다. 1단계는 CSS 152px !important가 이 값을 덮는다. */
+        if (footer && footer.dataset.shown === "1") b.style.bottom = "calc(88px + env(safe-area-inset-bottom, 0px))";
+        else b.style.bottom = "calc(140px + env(safe-area-inset-bottom, 0px))";
         const idx = firstUnchecked();
         let show = false;
         if (idx >= 0 && main && currentStepKey && stepDatabase[currentStepKey]) {
@@ -9249,7 +9249,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v659 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v662 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13979,14 +13979,10 @@ window.StepGuide = StepGuide;
     startPlay(0);
     return true;
   }
+  // v660: 장세박스 채널 눌러 애니메이션으로 넘어갈 때 주황 테두리 효과 없앰 — 바로 애니메이션으로 간다
   function showFromRegime() {
-    var bar = document.getElementById("regimeBar");
-    if (bar) bar.classList.add("posanim-regime-hl");
-    setTimeout(function () {
-      if (bar) bar.classList.remove("posanim-regime-hl");
-      // v646: 장세박스 미니 차트를 누르면 박스만 보인다 — 전체화면은 애니메이션 차트를 눌렀을 때만 된다
-      show(true);
-    }, 300);
+    // v646: 장세박스 미니 차트를 누르면 박스만 보인다 — 전체화면은 애니메이션 차트를 눌렀을 때만 된다
+    show(true);
   }
   function backToRegime(ev) {
     if (ev) { try { ev.preventDefault(); } catch (e) {} }
