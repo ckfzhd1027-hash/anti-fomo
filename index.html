@@ -180,11 +180,12 @@
     .dark .regime-chip-div-short { border-color:#fb7185 !important; color:#fda4af; }
     @keyframes regimeBlink { 0%,100% { opacity:1; } 50% { opacity:.4; } }
     .regime-blink { animation: regimeBlink 0.9s ease-in-out infinite; }
-    /* v684: 장세박스 채널 그림 점멸 더 세게 — 터치 유도 (채널 그림만, 전체 박스·봉 박스 아님) */
-    @keyframes regimeVizSoftBlink { 0%,100% { opacity:1; } 50% { opacity:.4; } }
-    #regimeViz { animation: regimeVizSoftBlink 1.2s ease-in-out infinite; }
-    /* v685: 헤더 제목 알약도 같은 점멸 — JS가 className을 갈아엎어도 ID 선택자라 유지된다 */
-    #headerStepTitle { animation: regimeVizSoftBlink 1.2s ease-in-out infinite; }
+    /* v687: 점멸 방식 변경 — 콘텐츠 자체(투명도)는 그대로 두고, 뒷배경 색만 점멸한다 */
+    @keyframes regimeVizBgBlink { 0%,100% { background-color: rgba(245,158,11,0); } 50% { background-color: rgba(245,158,11,0.22); } }
+    #regimeViz { border-radius: 12px; animation: regimeVizBgBlink 1.2s ease-in-out infinite; }
+    @keyframes headerBgBlink { 0%,100% { background-color: color-mix(in srgb, currentColor 12%, transparent); } 50% { background-color: color-mix(in srgb, currentColor 38%, transparent); } }
+    /* v687: 헤더 제목 알약도 배경색만 점멸 — JS가 className을 갈아엎어도 ID 선택자라 유지된다, 글자 투명도는 그대로 */
+    #headerStepTitle { animation: headerBgBlink 1.2s ease-in-out infinite; }
     .regime-chip-pos { border-color:#94a3b8 !important; }
     .dark .regime-chip-pos { border-color:rgba(148,163,184,.55) !important; }
 
@@ -469,7 +470,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v686 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v687 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9352,7 +9353,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v686 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v687 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
