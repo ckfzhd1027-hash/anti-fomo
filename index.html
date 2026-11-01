@@ -180,8 +180,8 @@
     .dark .regime-chip-div-short { border-color:#fb7185 !important; color:#fda4af; }
     @keyframes regimeBlink { 0%,100% { opacity:1; } 50% { opacity:.4; } }
     .regime-blink { animation: regimeBlink 0.9s ease-in-out infinite; }
-    /* v688: 채널 호박 배경 점멸 약하게 — 진하기 22%에서 10%로, 속도는 1.2초 그대로 */
-    @keyframes regimeVizBgBlink { 0%,100% { background-color: rgba(245,158,11,0); } 50% { background-color: rgba(245,158,11,0.10); } }
+    /* v690: 채널 호박 배경 점멸 더 약하게 — 진하기 10%에서 5%로, 속도는 1.2초 그대로 */
+    @keyframes regimeVizBgBlink { 0%,100% { background-color: rgba(245,158,11,0); } 50% { background-color: rgba(245,158,11,0.05); } }
     #regimeViz { border-radius: 12px; animation: regimeVizBgBlink 1.2s ease-in-out infinite; }
     /* v689: 제목 점멸도 약하게 — 진하기 38%에서 20%로, 속도는 1.2초 그대로 */
     @keyframes headerBgBlink { 0%,100% { background-color: color-mix(in srgb, currentColor 12%, transparent); } 50% { background-color: color-mix(in srgb, currentColor 20%, transparent); } }
@@ -471,7 +471,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v689 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v690 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9354,7 +9354,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v689 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v690 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
