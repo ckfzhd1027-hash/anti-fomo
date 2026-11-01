@@ -153,6 +153,9 @@
     html:not(.dark) [id^="box-icon-"] svg, html:not(.dark) .chart-marker-palette-btn svg { filter: brightness(0.93) saturate(1.45) contrast(1.1); }
       /* 장세 배지 2단 개편 (v260 -> v261: 삽입 위치·라이트 시인성 수정) */
     .regime-bar { border-color:#94a3b8; background:#f8fafc; color:#0f172a; }
+    /* v649: 장세박스가 커져도 하단에 빈 공간이 남지 않게 — 장세설명을 아래쪽으로 정렬한다. 봉 줄은 위에, 설명 줄은 아래에 붙는다. */
+    #regimeBar { display:flex; flex-direction:column; }
+    #regimeDescRow { margin-top:auto; }
     .regime-bar.regime-up { border-color:#10b981; background:linear-gradient(135deg, rgba(16,185,129,.22), rgba(16,185,129,.07)); }
     .regime-bar.regime-down { border-color:#f43f5e; background:linear-gradient(135deg, rgba(244,63,94,.20), rgba(244,63,94,.06)); }
     .regime-bar.regime-flat { border-color:#64748b; background:linear-gradient(135deg, rgba(100,116,139,.18), rgba(100,116,139,.06)); }
@@ -417,7 +420,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v648 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v649 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -580,7 +583,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       <div id="regimeCandleRow" onclick="event.stopPropagation();" class="px-3 pt-2.5 pb-1 cursor-pointer">
         <div id="regimeCandleBoxes" class="flex items-stretch gap-2"></div>
       </div>
-      <div class="flex items-center justify-between gap-2 px-3 pt-1.5 pb-1">
+      <div id="regimeDescRow" class="flex items-center justify-between gap-2 px-3 pt-1.5 pb-1">
         <div class="flex items-center gap-2 min-w-0">
           <span class="relative flex-none w-9 h-9">
             <span id="regimeDirIcon" class="flex-none w-9 h-9 rounded-xl flex items-center justify-center text-white text-lg shadow-sm bg-slate-500"><i class="ph-bold ph-chart-bar"></i></span>
@@ -9236,7 +9239,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v648 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v649 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13886,8 +13889,10 @@ window.StepGuide = StepGuide;
     setOutsideVisible(false);
   }
   // v647: 애니메이션 박스는 누르자마자 바로 전체화면으로 바뀐다 — 0.35초 기다림 없음. 두 번 빠르게 누르면 장세박스로 돌아간다.
-  var lastBoxTapTime = 0;
+  // v649: 폰 터치로도 바로 먹게 — 터치 뒤에 오는 클릭은 중복으로 처리하지 않는다
+  var lastBoxTapTime = 0, lastTouchTime = 0;
   function boxTap(ev) {
+    if (ev && ev.type === "click" && Date.now() - lastTouchTime < 500) return;
     if (ev) {
       var t = ev.target;
       if (t && t.closest && t.closest(".posanim-marker")) return;
@@ -13921,6 +13926,8 @@ window.StepGuide = StepGuide;
     activePos = decl.pos; activeSlope = decl.slope;
     var slot = document.getElementById("posAnimSlot");
     var bar = document.getElementById("regimeBar");
+    // v649: 애니메이션 높이는 키운 장세박스 높이가 아니라 원래 장세박스 높이로 — 키운 높이를 먼저 지우고 재서 쓴다
+    if (bar) { bar.style.height = ""; bar.style.paddingBottom = ""; }
     if (bar && !bar.classList.contains("hidden")) regimeBoxH = bar.offsetHeight;
     if (slot) slot.classList.remove("hidden");
     if (bar) bar.classList.add("hidden");
@@ -13965,6 +13972,8 @@ window.StepGuide = StepGuide;
       regimeBoxH = 0;
       exitFullAnim();
       try { if (typeof Regime !== "undefined" && Regime.renderBar) Regime.renderBar(); } catch (e) {}
+      var rb2 = document.getElementById("regimeBar");
+      if (rb2) { rb2.style.height = ""; rb2.style.paddingBottom = ""; }
       activePos = null; pinned = null;
     }, 300);
   }
@@ -13978,6 +13987,9 @@ window.StepGuide = StepGuide;
         slot.classList.add("hidden");
         try { if (typeof Regime !== "undefined" && Regime.renderBar) Regime.renderBar(); } catch (e) {}
       }
+      // v649: 단계를 벗어나면 키운 장세박스 높이를 지워서, 돌아올 때 원래 높이에서 다시 계산하게 한다
+      var rb3 = document.getElementById("regimeBar");
+      if (rb3) { rb3.style.height = ""; rb3.style.paddingBottom = ""; }
       playing = false;
       if (raf) { cancelAnimationFrame(raf); raf = null; }
       activePos = null; pinned = null;
@@ -13993,6 +14005,14 @@ window.StepGuide = StepGuide;
     show(false);
   }
   function init() {
+    var box0 = document.getElementById("posAnimBox");
+    if (box0) {
+      box0.addEventListener("touchend", function (ev) {
+        lastTouchTime = Date.now();
+        try { ev.preventDefault(); } catch (e) {}
+        boxTap(ev);
+      }, { passive: false });
+    }
     var viz = document.getElementById("regimeViz");
     if (viz) {
       viz.addEventListener("click", function (ev) {
