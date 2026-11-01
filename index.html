@@ -180,9 +180,11 @@
     .dark .regime-chip-div-short { border-color:#fb7185 !important; color:#fda4af; }
     @keyframes regimeBlink { 0%,100% { opacity:1; } 50% { opacity:.4; } }
     .regime-blink { animation: regimeBlink 0.9s ease-in-out infinite; }
-    /* v681: 장세박스 채널 그림 은은한 점멸 — 터치 유도 (채널 그림만, 전체 박스·봉 박스 아님) */
-    @keyframes regimeVizSoftBlink { 0%,100% { opacity:1; } 50% { opacity:.7; } }
-    #regimeViz { animation: regimeVizSoftBlink 2.4s ease-in-out infinite; }
+    /* v684: 장세박스 채널 그림 점멸 더 세게 — 터치 유도 (채널 그림만, 전체 박스·봉 박스 아님) */
+    @keyframes regimeVizSoftBlink { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+    #regimeViz { animation: regimeVizSoftBlink 1.2s ease-in-out infinite; }
+    /* v685: 헤더 제목 알약도 같은 점멸 — JS가 className을 갈아엎어도 ID 선택자라 유지된다 */
+    #headerStepTitle { animation: regimeVizSoftBlink 1.2s ease-in-out infinite; }
     .regime-chip-pos { border-color:#94a3b8 !important; }
     .dark .regime-chip-pos { border-color:rgba(148,163,184,.55) !important; }
 
@@ -467,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v683 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v686 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9350,7 +9352,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v683 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v686 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13863,7 +13865,7 @@ window.StepGuide = StepGuide;
       var isChecked = !!checkedMarks[idx];
       var isCur = currentPoint() === pt;
       // v652: 목록에서 체크한 타점은 애니메이션 차트에서도 초록으로 확인된다. 눌러서 멈춘 타점은 주황이 우선이다.
-      h += '<g class="posanim-marker" data-marker="' + idx + '"><circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="' + (isPinned ? 19 : 13) + '" fill="' + (isPinned ? "#ffa502" : (isChecked ? "#22c55e" : "#0f172a")) + '" stroke="#ffffff" stroke-width="2"/>';
+      h += '<g class="posanim-marker" data-marker="' + idx + '"><circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="30" fill="transparent" pointer-events="all"/>' + '<circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="' + (isPinned ? 19 : 13) + '" fill="' + (isPinned ? "#ffa502" : (isChecked ? "#22c55e" : "#0f172a")) + '" stroke="#ffffff" stroke-width="2"/>';
       h += '<text x="' + xy[0] + '" y="' + (xy[1] + 5) + '" font-size="15.5" text-anchor="middle" fill="#ffffff">' + (idx + 1) + '</text></g>';
       if (isCur && !isPinned) {
         h += '<circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="19" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.7"/>';
