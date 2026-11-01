@@ -320,6 +320,44 @@
   0%, 100% { box-shadow: 0 0 0 2px var(--alarm-color, #facc15), 0 0 12px 2px var(--alarm-color, #facc15); }
   50% { box-shadow: 0 0 0 2px transparent, 0 0 0 0 transparent; }
 }
+
+/* v631: 위치별 타점 애니매이션 (2단계 장세박스 자리, 최대 460px) */
+/* v642: 애니메이션 박스 크기를 기존 장세박스와 똑같이 — 460px 상한을 빼고 장세박스처럼 섹션 너비 그대로 쓴다 */
+#posAnimSlot { width:100%; }
+.posanim-box { width:100%; margin:0 auto; border:2px solid #94a3b8; border-radius:1rem; background:#ffffff; color:#0f172a; box-shadow:0 4px 14px rgba(15,23,42,.12); overflow:hidden; cursor:pointer; }
+.dark .posanim-box { background:#1e293b; color:#f1f5f9; border-color:#64748b; }
+#posAnimHead { display:flex; align-items:center; gap:8px; padding:10px 12px 6px 12px; }
+#posAnimBack { font-size:22px; font-weight:900; line-height:1; }
+#posAnimTitle { font-size:18px; font-weight:900; flex:1; min-width:0; }
+#posAnimRec { font-size:13px; font-weight:900; padding:4px 10px; border-radius:999px; background:#f43f5e; color:#ffffff; white-space:nowrap; }
+#posAnimRec.posanim-rec-long { background:#22c55e; color:#052e16; }
+#posAnimRec.posanim-rec-both { background:#f59e0b; color:#451a03; }
+#posAnimChart { width:100%; height:228px; }
+#posAnimChart svg { width:100%; height:100%; display:block; }
+#posAnimChart text { font-weight:900; }
+.posanim-box text { fill:#334155; }
+.posanim-marker text { fill:#ffffff !important; }
+.dark .posanim-box text { fill:#e2e8f0; }
+#posAnimOutside { width:100%; margin:8px auto 0 auto; }
+/* v640: 애니메이션은 장세박스 안에서만 표현 — 박스 밖은 기존 컨텐츠 그대로 진행된다 */
+/* v641: 기존 애니메이션 화면(박스 밖 설명·버튼·목록)은 애니메이션 창을 누르면 뜬다 — 기본은 안 보이고, 창 탭으로 토글한다 */
+#posAnimNow { font-size:15px; font-weight:900; line-height:1.5; margin:6px 2px; }
+#posAnimCond { font-size:14.5px; line-height:1.6; margin:6px 2px; }
+#posAnimCond ul { margin:4px 0 0 18px; }
+#posAnimControls { display:flex; gap:8px; margin:10px 2px; }
+#posAnimControls button { flex:1; min-height:44px; border-radius:12px; border:2px solid #94a3b8; background:#ffffff; color:#0f172a; font-weight:900; font-size:14px; cursor:pointer; }
+.dark #posAnimControls button { background:#111726; color:#f1f5f9; border-color:#64748b; }
+#posAnimMarks { display:flex; flex-direction:column; gap:6px; margin:6px 2px 0 2px; }
+#posAnimMarks button { text-align:left; border-radius:12px; border:2px solid #94a3b8; background:#ffffff; color:#0f172a; font-weight:900; font-size:14px; padding:10px 12px; cursor:pointer; }
+.dark #posAnimMarks button { background:#111726; color:#f1f5f9; border-color:#64748b; }
+#posAnimMarks button.posanim-marked { border-color:#22c55e; background:#ecfdf5; }
+.dark #posAnimMarks button.posanim-marked { background:#052e16; }
+.posanim-expand { animation:posanimZoomIn .35s ease; transform-origin:center top; }
+.posanim-shrink { animation:posanimZoomOut .30s ease; transform-origin:center top; }
+@keyframes posanimZoomIn { from { transform:scale(.85); opacity:.3; } to { transform:scale(1); opacity:1; } }
+@keyframes posanimZoomOut { from { transform:scale(1); opacity:1; } to { transform:scale(.85); opacity:.3; } }
+#regimeBar.posanim-regime-hl { box-shadow:0 0 0 3px #f59e0b !important; }
+.posanim-marker { cursor:pointer; }
 </style>
 </head>
 <body id="appBody" class="bg-slate-50 dark:bg-[#080b11] text-slate-900 dark:text-white flex flex-col h-full select-none transition-colors duration-300">
@@ -372,7 +410,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v630 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v644 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -553,6 +591,7 @@
         <span id="regimePathText" style="display:none" class="regime-chip-pos inline-flex items-center px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-black border-2"></span>
       </div>
       <div id="regimeExpiredRow" class="hidden px-3 pb-2.5 -mt-1 text-xs font-black text-red-500">⚠ 선언이 만료됐습니다 — 재선언 후 진행할 수 있습니다</div>
+      <div id="regimeBrkWarn" class="hidden px-3 pb-2.5 -mt-1 text-xs font-black text-red-500"></div>
       <div id="candleZoomPopup" class="hidden absolute inset-0 z-30" onclick="event.stopPropagation();">
         <div class="w-full h-full flex flex-col bg-white dark:bg-[#0f172a] px-2 py-1.5">
           <div class="flex items-center gap-1.5 flex-none">
@@ -564,6 +603,23 @@
           <div id="candleZoomChart" class="relative flex-1 min-h-0 mt-1 overflow-hidden"></div>
           <div id="candleZoomStatus" class="hidden mt-1"><span id="candleZoomStatusText" class="text-[11px] font-black text-red-500"></span> <button onclick="event.stopPropagation(); CandleZoom.retry();" class="flex-none px-2 py-0.5 rounded-md bg-white/20 text-[11px] font-black">다시 시도</button></div>
         </div>
+      </div>
+    </div>
+
+    <div id="posAnimSlot" class="hidden" style="margin:0 auto;width:100%;">
+      <div id="posAnimBox" class="posanim-box" onclick="PosAnim.boxTap(event)">
+        <div id="posAnimBrkWarn" class="hidden" style="padding:6px 12px 0;font-size:13px;font-weight:900;color:#ef4444;"></div>
+        <div id="posAnimChart"></div>
+      </div>
+      <div id="posAnimOutside">
+        <div id="posAnimNow"></div>
+        <div id="posAnimCond"></div>
+        <div id="posAnimControls">
+          <button type="button" onclick="PosAnim.restart()">▶ 다시 재생</button>
+          <button type="button" onclick="PosAnim.fromStart()">↻ 처음부터</button>
+          <button type="button" id="posAnimPauseBtn" onclick="PosAnim.togglePause()">일시정지</button>
+        </div>
+        <div id="posAnimMarks"></div>
       </div>
     </div>
 
@@ -4854,6 +4910,7 @@
         if (d.div === "top" && d.pos !== "bottom") return "short";
         // v472: 예측 다이버는 방향이 아님 — updateBranchRecommendation에서 추가 표시로만 처리 (아래 참조)
         // v462: 채널 돌파 후 밖에 있음 (다이버 다음, 상하단 사건보다 먼저 — 돌파는 확정된 구조 변화라 닿음·가짜보다 강함)
+        // v633: 돌파 추천은 리테 방향 — 상단 돌파→롱, 하단 돌파→숏 (몸통마감일 때만 brk가 잡힘)
         if (d.brk === "up") return "long";
         if (d.brk === "down") return "short";
         // v438: 다이버 없을 때 사건 폴백 (사용자 확인) — 상단 사건 → 숏, 하단 사건 → 롱 (다이버 우선 유지)
@@ -9172,7 +9229,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v630 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v644 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -10459,6 +10516,12 @@ window.FlowSync = (function(){
         return o;
       }
       if (data) { const divBefore = data.div; sanitizeDivState(data); if (data.div !== divBefore) save(); }
+      // v633: 몸통마감 확인 없는 옛 돌파는 돌파로 보지 않음 — 재선언 때까지 위치 기준으로 본다
+      if (data && data.brk && data.brkBody !== "yes") {
+        data.brk = null;
+        if (data.path) data.path = data.path.replace(" · 상방 돌파 후 밖에 있음", "").replace(" · 하방 돌파 후 밖에 있음", "").replace(" · 일봉 몸통 마감", "");
+        save();
+      }
       /* ===== 장세 미니 애니메이션 렌더러 (v283) ===== */
       function vizScene(state, isStatic, host) {
         const CY = 32, HH = 22, AMP = 9;
@@ -10814,6 +10877,14 @@ window.FlowSync = (function(){
         } else {
           expRow.classList.add("hidden");
         }
+        // v633: 돌파 몸통마감 경고 — 장세박스
+        const brkWarn = document.getElementById("regimeBrkWarn");
+        if (brkWarn) {
+          if (!expired && data.brkBody === "yes" && data.brk) {
+            brkWarn.textContent = "⚠ 채널 돌파 일봉 몸통 마감 확정 · 리테 " + (data.brk === "up" ? "롱" : "숏") + " 방향";
+            brkWarn.classList.remove("hidden");
+          } else { brkWarn.textContent = ""; brkWarn.classList.add("hidden"); }
+        }
         updateTimeRing();
         const dv = data.div || "none";
         if (dv === "none" && data.divExhausted) {
@@ -10862,17 +10933,14 @@ window.FlowSync = (function(){
         if (wizNeedsPos()) {
           qs.push({ key: "pos", title: wiz.slope === "flat" ? "박스권에서 현재 위치는?" : "채널 내 현재 위치는?", hint: "선에 닿았거나 채널 폭의 10% 이내면 상단·하단으로 본다.", options: [{ v: "top", t: "상단" }, { v: "mid", t: "중단" }, { v: "bottom", t: "하단" }] });
         }
-        if (wizNeedsEvt()) {
-          qs.push({ key: "evt", title: "가장 최근에 채널 상하단에서 무슨 일이 있었나?", hint: "직전 움직임 기록용이다 — 선언 결과(방향·위치)는 바뀌지 않고, 경위와 애니메이션에만 남는다.", options: [{ v: "none", t: "없음 — 아직 닿지 않았다" }, { v: "top_touch", t: "상단 — 닿고 밀렸다" }, { v: "top_fake", t: "상단 — 뚫었다가 재진입 (가짜 돌파)" }, { v: "bottom_touch", t: "하단 — 닿고 반등했다" }, { v: "bottom_fake", t: "하단 — 뚫었다가 재진입 (가짜 돌파)" }] });
+        // v633: 채널 돌파 몸통마감 체크 — 가격이 채널 밖에 있을 때만 묻는다
+        if (wiz.chan === "yes" && wiz.slope && (wiz.loc === "top" || wiz.loc === "bottom")) {
+          qs.push({ key: "brkBody", title: "채널 돌파가 일봉 몸통으로 마감됐나?", hint: "몸통 종가가 선 밖이면 돌파, 꼬리만 삐져나오면 돌파 아님.", options: [{ v: "yes", t: "몸통으로 마감됐다" }, { v: "no", t: "꼬리만 나갔다 / 아직 마감 안 됐다" }] });
         }
-        qs.push({ key: "div", title: "채널 상하단에서의 최근 고점·저점 이후에 생긴 다이버를 본다", hint: "", options: [{ v: "none", t: "없음" }, { v: "bottom", t: "상승 다이버" }, { v: "top", t: "하락 다이버" }] });
-        qs.push({ key: "wait", title: "리테 숏 이후 1강이 나왔는가?", hint: "상단 닿고 내려와 하락 돌파 리테 숏을 한 뒤, 1강을 기다리는 구간이 기준이다. 그 구간이 아니면 해당 없음으로 답한다.", options: [{ v: "na", t: "리테 숏 이후 구간 아님 — 대기 해당 없음" }, { v: "waiting", t: "아직 안 나왔다 — 1강 대기 중" }, { v: "done", t: "나왔다 — 대기 해제" }] });
-        if (wiz.wait === "done") {
-          qs.push({ key: "second", title: "1강 뒤 두번째 장대의 거래량이 줄었는가?", hint: "1강 다음에 나온 두번째 장대(큰 봉)의 거래량이 1강보다 줄었을 때만 다이버 준비가 열린다. 안 줄면 다이버 준비 안 함.", options: [{ v: "yes", t: "줄었다 — 다이버 준비 가능" }, { v: "no", t: "안 줄었다 — 다이버 준비 안 함" }] });
-          qs.push({ key: "oversold", title: "1강 자리가 과매도 상태인가?", hint: "1강이 나온 자리가 과매도 상태여야 1강이 유효하다. (앱이 자동 판정하지 않음 — 사용자가 보는 과매도 기준.)", options: [{ v: "yes", t: "과매도다" }, { v: "no", t: "아니다" }] });
-        }
-        if (wizNeedsFlip()) {
-          qs.push({ key: "flip", title: "전환이 확정됐나?", hint: "리테스트에서 지지·저항 전환이 확인되고, 새 고점·저점 갱신까지 된 경우만 확정으로 본다.", options: [{ v: "confirmed", t: "확인됐다 — 전환 확정" }, { v: "pending", t: "아직 — 이탈 직후다" }] });
+        // v632: 사건·대기·두번째장대·과매도·뒤집기 문항 폐지 — 남은 문항은 채널·기울기·위치·다이버만
+        // v635: 몸통마감 돌파일 때는 다이버 문항 생략
+        if (!(wiz.chan === "yes" && wiz.slope && (wiz.loc === "top" || wiz.loc === "bottom") && wiz.brkBody === "yes")) {
+          qs.push({ key: "div", title: "채널 상하단에서의 최근 고점·저점 이후에 생긴 다이버를 본다", hint: "", options: [{ v: "none", t: "없음" }, { v: "bottom", t: "상승 다이버" }, { v: "top", t: "하락 다이버" }] });
         }
         return qs;
       }
@@ -10912,10 +10980,15 @@ window.FlowSync = (function(){
         return wizPredDivDir() != null; // v495: ltf가 먼저이므로 volRev 조건 제거
       }
       function wizDerive() {
-        if (!wiz || !wiz.chan || !wiz.div || !wiz.wait) return null;
-        if (wiz.wait === "done" && !wiz.second) return null;
-        if (wiz.wait === "done" && !wiz.oversold) return null;
-        if (wiz.div !== "none" && !wiz.divPos) return null;
+        // v632: 장세선언 단순화 — 사건·대기·두번째장대·과매도·뒤집기 문항 폐지, 위치·방향·기울기·다이버만으로 선언
+        if (!wiz || !wiz.chan) return null;
+        // v633: 채널 밖에 있을 때는 몸통마감 체크가 필수
+        if (wiz.chan === "yes" && wiz.slope && (wiz.loc === "top" || wiz.loc === "bottom") && !wiz.brkBody) return null;
+        // v635: 몸통마감 돌파일 때는 다이버 안 묻는다 — 다이버 없음으로 저장
+        var brkConfirmed = wiz.chan === "yes" && wiz.slope && (wiz.loc === "top" || wiz.loc === "bottom") && wiz.brkBody === "yes";
+        if (!brkConfirmed && !wiz.div) return null;
+        var effDiv = brkConfirmed ? "none" : wiz.div;
+        if (effDiv !== "none" && !wiz.divPos) return null;
         let dir = null, pos = null, viz = null;
         if (wiz.chan === "no") { dir = "box"; pos = "mid"; viz = { slope: "none", event: "none", flip: null, side: null }; }
         else if (!wiz.slope || !wiz.loc) return null;
@@ -10924,10 +10997,9 @@ window.FlowSync = (function(){
             if (!wiz.pos) return null;
             dir = "box"; pos = wiz.pos; viz = { slope: "flat", event: "inside", flip: null, side: null };
           } else {
-            if (!wiz.flip) return null;
-            viz = { slope: "flat", event: "against", flip: wiz.flip, side: wiz.loc };
-            if (wiz.flip === "pending") { dir = "box"; pos = wiz.loc; }
-            else { dir = wiz.loc === "top" ? "up" : "down"; pos = wiz.loc === "top" ? "bottom" : "top"; }
+            // v632: 뒤집기 문항 폐지 — 이탈 직후(미확정)로 고정, 방향은 횡보·위치는 이탈 쪽
+            viz = { slope: "flat", event: "against", flip: "pending", side: wiz.loc };
+            dir = "box"; pos = wiz.loc;
           }
         } else {
           const withSide = wiz.slope === "up" ? "top" : "bottom";
@@ -10937,20 +11009,20 @@ window.FlowSync = (function(){
           } else if (wiz.loc === withSide) {
             dir = wiz.slope; pos = wiz.loc; viz = { slope: wiz.slope, event: "with", flip: null, side: wiz.loc };
           } else {
-            if (!wiz.flip) return null;
-            viz = { slope: wiz.slope, event: "against", flip: wiz.flip, side: wiz.loc };
-            if (wiz.flip === "pending") { dir = "box"; pos = wiz.loc; }
-            else { dir = wiz.slope === "down" ? "up" : "down"; pos = wiz.loc === "top" ? "bottom" : "top"; }
+            // v632: 뒤집기 문항 폐지 — 이탈 직후(미확정)로 고정, 방향은 횡보·위치는 이탈 쪽
+            viz = { slope: wiz.slope, event: "against", flip: "pending", side: wiz.loc };
+            dir = "box"; pos = wiz.loc;
           }
         }
         if (!dir || !pos) return null;
-        if (wiz.loc === "inside" && !wiz.evt) return null;
-        const evt = (wiz.loc === "inside" && wiz.evt && wiz.evt !== "none") ? wiz.evt : null;
+        // v632: 사건 문항 폐지 — 사건은 항상 없음
+        const evt = null;
         const volRev = null; // v625: volRev 문항 폐지 — 항상 없음
-        const brk = wiz.loc === "top" ? "up" : (wiz.loc === "bottom" ? "down" : null); // v465: brk 문항 폐지, 위치(loc)에서 유도
+        // v633: 돌파는 몸통마감일 때만 인정 — 꼬리만 나간 밖에 있음은 돌파가 아님
+        const brk = (wiz.brkBody === "yes" && wiz.loc === "top") ? "up" : ((wiz.brkBody === "yes" && wiz.loc === "bottom") ? "down" : null);
         const evtFakeSide = evt === "top_fake" ? "top" : (evt === "bottom_fake" ? "bottom" : null);
         if (evtFakeSide) viz = { slope: viz.slope, event: "fakeout", flip: null, side: evtFakeSide, pos: pos };
-        const out = { dir: dir, div: wiz.div, divPos: wiz.div !== "none" ? (wiz.divPos || null) : null, pos: pos, divExhausted: null, divExhaustedPos: null };
+        const out = { dir: dir, div: effDiv, divPos: effDiv !== "none" ? (wiz.divPos || null) : null, pos: pos, divExhausted: null, divExhaustedPos: null };
         let note = "";
         if (out.div === "bottom" && out.pos === "top") { out.divExhausted = "bottom"; out.divExhaustedPos = out.divPos; out.div = "none"; note = "상승 다이버는 상단 도달로 소진 처리했습니다."; }
         if (out.div === "top" && out.pos === "bottom") { out.divExhausted = "top"; out.divExhaustedPos = out.divPos; out.div = "none"; note = "하락 다이버는 하단 도달로 소진 처리했습니다."; }
@@ -10969,8 +11041,7 @@ window.FlowSync = (function(){
             else ev = (wiz.loc === "top" ? "상단 돌파" : "하단 이탈") + " · 기울기 반대";
           }
           path = sName + " · " + ev;
-          if (wiz.flip === "confirmed") path += " · 전환 확정";
-          else if (wiz.flip === "pending") path += " · 전환 미확정";
+          // v632: 뒤집기 경위 문구 폐지
           if (evt) path += " · " + evtLabel(evt);
         }
         if (out.div !== "none" && out.divPos) path += " · 다이버 " + POS_LABEL[out.divPos] + " 발생";
@@ -10978,11 +11049,9 @@ window.FlowSync = (function(){
         if (predDiv) path += " · 예측 다이버 " + (predDiv === "long" ? "롱" : "숏");
         if (volRev) path += " · 거래량 폭발 " + (volRev === "long" ? "상승 전환" : "하락 전환");
         if (brk) path += " · " + (brk === "up" ? "상방 돌파 후 밖에 있음" : "하방 돌파 후 밖에 있음");
-        if (wiz.wait === "waiting") path += " · 1강 대기 중";
-        else if (wiz.wait === "done") path += " · 1강 나옴";
-        if (wiz.wait === "done" && wiz.second === "yes") path += " · 두번째 장대 감소";
-        if (wiz.wait === "done" && wiz.oversold === "yes") path += " · 1강 자리 과매도";
-        return { decl: out, note: note, path: path, viz: viz, evt: evt, volRev: volRev, brk: brk, predDiv: predDiv, wait: wiz.wait || null, second: wiz.second || null, oversold: wiz.oversold || null };
+        if (brk && wiz.brkBody === "yes") path += " · 일봉 몸통 마감";
+        // v632: 대기·두번째장대·과매도 경위 문구 폐지
+        return { decl: out, note: note, path: path, viz: viz, evt: evt, volRev: volRev, brk: brk, brkBody: wiz.brkBody || null, predDiv: predDiv, wait: null, second: null, oversold: null };
       }
 
       function wizAnswerLabel(q, v) {
@@ -11168,6 +11237,7 @@ window.FlowSync = (function(){
           flip: ["전환", { confirmed: "확정", pending: "미확정" }],
           div: ["다이버", { none: "없음", bottom: "상승", top: "하락" }],
           pos: ["위치", { top: "상단", mid: "중단", bottom: "하단" }],
+          brkBody: ["돌파마감", { yes: "몸통마감", no: "꼬리만" }],
           evt: ["사건", { none: "없음", top_touch: "상단 닿음", top_fake: "상단 가짜", bottom_touch: "하단 닿음", bottom_fake: "하단 가짜" }],
           volRev: ["거래량 전환", { none: "없음", long: "상승", short: "하락" }],
           ltf: ["예측 다이버", { yes: "예측", no: "없음" }],
@@ -11228,6 +11298,7 @@ window.FlowSync = (function(){
               if ((data.evt || null) !== (r.evt || null)) { const el = function (v) { return v ? evtLabel(v) : "없음"; }; parts.push("사건 " + el(data.evt) + " → " + el(r.evt)); }
               if ((data.volRev || null) !== (r.volRev || null)) { const vl = function (v) { return v === "long" ? "상승 전환" : (v === "short" ? "하락 전환" : "없음"); }; parts.push("거래량 전환 " + vl(data.volRev) + " → " + vl(r.volRev)); }
               if ((data.brk || null) !== (r.brk || null)) { const bl = function (v) { return v === "up" ? "상방 돌파" : (v === "down" ? "하방 돌파" : "없음"); }; parts.push("돌파 " + bl(data.brk) + " → " + bl(r.brk)); }
+              if ((data.brkBody || null) !== (r.brkBody || null)) { const bbl = function (v) { return v === "yes" ? "몸통마감" : (v === "no" ? "꼬리만" : "해당 없음"); }; parts.push("돌파마감 " + bbl(data.brkBody) + " → " + bbl(r.brkBody)); }
               if ((data.divExhausted || null) !== (r.decl.divExhausted || null)) { const xl = function (v) { return v === "bottom" ? "상승 소진" : (v === "top" ? "하락 소진" : "없음"); }; parts.push("다이버 소진 " + xl(data.divExhausted) + " → " + xl(r.decl.divExhausted)); }
               if ((data.predDiv || null) !== (r.predDiv || null)) { const pl = function (v) { return v === "long" ? "예측 롱" : (v === "short" ? "예측 숏" : "없음"); }; parts.push("예측 다이버 " + pl(data.predDiv) + " → " + pl(r.predDiv)); }
               if ((data.wait || null) !== (r.wait || null)) { const wl = function (v) { return v === "waiting" ? "대기 중" : (v === "done" ? "나옴" : "해당 없음"); }; parts.push("1강 " + wl(data.wait) + " → " + wl(r.wait)); }
@@ -11305,7 +11376,7 @@ window.FlowSync = (function(){
       function confirmDeclare() {
         const r = wizDerive();
         if (!r) return;
-        data = { dir: r.decl.dir, div: r.decl.div, divPos: r.decl.divPos || null, pos: r.decl.pos, path: r.path, viz: r.viz, evt: r.evt, volRev: r.volRev || null, brk: r.brk || null, divExhausted: r.decl.divExhausted || null, divExhaustedPos: r.decl.divExhaustedPos || null, predDiv: r.predDiv || null, wait: r.wait || null, second: r.second || null, oversold: r.oversold || null, ts: Date.now() };
+        data = { dir: r.decl.dir, div: r.decl.div, divPos: r.decl.divPos || null, pos: r.decl.pos, path: r.path, viz: r.viz, evt: r.evt, volRev: r.volRev || null, brk: r.brk || null, brkBody: r.brkBody || null, divExhausted: r.decl.divExhausted || null, divExhaustedPos: r.decl.divExhaustedPos || null, predDiv: r.predDiv || null, wait: r.wait || null, second: r.second || null, oversold: r.oversold || null, ts: Date.now() };
         save();
         try { window.__waitPick = false; } catch (e) {} // v503: 장세 재선언 시 대기 선택 해제
         const cb = pendingCb;
@@ -13312,5 +13383,621 @@ window.StepGuide = StepGuide;
       render();
     })();
   </script>
+
+<script>
+/* v631: 위치별 타점 애니매이션 (2단계 장세박스 자리) — 예시 동작을 본 앱에 통합, 장세박스 크기에 맞춤 */
+(function () {
+  var W = 720, H = 360, VOL_BASE = 340, SLOT_W = 12, SLOT_GAP = 20;
+  function chanY(slope, top, x) {
+    var f = slope === "up" ? -36 : (slope === "down" ? 36 : 0);
+    return (top ? 60 : 250) + f * x / 720;
+  }
+  function dist(a, b) { var dx = b[0] - a[0], dy = b[1] - a[1]; return Math.sqrt(dx * dx + dy * dy); }
+  function pathLen(path) { var t = 0; for (var i = 1; i < path.length; i++) t += dist(path[i - 1], path[i]); return t; }
+  function pointAt(path, total, frac) {
+    var target = total * Math.max(0, Math.min(1, frac)), acc = 0;
+    for (var i = 1; i < path.length; i++) {
+      var seg = dist(path[i - 1], path[i]);
+      if (acc + seg >= target) {
+        var r = seg === 0 ? 0 : (target - acc) / seg;
+        return [path[i - 1][0] + (path[i][0] - path[i - 1][0]) * r, path[i - 1][1] + (path[i][1] - path[i - 1][1]) * r];
+      }
+      acc += seg;
+    }
+    return path[path.length - 1];
+  }
+  function fracAt(path, total, vi) {
+    var acc = 0;
+    for (var i = 1; i <= vi && i < path.length; i++) acc += dist(path[i - 1], path[i]);
+    return total === 0 ? 0 : acc / total;
+  }
+  function crossX(ax, ay, bx, by, lineY) {
+    if (by === ay) return ax;
+    var t = (lineY - ay) / (by - ay);
+    if (t < 0) t = 0; if (t > 1) t = 1;
+    return ax + (bx - ax) * t;
+  }
+  function slotIdx(x) { var i = Math.round((x - 16) / 20); if (i < 0) i = 0; if (i > 35) i = 35; return i; }
+  var BASE_VOL = [18, 22, 16, 24, 20, 26, 18, 22, 28, 20, 24, 18, 22, 16, 24, 20, 26, 18, 22, 28, 20, 24, 18, 22, 16, 24, 20, 26, 18, 22, 28, 20, 24, 18, 22, 16];
+  var POS = {
+    top: {
+      title: "상단 — 숏 흐름", rec: "숏 추천", recCls: "",
+      path: [[16, 170], [136, 110], [236, 150], [336, 70], [396, 120], [436, 170], [496, 200], [556, 150], [636, 210], [696, 230]],
+      horizY: 150, horizX0: 236, horizX1: 556,
+      points: [
+        { n: 1, name: "하락 다이버", type: "divShort", vi: 3, vol: "div", prevX: 136, prevY: 110, now: "지금: 가격이 전고점보다 높은 고점을 만드는데 RSI 고점은 낮아지는 하락 다이버 자리입니다.",
+          cond: ["가격이 전고점보다 높은 고점을 만드는데 RSI 고점은 낮아진다 (가격 ↑ · RSI ↓)", "거래량은 두 지점 모두 장대이나 두 번째가 직전보다 감소한다", "다이버 확인 후 바로 진입하지 않고 다음 흐름을 본다"] },
+        { n: 2, name: "2강 / 추세를 깨는 1강", type: "gang2", vi: 5, vol: "gang2", now: "지금: 마지막 봉 최장 + 거래량 최대인 2강 / 가파른 상승추세선을 깨는 1강이 나옵니다.",
+          cond: ["마지막 봉이 구간에서 가장 긴 장대 음봉이다", "그 봉의 거래량이 구간 최대다 (빨강 막대)", "그 장대음봉이 가파른 상승추세선과 겹치며 깨고 마감한다", "지지선 아래로 마감하지 않고 꼬리만 찍고 복귀하면 1강이 아니다"] },
+        { n: 3, name: "리테 숏", type: "retestShort", vi: 7, vol: "retest", now: "지금: 되돌림 파동이 올라와 뒤집힌 수평저항 라인에 정확히 닿고 밀리면 리테스트 숏 자리입니다.",
+          cond: ["가격이 깨진 추세선/지지 자리와 직전 상단 수평저항라인까지 되돌아온다", "지지선을 아래로 뚫을 때 장대음봉이 나온다", "되돌림 봉이 수평저항라인에 닿는 터치 지점에서 멈춘다", "터치 후 다시 밀리는 음봉이 확인될 때만 진입한다", "되돌림 거래량은 돌파 때보다 줄어 있는 것이 정상이다 (주황 막대)"] },
+        { n: 4, name: "채널 돌파 숏", type: "breakShort", vi: null, vol: "breakShort", branch: [[516, 120], [596, 210], [636, 210], [676, 150], [716, 190]], lineY: 150, x: 676, y: 150, now: "지금: 수평선을 아래로 뚫고 몸통이 선 밖에서 마감한 뒤, 되돌림이 선에 닿는 리테스트 지점이 채널 돌파 숏 자리입니다.",
+          cond: ["가격이 수평선을 아래로 뚫고 몸통이 선 밖(아래)에서 마감한다 — 꼬리만 찍고 복귀하면 이탈 아님", "돌파 직후 추격하지 않는다 — 되돌림이 깨진 선에 닿아 저항이 되는지 기다린다", "되돌림이 선에 닿는 리테스트 지점에서 저항이 확인되면 숏으로 본다", "타점은 리테스트 지점이다"] }
+      ]
+    },
+    bottom: {
+      title: "하단 — 롱 흐름", rec: "롱 추천", recCls: "posanim-rec-long",
+      path: [[16, 90], [116, 150], [216, 238], [276, 182], [316, 252], [396, 200], [456, 150], [496, 182], [596, 120], [696, 90]],
+      horizY: 182, horizX0: 276, horizX1: 496,
+      points: [
+        { n: 1, name: "1강", type: "gang1", vi: 2, vol: "gang1", now: "지금: 하단 지지에서 마지막 봉 최장 + 거래량 최대인 1강 흡수가 확인됩니다.",
+          cond: ["마지막 봉이 가장 길 때 (장대)", "마지막 봉의 거래량이 가장 많다 (초록 최대 막대)", "지지선이 버티고 있다 — 장대음봉으로 지지 아래 마감 없음", "거래량 터지는데 저점 갱신 안 됨 (흡수)"] },
+        { n: 2, name: "상승 다이버", type: "divLong", vi: 4, vol: "div", prevX: 216, prevY: 238, now: "지금: 가격이 전저점보다 낮은 저점을 만드는데 RSI 저점은 높아지는 상승 다이버 자리입니다. 다이버 타점이 최저점입니다.",
+          cond: ["가격이 전저점보다 낮은 저점을 만드는데 RSI 저점은 높아진다 (가격 ↓ · RSI ↑)", "다이버 타점이 최저점이다", "거래량은 두 지점 모두 장대이나 두 번째가 직전보다 감소한다"] },
+        { n: 3, name: "리테 롱", type: "retestLong", vi: 7, vol: "retest", now: "지금: 돌파 뒤 되돌림이 내려와 그 라인에 처음 닿는 저점이 리테스트 롱 자리입니다. 라인은 지지로 바뀝니다.",
+          cond: ["수평저항 라인은 두 저점 사이 반등 고점이 닿은 높이에 만들어진다", "가격이 오르며 그 라인을 위로 돌파해 고점을 만든다 — 수평선을 뚫을 때 장대양봉이 나온다", "돌파 뒤 되돌림이 내려와 그 라인에 처음 닿는 저점이 리테 지점이다 — 그 뒤의 두 번째 딥이 아니다", "터치 후 다시 올라가는 양봉이 확인될 때만 진입한다. 되돌림 거래량은 상승 때보다 줄어 있는 것이 정상이다 (주황 막대)"] },
+        { n: 4, name: "채널 돌파 롱", type: "breakLong", vi: null, vol: "breakLong", branch: [[376, 210], [456, 140], [496, 120], [596, 182], [676, 110]], lineY: 182, x: 596, y: 182, now: "지금: 수평선을 위로 뚫고 몸통이 선 밖에서 마감한 뒤, 되돌림이 선에 닿는 리테스트 지점이 채널 돌파 롱 자리입니다.",
+          cond: ["가격이 수평선을 위로 뚫고 몸통이 선 밖(위)에서 마감한다 — 꼬리만 찍고 복귀하면 돌파 아님", "돌파 직후 추격하지 않는다 — 되돌림이 깨진 선에 닿아 지지되는지 기다린다", "되돌림이 선에 닿는 리테스트 지점에서 지지되면 롱으로 본다", "타점은 리테스트 지점이다"] }
+      ]
+    },
+    mid: {
+      title: "중단 — 롱·숏 모두 나오는 흐름", rec: "롱·숏 모두 가능", recCls: "posanim-rec-both",
+      path: [[16, 170], [66, 220], [116, 240], [176, 185], [216, 250], [266, 150], [316, 185], [376, 120], [396, 150], [436, 90], [486, 140], [536, 200], [596, 170], [636, 150], [696, 170]],
+      horizY: null, horizX0: null, horizX1: null,
+      points: [
+        { n: 1, name: "1강", type: "gang1", vi: 2, vol: "gang1", now: "지금: 중단 아래쪽에서 마지막 봉 최장 + 거래량 최대인 1강이 나옵니다.",
+          cond: ["마지막 봉이 가장 길 때 (장대)", "마지막 봉의 거래량이 가장 많다 (초록 최대 막대)", "지지선이 버티고 있다 — 장대음봉으로 지지 아래 마감 없음"] },
+        { n: 2, name: "상승 다이버", type: "divLong", vi: 4, vol: "div", prevX: 116, prevY: 240, now: "지금: 중단 아래쪽에서 전저점보다 낮은 저점에 상승 다이버가 나옵니다. 다이버 타점 이전 전저점이 비교 기준입니다.",
+          cond: ["다이버 타점 이전 전저점이 있다 — 전저점과 비교한다", "가격이 전저점보다 낮은 저점을 만드는데 RSI 저점은 높아진다 (가격 ↓ · RSI ↑)", "거래량은 두 지점 모두 장대이나 두 번째가 직전보다 감소한다"] },
+        { n: 3, name: "리테 롱", type: "retestLong", vi: 6, vol: "retest", lineY: 185, lineX0: 176, lineX1: 316, now: "지금: 중단 아래쪽에서 돌파 뒤 되돌림이 수평라인에 처음 닿는 저점이 리테스트 롱 자리입니다.",
+          cond: ["수평라인은 반등 고점이 닿은 높이에 만들어진다", "가격이 오르며 그 라인을 위로 돌파해 고점을 만든다 — 수평선을 뚫을 때 장대양봉이 나온다", "돌파 뒤 되돌림이 내려와 그 라인에 처음 닿는 저점이 리테 지점이다", "터치 후 다시 올라가는 양봉이 확인될 때만 진입한다. 되돌림 거래량은 상승 때보다 줄어 있는 것이 정상이다 (주황 막대)"] },
+        { n: 4, name: "하락 다이버", type: "divShort", vi: 9, vol: "div", prevX: 376, prevY: 120, now: "지금: 중단 위쪽에서 전고점보다 높은 고점에 하락 다이버가 나옵니다.",
+          cond: ["가격이 전고점보다 높은 고점을 만드는데 RSI 고점은 낮아진다 (가격 ↑ · RSI ↓)", "거래량은 두 지점 모두 장대이나 두 번째가 직전보다 감소한다"] },
+        { n: 5, name: "2강 / 추세를 깨는 1강", type: "gang2", vi: 11, vol: "gang2", now: "지금: 중단 위쪽에서 마지막 봉 최장 + 거래량 최대인 2강 / 추세를 깨는 1강이 나옵니다.",
+          cond: ["마지막 봉이 구간에서 가장 긴 장대 음봉이다", "그 봉의 거래량이 구간 최대다 (빨강 막대)", "그 장대음봉이 가파른 상승추세선과 겹치며 깨고 마감한다"] },
+        { n: 6, name: "리테 숏", type: "retestShort", vi: 13, vol: "retest", lineY: 150, lineX0: 396, lineX1: 636, now: "지금: 중단 위쪽에서 되돌림이 뒤집힌 수평저항 라인에 정확히 닿고 밀리면 리테스트 숏 자리입니다.",
+          cond: ["가격이 깨진 자리와 직전 수평저항라인까지 되돌아온다", "지지선을 아래로 뚫을 때 장대음봉이 나온다 — 상단 숏타점의 장대음봉과 같은 형태다", "되돌림 봉이 수평저항라인에 닿는 터치 지점에서 멈춘다", "터치 후 다시 밀리는 음봉이 확인될 때만 진입한다", "되돌림 거래량은 돌파 때보다 줄어 있는 것이 정상이다 (주황 막대)"] },
+        { n: 7, name: "중단 복귀 (대기)", type: "return", vi: 14, vol: "none", now: "지금: 되돌림 파동이 올라와 수평저항에 정확히 닿고 밀리면 리테스트 숏, 어느 쪽도 완성되지 않으면 중단 대기로 돌아옵니다.",
+          cond: ["하단 쪽도 상단 쪽도 타점이 완성되지 않고 중단으로 돌아오면 대기다", "중단에서는 롱·숏 모두 가능하지만, 타점 조건이 갖춰질 때만 본다"] }
+      ]
+    }
+  };
+  function pointXY(cfg, pt) {
+    if (pt.x != null && pt.y != null) return [pt.x, pt.y];
+    var v = cfg.path[pt.vi];
+    return [v[0], v[1]];
+  }
+  function pointAtFrac(cfg, pt) {
+    if (pt.type === "breakLong" || pt.type === "breakShort") return 0.92;
+    return fracAt(cfg.path, pathLen(cfg.path), pt.vi);
+  }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  var activePos = null, activeSlope = "flat", prog = 0, playing = false, pinned = null, raf = null, lastTs = 0, userWentBack = false;
+  var marksByPos = { top: [], mid: [], bottom: [] };
+  // v634: 돌파타점 조건부 표시 — 돌파롱은 상단 돌파 몸통마감일 때만, 돌파숏은 하단 돌파 몸통마감일 때만 나온다
+  function visiblePoints(cfg) {
+    if (!cfg) return [];
+    var d = null;
+    try { d = (typeof Regime !== "undefined" && Regime._data) ? Regime._data() : null; } catch (e) { d = null; }
+    var out = [];
+    for (var i = 0; i < cfg.points.length; i++) {
+      var pt = cfg.points[i];
+      if (pt.type === "breakShort" && !(d && d.brk === "down" && d.brkBody === "yes")) continue;
+      if (pt.type === "breakLong" && !(d && d.brk === "up" && d.brkBody === "yes")) continue;
+      out.push(pt);
+    }
+    return out;
+  }
+  function ensureMarks(pos) {
+    var n = visiblePoints(POS[pos]).length;
+    if (!marksByPos[pos] || marksByPos[pos].length !== n) { marksByPos[pos] = []; for (var i = 0; i < n; i++) marksByPos[pos].push(false); }
+    return marksByPos[pos];
+  }
+  function getDecl() {
+    try {
+      if (typeof Regime === "undefined" || !Regime._data) return null;
+      var d = Regime._data();
+      if (!d || !d.pos) return null;
+      if (Regime.needsDeclaration && Regime.needsDeclaration()) return null;
+      var slope = (d.viz && d.viz.slope) || (d.dir === "up" ? "up" : (d.dir === "down" ? "down" : "flat"));
+      var pos = d.pos;
+      if (pos !== "top" && pos !== "mid" && pos !== "bottom") pos = "mid";
+      return { pos: pos, slope: slope };
+    } catch (e) { return null; }
+  }
+  function priceColor(pos) { return pos === "top" ? "#f87171" : (pos === "bottom" ? "#4ade80" : "#f59e0b"); }
+  function buildChart() {
+    var cfg = POS[activePos];
+    var total = pathLen(cfg.path);
+    var d = "M" + cfg.path.map(function (p) { return p[0] + "," + p[1]; }).join(" L");
+    var topD = "M0," + chanY(activeSlope, true, 0).toFixed(1) + " L720," + chanY(activeSlope, true, 720).toFixed(1);
+    var botD = "M0," + chanY(activeSlope, false, 0).toFixed(1) + " L720," + chanY(activeSlope, false, 720).toFixed(1);
+    var vol = "";
+    for (var i = 0; i < 36; i++) {
+      var x = 10 + i * 20;
+      vol += '<rect data-volslot="' + i + '" x="' + x + '" y="' + (VOL_BASE - BASE_VOL[i]) + '" width="12" height="' + BASE_VOL[i] + '" fill="#475569" rx="1"/>';
+    }
+    var svg = '<svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'
+      + '<path d="' + topD + '" fill="none" stroke="#94a3b8" stroke-width="2"/>'
+      + '<path d="' + botD + '" fill="none" stroke="#94a3b8" stroke-width="2"/>'
+      + '<text x="8" y="48" font-size="16">상단선 · 저항</text>'
+      + '<text x="8" y="268" font-size="16">하단선 · 지지</text>'
+      + '<g id="posAnimVol">' + vol + '</g>'
+      + '<path id="posAnimPrice" d="' + d + '" fill="none" stroke="' + priceColor(activePos) + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="100"/>'
+      + '<g id="posAnimBranch"></g>'
+      + '<g id="posAnimGuides"></g>'
+      + '<g id="posAnimMarkers"></g>'
+      + '</svg>';
+    var host = document.getElementById("posAnimChart");
+    if (host) host.innerHTML = svg;
+    renderMarks();
+    renderFrame();
+  }
+  function currentPoint() {
+    var cfg = POS[activePos];
+    var pts = visiblePoints(cfg);
+    if (pinned != null && pinned < pts.length) return pts[pinned];
+    if (pinned != null) pinned = null;
+    var cur = pts[0];
+    for (var i = 0; i < pts.length; i++) {
+      if (prog >= pointAtFrac(cfg, pts[i]) - 0.001) cur = pts[i];
+    }
+    return cur;
+  }
+  function volFor(pt) {
+    var out = [];
+    if (pt.vol === "gang1") out.push({ slot: slotIdx(pointXY(POS[activePos], pt)[0]), h: 68, c: "#22c55e", label: "거래량 최대" });
+    else if (pt.vol === "gang2") out.push({ slot: slotIdx(pointXY(POS[activePos], pt)[0]), h: 68, c: "#ef4444", label: "거래량 최대" });
+    else if (pt.vol === "div") {
+      var xy = pointXY(POS[activePos], pt);
+      out.push({ slot: slotIdx(pt.prevX), h: 44, c: "#c084fc", label: "장대 거래량" });
+      out.push({ slot: slotIdx(xy[0]), h: 30, c: "#c084fc", label: "장대 거래량 · 직전보다 감소" });
+    } else if (pt.vol === "retest") {
+      var xy2 = pointXY(POS[activePos], pt);
+      out.push({ slot: slotIdx(xy2[0]), h: 30, c: "#ffa502", label: "되돌림 거래량 감소" });
+    } else if (pt.vol === "breakLong") {
+      var b = pt.branch;
+      var cx = crossX(b[0][0], b[0][1], b[1][0], b[1][1], pt.lineY);
+      out.push({ slot: slotIdx(cx), h: 68, c: "#22c55e", label: "돌파 거래량 최대" });
+      out.push({ slot: slotIdx(pt.x), h: 30, c: "#ffa502", label: "되돌림 거래량 감소" });
+    } else if (pt.vol === "breakShort") {
+      var b2 = pt.branch;
+      var cx2 = crossX(b2[0][0], b2[0][1], b2[1][0], b2[1][1], pt.lineY);
+      out.push({ slot: slotIdx(cx2), h: 68, c: "#ef4444", label: "돌파 거래량 최대" });
+      out.push({ slot: slotIdx(pt.x), h: 30, c: "#ffa502", label: "되돌림 거래량 감소" });
+    }
+    return out;
+  }
+  function renderVol(pt) {
+    var volG = document.getElementById("posAnimVol");
+    if (!volG) return;
+    var rects = volG.querySelectorAll("rect");
+    for (var i = 0; i < rects.length; i++) {
+      var r = rects[i];
+      r.setAttribute("y", VOL_BASE - BASE_VOL[i]);
+      r.setAttribute("height", BASE_VOL[i]);
+      r.setAttribute("fill", "#475569");
+      r.setAttribute("stroke", "none");
+    }
+    var em = volFor(pt);
+    em.forEach(function (e) {
+      var r = volG.querySelector('rect[data-volslot="' + e.slot + '"]');
+      if (!r) return;
+      r.setAttribute("y", VOL_BASE - e.h);
+      r.setAttribute("height", e.h);
+      r.setAttribute("fill", e.c);
+      r.setAttribute("stroke", "#ffffff");
+      r.setAttribute("stroke-width", "1.5");
+    });
+    var lbl = em.length ? em[em.length - 1].label : "";
+    var old = document.getElementById("posAnimVolLabel");
+    if (old) old.textContent = lbl;
+  }
+  function guidesFor(pt) {
+    var cfg = POS[activePos];
+    var xy = pointXY(cfg, pt);
+    var x = xy[0], y = xy[1];
+    var h = "";
+    if (pt.type === "divLong" || pt.type === "divShort") {
+      var px = pt.prevX, py = pt.prevY;
+      h += '<line x1="' + px + '" y1="' + y + '" x2="' + x + '" y2="' + py + '" stroke="#c084fc" stroke-width="2" stroke-dasharray="6 4"/>';
+      h += '<circle cx="' + px + '" cy="' + py + '" r="6" fill="#ffffff" stroke="#c084fc" stroke-width="2"/>';
+      h += '<circle cx="' + x + '" cy="' + y + '" r="6" fill="#ffffff" stroke="#c084fc" stroke-width="2"/>';
+      h += '<text x="' + ((px + x) / 2) + '" y="' + (((py + y) / 2) - 12) + '" font-size="16" text-anchor="middle">가격</text>';
+      h += '<text x="' + ((px + x) / 2) + '" y="' + (((py + y) / 2) + 22) + '" font-size="16" text-anchor="middle">RSI</text>';
+    } else if (pt.type === "gang1") {
+      h += '<line x1="' + (x - 120) + '" y1="' + (y + 12) + '" x2="' + (x + 60) + '" y2="' + (y + 12) + '" stroke="#22c55e" stroke-width="2" stroke-dasharray="6 4"/>';
+      h += '<text x="' + (x + 66) + '" y="' + (y + 16) + '" font-size="16">지지</text>';
+      h += '<line x1="' + x + '" y1="' + (y - 86) + '" x2="' + x + '" y2="' + (y + 10) + '" stroke="#94a3b8" stroke-width="2"/>';
+      h += '<rect x="' + (x - 13) + '" y="' + (y - 76) + '" width="26" height="76" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>';
+      h += '<text x="' + (x + 20) + '" y="' + (y - 80) + '" font-size="16">가장 긴 봉</text>';
+    } else if (pt.type === "gang2") {
+      // v638: 2강은 타점이 아니므로 가이드(상승추세선·장대음봉)는 리테 숏에서만 그린다. 2강 단계에서는 아무것도 안 그린다 — 상단·중단 리테 숏 모두 동일.
+    } else if (pt.type === "retestLong" || pt.type === "retestShort") {
+      var ly = pt.lineY != null ? pt.lineY : (cfg.horizY != null ? cfg.horizY : y);
+      var lx0 = pt.lineX0 != null ? pt.lineX0 : (cfg.horizX0 != null ? cfg.horizX0 : x - 180);
+      var col = pt.type === "retestLong" ? "#22c55e" : "#ef4444";
+      // v638: 상승추세선은 리테 숏에 맞춰서 나온다 — 2강 단계 전에 나타나 사라지지 않고 리테 숏에서 같이 그려진다
+      if (pt.type === "retestShort") {
+        var gangPt = null;
+        for (var gi = 0; gi < cfg.points.length; gi++) if (cfg.points[gi].type === "gang2") { gangPt = cfg.points[gi]; break; }
+        if (gangPt) {
+          var gxy = pointXY(cfg, gangPt);
+          h += '<line x1="' + (gxy[0] - 140) + '" y1="' + (gxy[1] + 20) + '" x2="' + (gxy[0] + 40) + '" y2="' + (gxy[1] - 60) + '" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 4"/>';
+          h += '<text x="' + (gxy[0] - 140) + '" y="' + (gxy[1] + 36) + '" font-size="16">상승추세선</text>';
+        }
+      }
+      h += '<line x1="' + lx0 + '" y1="' + ly + '" x2="' + (x + 60) + '" y2="' + ly + '" stroke="' + col + '" stroke-width="2" stroke-dasharray="8 5"/>';
+      h += '<circle cx="' + lx0 + '" cy="' + ly + '" r="6" fill="#ffffff" stroke="' + col + '" stroke-width="2"/>';
+      h += '<circle cx="' + x + '" cy="' + y + '" r="19" fill="none" stroke="#ffa502" stroke-width="2"/>';
+      h += '<text x="' + (x + 26) + '" y="' + (y - 12) + '" font-size="16">리테 지점</text>';
+      h += '<text x="' + (lx0 + 10) + '" y="' + (ly - 10) + '" font-size="16">' + (pt.type === "retestLong" ? "수평저항 → 지지" : "수평지지 → 저항") + '</text>';
+      // v634: 수평 돌파 지점의 장대 캔들 — 리테롱은 장대양봉, 중단 리테숏은 지지 돌파 장대음봉 (상단 숏타점 장대음봉과 동일 형태)
+      (function () {
+        var path = cfg.path || [];
+        var bx = null;
+        for (var s = 0; s + 1 < path.length; s++) {
+          var y1 = path[s][1], y2 = path[s + 1][1];
+          var cross = false;
+          if (pt.type === "retestLong" && y1 > ly && y2 < ly) cross = true;
+          if (pt.type === "retestShort" && y1 < ly && y2 > ly) cross = true;
+          if (!cross) continue;
+          var t = (ly - y1) / (y2 - y1);
+          if (t < 0 || t > 1) continue;
+          bx = path[s][0] + t * (path[s + 1][0] - path[s][0]);
+          break;
+        }
+        if (bx == null) return;
+        if (pt.type === "retestLong") {
+          h += '<line x1="' + bx + '" y1="' + (ly - 48) + '" x2="' + bx + '" y2="' + (ly + 48) + '" stroke="#94a3b8" stroke-width="2"/>';
+          h += '<rect x="' + (bx - 13) + '" y="' + (ly - 38) + '" width="26" height="76" fill="#22c55e" stroke="#14532d" stroke-width="1"/>';
+          h += '<text x="' + (bx + 20) + '" y="' + (ly - 42) + '" font-size="16">수평 돌파 장대양봉</text>';
+        } else if (pt.type === "retestShort") {
+          h += '<line x1="' + bx + '" y1="' + (ly - 48) + '" x2="' + bx + '" y2="' + (ly + 38) + '" stroke="#94a3b8" stroke-width="2"/>';
+          h += '<rect x="' + (bx - 13) + '" y="' + (ly - 38) + '" width="26" height="76" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>';
+          h += '<text x="' + (bx + 20) + '" y="' + (ly - 42) + '" font-size="16">지지 돌파 장대음봉</text>';
+        }
+      })();
+    } else if (pt.type === "breakLong" || pt.type === "breakShort") {
+      var br = pt.branch;
+      var colB = pt.type === "breakLong" ? "#22c55e" : "#ef4444";
+      /* 분기 경로는 renderFrame의 branchG가 진행률에 따라 그린다 — guides에는 교차 링·리테 지점만 (중복 그리기 방지) */
+      var cxB = crossX(br[0][0], br[0][1], br[1][0], br[1][1], pt.lineY);
+      h += '<circle cx="' + cxB.toFixed(1) + '" cy="' + pt.lineY + '" r="13" fill="none" stroke="' + colB + '" stroke-width="2"/>';
+      h += '<circle cx="' + cxB.toFixed(1) + '" cy="' + pt.lineY + '" r="4" fill="' + colB + '"/>';
+      h += '<text x="' + (cxB - 10) + '" y="' + (pt.lineY - 16) + '" font-size="16">돌파</text>';
+      h += '<line x1="' + (pt.x - 180) + '" y1="' + pt.lineY + '" x2="' + (pt.x + 60) + '" y2="' + pt.lineY + '" stroke="' + colB + '" stroke-width="2" stroke-dasharray="8 5"/>';
+      h += '<circle cx="' + pt.x + '" cy="' + pt.y + '" r="19" fill="none" stroke="#ffa502" stroke-width="2"/>';
+      h += '<text x="' + (pt.x + 26) + '" y="' + (pt.y - 12) + '" font-size="16">리테 지점</text>';
+    }
+    return h;
+  }
+  function renderMarkers() {
+    var cfg = POS[activePos];
+    var g = document.getElementById("posAnimMarkers");
+    if (!g) return;
+    var h = "";
+    visiblePoints(cfg).forEach(function (pt, idx) {
+      // v644: 5,6 수정 남기고 다 원복 — 2강만 빼고 나머지는 다 보인다. 다이버·1강·중단 복귀 포함, 원래 번호 그대로.
+      if (pt.type === "gang2") return;
+      var xy = pointXY(cfg, pt);
+      var isPinned = pinned === idx;
+      var isCur = currentPoint() === pt;
+      h += '<g class="posanim-marker" data-marker="' + idx + '"><circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="' + (isPinned ? 19 : 13) + '" fill="' + (isPinned ? "#ffa502" : "#0f172a") + '" stroke="#ffffff" stroke-width="2"/>';
+      h += '<text x="' + xy[0] + '" y="' + (xy[1] + 5) + '" font-size="15.5" text-anchor="middle" fill="#ffffff">' + (idx + 1) + '</text></g>';
+      if (isCur && !isPinned) {
+        h += '<circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="19" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.7"/>';
+      }
+    });
+    g.innerHTML = h;
+    var els = g.querySelectorAll("[data-marker]");
+    for (var i = 0; i < els.length; i++) {
+      (function (el) {
+        el.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          var idx = parseInt(el.getAttribute("data-marker"), 10);
+          tapMarker(idx);
+        });
+      })(els[i]);
+    }
+  }
+  function renderFrame() {
+    if (!activePos) return;
+    var cfg = POS[activePos];
+    var total = pathLen(cfg.path);
+    var pt = currentPoint();
+    var priceEl = document.getElementById("posAnimPrice");
+    var branchG = document.getElementById("posAnimBranch");
+    var guidesG = document.getElementById("posAnimGuides");
+    if (priceEl) {
+      if (pt.type === "breakLong" || pt.type === "breakShort") {
+        var visPts = visiblePoints(cfg);
+        var prevIdx = visPts.indexOf(pt) - 1;
+        var prevFrac = prevIdx >= 0 ? pointAtFrac(cfg, visPts[prevIdx]) : 0;
+        priceEl.setAttribute("stroke-dasharray", "100");
+        priceEl.setAttribute("stroke-dashoffset", String((1 - prevFrac) * 100));
+        if (branchG) {
+          var br = pt.branch;
+          var bd = "M" + br.map(function (p) { return p[0] + "," + p[1]; }).join(" L");
+          var bp = Math.max(0, Math.min(1, (prog - 0.85) / 0.15));
+          if (pinned != null && pinned === visPts.indexOf(pt)) bp = 1;
+          branchG.innerHTML = '<path d="' + bd + '" fill="none" stroke="' + (pt.type === "breakLong" ? "#22c55e" : "#ef4444") + '" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="' + String((1 - bp) * 100) + '" pathLength="100" stroke-linecap="round" stroke-linejoin="round"/>';
+        }
+      } else {
+        priceEl.setAttribute("stroke-dasharray", "100");
+        priceEl.setAttribute("stroke-dashoffset", String((1 - Math.max(0, Math.min(1, prog))) * 100));
+        if (branchG) branchG.innerHTML = "";
+      }
+    }
+    if (guidesG) guidesG.innerHTML = guidesFor(pt);
+    renderMarkers();
+    renderVol(pt);
+    var nowEl = document.getElementById("posAnimNow");
+    if (nowEl) nowEl.textContent = "지금: " + pt.now.replace(/^지금:\s*/, "");
+    var condEl = document.getElementById("posAnimCond");
+    if (condEl) {
+      var ch = "<div style=\"font-weight:900;font-size:18px;\">" + esc(pt.name) + "</div><ul>";
+      pt.cond.forEach(function (c) { ch += "<li>▸ " + esc(c) + "</li>"; });
+      ch += "</ul><div style=\"margin-top:6px;font-size:14px;opacity:.75;\"><span id=\"posAnimVolLabel\"></span></div>";
+      condEl.innerHTML = ch;
+      renderVol(pt);
+    }
+    var titleEl = document.getElementById("posAnimTitle");
+    if (titleEl) titleEl.textContent = cfg.title;
+    var recEl = document.getElementById("posAnimRec");
+    if (recEl) { recEl.textContent = cfg.rec; recEl.className = cfg.recCls ? cfg.recCls : ""; }
+    // v633: 돌파 몸통마감 경고 — 애니매이션 박스
+    var bwEl = document.getElementById("posAnimBrkWarn");
+    if (bwEl) {
+      var bd = null;
+      try { bd = (typeof Regime !== "undefined" && Regime._data) ? Regime._data() : null; } catch (e) { bd = null; }
+      if (bd && bd.brkBody === "yes" && bd.brk) {
+        bwEl.textContent = "⚠ 채널 돌파 일봉 몸통 마감 확정 · 리테 " + (bd.brk === "up" ? "롱" : "숏") + " 방향";
+        bwEl.classList.remove("hidden");
+      } else { bwEl.textContent = ""; bwEl.classList.add("hidden"); }
+      syncAnimBoxSize();
+    }
+    var pauseBtn = document.getElementById("posAnimPauseBtn");
+    if (pauseBtn) pauseBtn.textContent = playing ? "일시정지" : "재생";
+  }
+  function renderMarks() {
+    if (!activePos) return;
+    var cfg = POS[activePos];
+    var marks = ensureMarks(activePos);
+    var host = document.getElementById("posAnimMarks");
+    if (!host) return;
+    var h = "";
+    visiblePoints(cfg).forEach(function (pt, idx) {
+      // v644: 5,6 수정 남기고 다 원복 — 2강만 빼고 나머지는 다 보인다. 다이버·1강·중단 복귀 포함, 원래 번호 그대로.
+      if (pt.type === "gang2") return;
+      var on = !!marks[idx];
+      h += '<button type="button" data-mark="' + idx + '" class="' + (on ? "posanim-marked" : "") + '">' + (idx + 1) + " · " + esc(pt.name) + " — " + (on ? "내가 표시함 ✓" : "내가 아직 표시 안 함") + '</button>';
+    });
+    host.innerHTML = h;
+    var btns = host.querySelectorAll("[data-mark]");
+    for (var i = 0; i < btns.length; i++) {
+      (function (b) {
+        b.addEventListener("click", function () {
+          var idx = parseInt(b.getAttribute("data-mark"), 10);
+          var m = ensureMarks(activePos);
+          if (!m[idx]) { for (var j = 0; j <= idx; j++) m[j] = true; }
+          else { for (var k = idx; k < m.length; k++) m[k] = false; }
+          renderMarks();
+        });
+      })(btns[i]);
+    }
+  }
+  function tick(ts) {
+    if (!playing) { raf = null; return; }
+    if (!lastTs) lastTs = ts;
+    var dt = ts - lastTs; lastTs = ts;
+    prog += dt / 14000;
+    if (prog >= 1) { prog = 1; playing = false; }
+    renderFrame();
+    if (playing) raf = requestAnimationFrame(tick);
+    else raf = null;
+  }
+  function startPlay(fromProg) {
+    prog = fromProg;
+    pinned = null;
+    playing = true;
+    lastTs = 0;
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(tick);
+    renderFrame();
+  }
+  function tapMarker(idx) {
+    if (!activePos) return;
+    var cfg = POS[activePos];
+    var pt = visiblePoints(cfg)[idx];
+    if (!pt) return;
+    if (pinned === idx) {
+      pinned = null;
+      prog = pointAtFrac(cfg, pt);
+      if (pt.type === "breakLong" || pt.type === "breakShort") prog = 0.92;
+      playing = true; lastTs = 0;
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(tick);
+    } else {
+      pinned = idx;
+      playing = false;
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      prog = pointAtFrac(cfg, pt);
+      if (pt.type === "breakLong" || pt.type === "breakShort") prog = 0.92;
+      renderFrame();
+    }
+    var pauseBtn = document.getElementById("posAnimPauseBtn");
+    if (pauseBtn) pauseBtn.textContent = playing ? "일시정지" : "재생";
+  }
+  // v641: 기존 애니메이션 화면은 애니메이션 창을 누르면 뜬다 — 기본은 박스만 보이고 박스 밖은 안 보인다
+  function setOutsideVisible(vis) {
+    var o = document.getElementById("posAnimOutside");
+    if (o) o.style.display = vis ? "" : "none";
+  }
+  function toggleOutside(ev) {
+    if (ev) {
+      var t = ev.target;
+      if (t && t.closest && t.closest(".posanim-marker")) return;
+    }
+    var o = document.getElementById("posAnimOutside");
+    if (!o) return;
+    o.style.display = (o.style.display === "none") ? "" : "none";
+  }
+  // v643: 버튼 없이 장세박스로 돌아가는 방법 — 창을 두 번 빠르게 누르면 장세박스로 돌아간다. 한 번 누르면 기존 애니메이션 화면이 뜬다.
+  var lastBoxTapTime = 0, boxTapTimer = null;
+  function boxTap(ev) {
+    if (ev) {
+      var t = ev.target;
+      if (t && t.closest && t.closest(".posanim-marker")) return;
+    }
+    var now = Date.now();
+    if (now - lastBoxTapTime < 350) {
+      if (boxTapTimer) { clearTimeout(boxTapTimer); boxTapTimer = null; }
+      lastBoxTapTime = 0;
+      backToRegime();
+      return;
+    }
+    lastBoxTapTime = now;
+    if (boxTapTimer) clearTimeout(boxTapTimer);
+    boxTapTimer = setTimeout(function () { boxTapTimer = null; toggleOutside(); }, 350);
+  }
+  // v643: 애니메이션 박스 크기를 기존 장세박스와 똑같이 — 장세박스 높이를 재서 박스·차트 높이에 그대로 쓴다
+  var regimeBoxH = 0;
+  function syncAnimBoxSize() {
+    if (!regimeBoxH) return;
+    var box = document.getElementById("posAnimBox");
+    var chart = document.getElementById("posAnimChart");
+    var warn = document.getElementById("posAnimBrkWarn");
+    if (box) box.style.height = regimeBoxH + "px";
+    if (chart) {
+      var warnH = (warn && !warn.classList.contains("hidden")) ? warn.offsetHeight : 0;
+      chart.style.height = Math.max(80, regimeBoxH - 4 - warnH) + "px";
+    }
+  }
+  function show(expand) {
+    var decl = getDecl();
+    if (!decl) return false;
+    activePos = decl.pos; activeSlope = decl.slope;
+    var slot = document.getElementById("posAnimSlot");
+    var bar = document.getElementById("regimeBar");
+    if (bar && !bar.classList.contains("hidden")) regimeBoxH = bar.offsetHeight;
+    if (slot) slot.classList.remove("hidden");
+    if (bar) bar.classList.add("hidden");
+    setOutsideVisible(false);
+    syncAnimBoxSize();
+    var box = document.getElementById("posAnimBox");
+    if (box) {
+      box.classList.remove("posanim-expand", "posanim-shrink");
+      if (expand) { void box.offsetWidth; box.classList.add("posanim-expand"); }
+    }
+    userWentBack = false;
+    buildChart();
+    startPlay(0);
+    return true;
+  }
+  function showFromRegime() {
+    var bar = document.getElementById("regimeBar");
+    if (bar) bar.classList.add("posanim-regime-hl");
+    setTimeout(function () {
+      if (bar) bar.classList.remove("posanim-regime-hl");
+      show(true);
+      // v643: 장세박스 창을 누르면 기존 애니메이션 화면이 바로 뜬다 — 자동 진입(박스만)과 달리, 직접 누른 경우는 박스 밖 화면까지 바로 보여준다
+      setOutsideVisible(true);
+    }, 300);
+  }
+  function backToRegime(ev) {
+    if (ev) { try { ev.preventDefault(); } catch (e) {} }
+    var box = document.getElementById("posAnimBox");
+    var slot = document.getElementById("posAnimSlot");
+    userWentBack = true;
+    playing = false;
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    if (box) { box.classList.remove("posanim-expand"); void box.offsetWidth; box.classList.add("posanim-shrink"); }
+    setTimeout(function () {
+      if (slot) slot.classList.add("hidden");
+      if (box) {
+        box.classList.remove("posanim-shrink");
+        box.style.height = "";
+      }
+      var chart = document.getElementById("posAnimChart");
+      if (chart) chart.style.height = "";
+      regimeBoxH = 0;
+      setOutsideVisible(false);
+      try { if (typeof Regime !== "undefined" && Regime.renderBar) Regime.renderBar(); } catch (e) {}
+      activePos = null; pinned = null;
+    }, 300);
+  }
+  function onStep(stepKey) {
+    if (stepKey !== "step_2") {
+      userWentBack = false;
+      var slot = document.getElementById("posAnimSlot");
+      if (slot && !slot.classList.contains("hidden")) {
+        slot.classList.add("hidden");
+        try { if (typeof Regime !== "undefined" && Regime.renderBar) Regime.renderBar(); } catch (e) {}
+      }
+      playing = false;
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      activePos = null; pinned = null;
+      return;
+    }
+    if (userWentBack) return;
+    var decl = getDecl();
+    if (!decl) return;
+    if (activePos === decl.pos && activeSlope === decl.slope) {
+      var slot2 = document.getElementById("posAnimSlot");
+      if (slot2 && !slot2.classList.contains("hidden")) return;
+    }
+    show(false);
+  }
+  function init() {
+    var viz = document.getElementById("regimeViz");
+    if (viz) {
+      viz.addEventListener("click", function (ev) {
+        if (typeof currentStepKey !== "undefined" && currentStepKey === "step_2" && getDecl()) {
+          ev.stopPropagation();
+          showFromRegime();
+        }
+      });
+    }
+    try {
+      if (typeof Regime !== "undefined" && Regime.afterLoad) {
+        var origAfter = Regime.afterLoad;
+        Regime.afterLoad = function (stepKey) {
+          var r = origAfter(stepKey);
+          try { onStep(stepKey); } catch (e) {}
+          return r;
+        };
+      }
+    } catch (e) {}
+    try {
+      if (typeof currentStepKey !== "undefined" && currentStepKey === "step_2") onStep("step_2");
+    } catch (e) {}
+  }
+  window.PosAnim = {
+    show: show, showFromRegime: showFromRegime, backToRegime: backToRegime, onStep: onStep, toggleOutside: toggleOutside, boxTap: boxTap,
+    restart: function () { startPlay(0); },
+    fromStart: function () { startPlay(0); },
+    togglePause: function () {
+      if (playing) { playing = false; if (raf) { cancelAnimationFrame(raf); raf = null; } }
+      else { playing = true; lastTs = 0; if (raf) cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); }
+      renderFrame();
+    },
+    tapMarker: tapMarker,
+    _pointAtFrac: pointAtFrac, _crossX: crossX, _slotIdx: slotIdx, _POS: POS
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+</script>
 </body>
 </html>
