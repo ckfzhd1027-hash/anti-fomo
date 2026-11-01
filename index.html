@@ -299,8 +299,8 @@
     body[data-current-step="step_1"] #boxListContainer [id^="box-item-"] { min-height: 112px; } /* v556: 1단계 작업 전수 롤백 — min-height는 1단계에만, 다른 단계는 v536처럼 내용 높이 */
     body[data-current-step="step_1"] #stickyCheckBar { bottom: calc(152px + env(safe-area-inset-bottom, 0px)) !important; } /* v556: 152px 상단은 1단계에만, 다른 단계는 JS bottom(30px/OX+38) */
     body[data-current-step="step_1"] #regimeBar { margin-bottom: 4px; } /* v556: 1단계만 mb-1 유지, 다른 단계는 mb-2.5(v536) */
-    /* v657: 1단계 장세박스 높이 고정값 300px — 앱에서 계산하지 않는다. 사진(2:27, 1단계 0/6) 기준: 원래 장세박스 약 226px, 보이는 구역 약 206px, 첫 체크박스 약 124px, 남는 공간 약 74px을 더한 값. !important라 앱의 높이 계산이 덮지 못한다. */
-    body[data-current-step="step_1"] #regimeBar:not(.hidden) { height: 300px !important; }
+    /* v658: 1단계 장세박스 높이 고정값 220px — 앱에서 계산하지 않는다. 사진(2:56, 1단계 0/6, v657 300px) 기준: 첫 체크박스가 O/X에 가려 약 50px만 보였고, 온전히 보이려면 보이는 구역을 약 80px 늘려야 해서 300px에서 80px 뺀 값. !important라 앱의 높이 계산이 덮지 못한다. */
+    body[data-current-step="step_1"] #regimeBar:not(.hidden) { height: 220px !important; }
 
 /* v575: 15분 봉 마감 5초 전부터 점멸 (카운트다운), 바뀔 때 한 번 더 강조 */
 @keyframes candleBlinkPulse {
@@ -430,7 +430,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v657 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v658 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9249,7 +9249,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v657 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v658 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
