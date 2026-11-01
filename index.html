@@ -421,7 +421,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v650 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v652 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9240,7 +9240,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v650 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v652 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13714,13 +13714,16 @@ window.StepGuide = StepGuide;
     var g = document.getElementById("posAnimMarkers");
     if (!g) return;
     var h = "";
+    var checkedMarks = ensureMarks(activePos);
     visiblePoints(cfg).forEach(function (pt, idx) {
       // v644: 5,6 수정 남기고 다 원복 — 2강만 빼고 나머지는 다 보인다. 다이버·1강·중단 복귀 포함, 원래 번호 그대로.
       if (pt.type === "gang2") return;
       var xy = pointXY(cfg, pt);
       var isPinned = pinned === idx;
+      var isChecked = !!checkedMarks[idx];
       var isCur = currentPoint() === pt;
-      h += '<g class="posanim-marker" data-marker="' + idx + '"><circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="' + (isPinned ? 19 : 13) + '" fill="' + (isPinned ? "#ffa502" : "#0f172a") + '" stroke="#ffffff" stroke-width="2"/>';
+      // v652: 목록에서 체크한 타점은 애니메이션 차트에서도 초록으로 확인된다. 눌러서 멈춘 타점은 주황이 우선이다.
+      h += '<g class="posanim-marker" data-marker="' + idx + '"><circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="' + (isPinned ? 19 : 13) + '" fill="' + (isPinned ? "#ffa502" : (isChecked ? "#22c55e" : "#0f172a")) + '" stroke="#ffffff" stroke-width="2"/>';
       h += '<text x="' + xy[0] + '" y="' + (xy[1] + 5) + '" font-size="15.5" text-anchor="middle" fill="#ffffff">' + (idx + 1) + '</text></g>';
       if (isCur && !isPinned) {
         h += '<circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="19" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.7"/>';
@@ -13820,6 +13823,7 @@ window.StepGuide = StepGuide;
           if (!m[idx]) { for (var j = 0; j <= idx; j++) m[j] = true; }
           else { for (var k = idx; k < m.length; k++) m[k] = false; }
           renderMarks();
+          renderMarkers();
         });
       })(btns[i]);
     }
@@ -13828,7 +13832,8 @@ window.StepGuide = StepGuide;
     if (!playing) { raf = null; return; }
     if (!lastTs) lastTs = ts;
     var dt = ts - lastTs; lastTs = ts;
-    prog += dt / 14000;
+    // v652: 재생속도 올리기 — 한 바퀴 14초에서 9초로
+    prog += dt / 9000;
     // v645: 애니메이션 반복 — 끝나면 멈추지 않고 처음부터 다시 반복한다. 일시정지로 멈출 수 있다.
     if (prog >= 1) { prog = 0; lastTs = ts; }
     renderFrame();
@@ -13895,6 +13900,7 @@ window.StepGuide = StepGuide;
   }
   // v647: 애니메이션 박스는 누르자마자 바로 전체화면으로 바뀐다 — 0.35초 기다림 없음. 두 번 빠르게 누르면 장세박스로 돌아간다.
   // v649: 폰 터치로도 바로 먹게 — 터치 뒤에 오는 클릭은 중복으로 처리하지 않는다
+  // v651: 전체화면에서 애니메이션을 한 번 누르면 박스형태로 돌아간다 — 전체화면을 풀고 박스만 보이는 상태로, 장세박스로 돌아가는 게 아니다
   var lastBoxTapTime = 0, lastTouchTime = 0;
   function boxTap(ev) {
     if (ev && ev.type === "click" && Date.now() - lastTouchTime < 500) return;
@@ -13909,7 +13915,7 @@ window.StepGuide = StepGuide;
       return;
     }
     lastBoxTapTime = now;
-    if (document.body.classList.contains("posanim-full")) return;
+    if (document.body.classList.contains("posanim-full")) { exitFullAnim(); return; }
     enterFullAnim();
   }
   // v643: 애니메이션 박스 크기를 기존 장세박스와 똑같이 — 장세박스 높이를 재서 박스·차트 높이에 그대로 쓴다
