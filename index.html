@@ -183,7 +183,8 @@
     /* v688: 채널 호박 배경 점멸 약하게 — 진하기 22%에서 10%로, 속도는 1.2초 그대로 */
     @keyframes regimeVizBgBlink { 0%,100% { background-color: rgba(245,158,11,0); } 50% { background-color: rgba(245,158,11,0.10); } }
     #regimeViz { border-radius: 12px; animation: regimeVizBgBlink 1.2s ease-in-out infinite; }
-    @keyframes headerBgBlink { 0%,100% { background-color: color-mix(in srgb, currentColor 12%, transparent); } 50% { background-color: color-mix(in srgb, currentColor 38%, transparent); } }
+    /* v689: 제목 점멸도 약하게 — 진하기 38%에서 20%로, 속도는 1.2초 그대로 */
+    @keyframes headerBgBlink { 0%,100% { background-color: color-mix(in srgb, currentColor 12%, transparent); } 50% { background-color: color-mix(in srgb, currentColor 20%, transparent); } }
     /* v687: 헤더 제목 알약도 배경색만 점멸 — JS가 className을 갈아엎어도 ID 선택자라 유지된다, 글자 투명도는 그대로 */
     #headerStepTitle { animation: headerBgBlink 1.2s ease-in-out infinite; }
     .regime-chip-pos { border-color:#94a3b8 !important; }
@@ -470,7 +471,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v688 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v689 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9353,7 +9354,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v688 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v689 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
