@@ -428,7 +428,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v654 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v655 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9247,7 +9247,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v654 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v655 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13078,6 +13078,16 @@ window.StepGuide = StepGuide;
   if (!window.__fitRegimeResizeBound) {
     window.__fitRegimeResizeBound = true;
     window.addEventListener("resize", function () { fitTopmostBox(); });
+    // v655: 네가 여태 설명한 대로 — 체크박스가 하나만 보이도록 남는 공간만큼 장세박스를 키운다. 체크·스크롤로 보이는 박스가 바뀌어도 매번 다시 맞춘다. 고정하는 게 아니다.
+    var __fitScrollTicking = false;
+    var __mainEl = document.querySelector("main");
+    if (__mainEl) {
+      __mainEl.addEventListener("scroll", function () {
+        if (__fitScrollTicking) return;
+        __fitScrollTicking = true;
+        requestAnimationFrame(function () { __fitScrollTicking = false; fitTopmostBox(); });
+      }, { passive: true });
+    }
   }
 
 
