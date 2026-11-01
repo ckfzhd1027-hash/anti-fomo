@@ -346,7 +346,9 @@
 /* v640: 애니메이션은 장세박스 안에서만 표현 — 박스 밖은 기존 컨텐츠 그대로 진행된다 */
 /* v641: 기존 애니메이션 화면(박스 밖 설명·버튼·목록)은 애니메이션 창을 누르면 뜬다 — 기본은 안 보이고, 창 탭으로 토글한다 */
 #posAnimNow { font-size:15px; font-weight:900; line-height:1.5; margin:6px 2px; }
-#posAnimCond { font-size:14.5px; line-height:1.6; margin:6px 2px; }
+/* v653: 중간 설명이 길어졌다 짧아졌다 해도 아래 버튼·표시 목록 위치가 안 바뀌게 — 설명 칸 높이를 고정하고, 길면 설명 안에서만 스크롤한다 */
+#posAnimNow { height:68px; overflow:hidden; }
+#posAnimCond { font-size:14.5px; line-height:1.6; margin:6px 2px; height:280px; overflow-y:auto; }
 #posAnimCond ul { margin:4px 0 0 18px; }
 #posAnimControls { display:flex; gap:8px; margin:10px 2px; }
 #posAnimControls button { flex:1; min-height:44px; border-radius:12px; border:2px solid #94a3b8; background:#ffffff; color:#0f172a; font-weight:900; font-size:14px; cursor:pointer; }
@@ -360,6 +362,11 @@
 .posanim-shrink { animation:posanimZoomOut .30s ease; transform-origin:center top; }
 @keyframes posanimZoomIn { from { transform:scale(.85); opacity:.3; } to { transform:scale(1); opacity:1; } }
 @keyframes posanimZoomOut { from { transform:scale(1); opacity:1; } to { transform:scale(.85); opacity:.3; } }
+/* v654: 전환은 박스 크기가 아니라 채널 그림만 커졌다 작아진다 — 박스 크기는 그대로, 차트 그림만 스케일로 커지고 작아진다 */
+.posanim-chart-grow { animation:posanimChartGrow .35s ease; transform-origin:center; }
+.posanim-chart-shrink { animation:posanimChartShrink .30s ease; transform-origin:center; }
+@keyframes posanimChartGrow { from { transform:scale(.35); opacity:.3; } to { transform:scale(1); opacity:1; } }
+@keyframes posanimChartShrink { from { transform:scale(1); opacity:1; } to { transform:scale(.35); opacity:.3; } }
 #regimeBar.posanim-regime-hl { box-shadow:0 0 0 3px #f59e0b !important; }
 .posanim-marker { cursor:pointer; }
 /* v645: 애니메이션 화면 전환 시 화면 전체가 기존 애니메이션 화면으로 바뀐다 — 단계 체크·OX·다음 체크 바를 다 숨기고 애니메이션 슬롯만 남긴다 */
@@ -421,7 +428,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v652 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v654 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9240,7 +9247,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v652 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v654 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13901,22 +13908,23 @@ window.StepGuide = StepGuide;
   // v647: 애니메이션 박스는 누르자마자 바로 전체화면으로 바뀐다 — 0.35초 기다림 없음. 두 번 빠르게 누르면 장세박스로 돌아간다.
   // v649: 폰 터치로도 바로 먹게 — 터치 뒤에 오는 클릭은 중복으로 처리하지 않는다
   // v651: 전체화면에서 애니메이션을 한 번 누르면 박스형태로 돌아간다 — 전체화면을 풀고 박스만 보이는 상태로, 장세박스로 돌아가는 게 아니다
-  var lastBoxTapTime = 0, lastTouchTime = 0;
+  // v653: 더블터치는 전체화면을 거치지 않고 바로 장세박스로 간다 — 한 번 누름은 0.35초 기다렸다가 두 번째 누름이 없으면 박스형태·전체화면으로 바뀐다
+  var lastTouchTime = 0, boxTapTimer = null;
   function boxTap(ev) {
     if (ev && ev.type === "click" && Date.now() - lastTouchTime < 500) return;
     if (ev) {
       var t = ev.target;
       if (t && t.closest && t.closest(".posanim-marker")) return;
     }
-    var now = Date.now();
-    if (now - lastBoxTapTime < 350) {
-      lastBoxTapTime = 0;
-      backToRegime();
-      return;
-    }
-    lastBoxTapTime = now;
-    if (document.body.classList.contains("posanim-full")) { exitFullAnim(); return; }
-    enterFullAnim();
+    if (boxTapTimer) { clearTimeout(boxTapTimer); boxTapTimer = null; backToRegime(); return; }
+    var wasFull = document.body.classList.contains("posanim-full");
+    boxTapTimer = setTimeout(function () {
+      boxTapTimer = null;
+      var slot = document.getElementById("posAnimSlot");
+      if (!slot || slot.classList.contains("hidden")) return;
+      if (document.body.classList.contains("posanim-full") !== wasFull) return;
+      if (wasFull) exitFullAnim(); else enterFullAnim();
+    }, 350);
   }
   // v643: 애니메이션 박스 크기를 기존 장세박스와 똑같이 — 장세박스 높이를 재서 박스·차트 높이에 그대로 쓴다
   var regimeBoxH = 0;
@@ -13945,13 +13953,15 @@ window.StepGuide = StepGuide;
     // v646: 자동 진입·장세박스 누름 때는 박스만 보인다 — 전체화면은 애니메이션 차트를 눌렀을 때만 된다
     setOutsideVisible(false);
     syncAnimBoxSize();
-    var box = document.getElementById("posAnimBox");
-    if (box) {
-      box.classList.remove("posanim-expand", "posanim-shrink");
-      if (expand) { void box.offsetWidth; box.classList.add("posanim-expand"); }
-    }
     userWentBack = false;
     buildChart();
+    // v654: 박스 크기는 그대로, 채널 그림만 작았다 커지면서 애니메이션으로 전환된다
+    var chart0 = document.getElementById("posAnimChart");
+    if (chart0) {
+      chart0.classList.remove("posanim-chart-grow", "posanim-chart-shrink");
+      void chart0.offsetWidth;
+      chart0.classList.add("posanim-chart-grow");
+    }
     startPlay(0);
     return true;
   }
@@ -13971,15 +13981,18 @@ window.StepGuide = StepGuide;
     userWentBack = true;
     playing = false;
     if (raf) { cancelAnimationFrame(raf); raf = null; }
-    if (box) { box.classList.remove("posanim-expand"); void box.offsetWidth; box.classList.add("posanim-shrink"); }
+    // v654: 박스 크기는 그대로, 채널 그림만 커졌다 작아지면서 장세박스로 돌아간다
+    var chartS = document.getElementById("posAnimChart");
+    if (chartS) {
+      chartS.classList.remove("posanim-chart-grow");
+      void chartS.offsetWidth;
+      chartS.classList.add("posanim-chart-shrink");
+    }
     setTimeout(function () {
       if (slot) slot.classList.add("hidden");
-      if (box) {
-        box.classList.remove("posanim-shrink");
-        box.style.height = "";
-      }
+      if (box) box.style.height = "";
       var chart = document.getElementById("posAnimChart");
-      if (chart) chart.style.height = "";
+      if (chart) { chart.classList.remove("posanim-chart-shrink"); chart.style.height = ""; }
       regimeBoxH = 0;
       exitFullAnim();
       try { if (typeof Regime !== "undefined" && Regime.renderBar) Regime.renderBar(); } catch (e) {}
