@@ -289,6 +289,12 @@
       body[data-current-step^="step_3"] main { padding-top: 0 !important; }
       body[data-current-step^="step_3"] main [id$="ExampleCard"] { margin-top: 0 !important; }
       body[data-current-step^="step_3"] #boxListContainer { margin-top: 0 !important; }
+      /* v672: 파동 형태 판별 화면 이후 각 대안 유형 화면에서도 똑같이 제목박스를 지우고 아래 박스들을 올리고 간격 4px을 유지한다. */
+      body[data-current-step^="step_2_alt"] #stepTitleBox { display: none !important; }
+      body[data-current-step^="step_2_alt"] section { padding-bottom: 0 !important; }
+      body[data-current-step^="step_2_alt"] main { padding-top: 0 !important; }
+      body[data-current-step^="step_2_alt"] main [id$="ExampleCard"] { margin-top: 0 !important; }
+      body[data-current-step^="step_2_alt"] #boxListContainer { margin-top: 0 !important; }
       #guideCompleteCenter { display: none; }
       #guideCompleteCenter.on { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; } /* v552: 완료 화면을 여백 중앙으로 */
       #guideCompleteCenter > div { text-align: center; padding: 24px 20px; border-color: #34d399; } /* v559: 완료 박스 글자 가운데 정렬 + 전체 크게 (패딩 확대) + 박스 색 에메랄드로 */
@@ -458,7 +464,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v670 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v672 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -5331,18 +5337,24 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         startEmergencyLockdown(5);
       } else if (branchType === 'B') {
         playReadySound();
-        loadStep("step_3");
+        // v671: 분기 선택 화면에서 들어온 표시 — 다음 단계에서 이전을 누르면 분기 선택 화면으로 돌아간다
+        stepHistory.push("__branch__");
+        loadStep("step_3", false);
       } else if (branchType === 'C') {
         playBranchSound();
-        loadStep("step_3_fast");
+        stepHistory.push("__branch__");
+        loadStep("step_3_fast", false);
       } else if (branchType === 'E') {
         playBranchSound();
-        loadStep("step_3_type_e");
+        stepHistory.push("__branch__");
+        loadStep("step_3_type_e", false);
       } else if (branchType === 'D') {
         playBranchSound();
+        window.__speedGuideFromBranch = true;
         SpeedGuide.open("step_3_type_d", "long");
       } else if (branchType === 'F') {
         playBranchSound();
+        window.__speedGuideFromBranch = true;
         SpeedGuide.open("step_3_type_f", "short");
       } else if (branchType === 'G') {
         playBranchSound();
@@ -5373,14 +5385,16 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     function handleTrackSelect(trackType) {
       closeTrackModal();
       playBranchSound();
+      // v672: 파동 형태 판별 화면에서 들어온 표시 — 다음 화면에서 이전을 누르면 파동 형태 판별 화면으로 돌아간다
+      if (typeof stepHistory !== "undefined") stepHistory.push("__track__");
       if (trackType === 'T1L') {
-        loadStep("step_2_alt_db");
+        loadStep("step_2_alt_db", false);
       } else if (trackType === 'T2L') {
-        loadStep("step_2_alt");
+        loadStep("step_2_alt", false);
       } else if (trackType === 'T3L') {
-        loadStep("step_2_alt_slow");
+        loadStep("step_2_alt_slow", false);
       } else if (trackType === 'T4L') {
-        loadStep("step_2_alt_slow_box");
+        loadStep("step_2_alt_slow_box", false);
       }
     }
 
@@ -9206,6 +9220,20 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     function goToPrevStep() {
       // v323: 아이콘 배치창이 켜져 있으면 이전 버튼은 단계 이동 없이 배치창만 닫음 (사용자 요청)
       if (typeof ChartMarkers !== "undefined" && ChartMarkers.edit) { ChartMarkers.exitEdit(); return; }
+      // v671: 분기 선택 화면에서 들어온 다음 단계에서 이전을 누르면 2단계가 아니라 분기 선택 화면으로 돌아간다
+      if (stepHistory.length > 0 && stepHistory[stepHistory.length - 1] === "__branch__") {
+        stepHistory.pop();
+        loadStep("step_2", false);
+        openBranchModal();
+        return;
+      }
+      // v672: 파동 형태 판별 화면에서 들어온 다음 단계에서 이전을 누르면 2단계가 아니라 파동 형태 판별 화면으로 돌아간다
+      if (stepHistory.length > 0 && stepHistory[stepHistory.length - 1] === "__track__") {
+        stepHistory.pop();
+        loadStep("step_2", false);
+        openTrackModal();
+        return;
+      }
       if (stepHistory.length > 0) {
         const prevKey = stepHistory.pop();
         loadStep(prevKey, false);
@@ -9308,7 +9336,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v670 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v672 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13396,7 +13424,7 @@ window.StepGuide = StepGuide;
         state = { stepKey: stepKey, dir: dir, speed: null, idx: 0, slides: null };
         show(document.getElementById('speedModal'));
       }
-      function closeSpeed() { hide(document.getElementById('speedModal')); state = null; }
+      function closeSpeed() { hide(document.getElementById('speedModal')); state = null; window.__speedGuideFromBranch = false; }
       function pick(speed) {
         if (!state) return;
         hide(document.getElementById('speedModal'));
@@ -13426,10 +13454,18 @@ window.StepGuide = StepGuide;
       }
       function finish() {
         const sk = state ? state.stepKey : null;
+        // v671: 분기 선택 화면에서 들어온 경우, 다음 단계에서 이전을 누르면 분기 선택 화면으로 돌아가게 표시를 남긴다
+        const fromBranch = !!window.__speedGuideFromBranch;
         closeSlides();
-        if (sk) loadStep(sk);
+        if (!sk) return;
+        if (fromBranch) {
+          if (typeof stepHistory !== "undefined") stepHistory.push("__branch__");
+          loadStep(sk, false);
+        } else {
+          loadStep(sk);
+        }
       }
-      function closeSlides() { hide(document.getElementById('speedSlideModal')); state = null; }
+      function closeSlides() { hide(document.getElementById('speedSlideModal')); state = null; window.__speedGuideFromBranch = false; }
       (function bindSwipeTap() {
         const card = document.getElementById('speedSlideCard');
         const chart = document.getElementById('speedSlideChart');
