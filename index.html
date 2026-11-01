@@ -358,6 +358,13 @@
 @keyframes posanimZoomOut { from { transform:scale(1); opacity:1; } to { transform:scale(.85); opacity:.3; } }
 #regimeBar.posanim-regime-hl { box-shadow:0 0 0 3px #f59e0b !important; }
 .posanim-marker { cursor:pointer; }
+/* v645: 애니메이션 화면 전환 시 화면 전체가 기존 애니메이션 화면으로 바뀐다 — 단계 체크·OX·다음 체크 바를 다 숨기고 애니메이션 슬롯만 남긴다 */
+body.posanim-full main { display:none !important; }
+body.posanim-full #oxGate { display:none !important; }
+body.posanim-full #stickyCheckBar { display:none !important; }
+body.posanim-full #stepTitleBox { display:none !important; }
+body.posanim-full [id$="ExampleCard"] { display:none !important; }
+body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important; }
 </style>
 </head>
 <body id="appBody" class="bg-slate-50 dark:bg-[#080b11] text-slate-900 dark:text-white flex flex-col h-full select-none transition-colors duration-300">
@@ -410,7 +417,7 @@
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v644 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v645 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9229,7 +9236,7 @@
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v644 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v645 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13802,10 +13809,10 @@ window.StepGuide = StepGuide;
     if (!lastTs) lastTs = ts;
     var dt = ts - lastTs; lastTs = ts;
     prog += dt / 14000;
-    if (prog >= 1) { prog = 1; playing = false; }
+    // v645: 애니메이션 반복 — 끝나면 멈추지 않고 처음부터 다시 반복한다. 일시정지로 멈출 수 있다.
+    if (prog >= 1) { prog = 0; lastTs = ts; }
     renderFrame();
-    if (playing) raf = requestAnimationFrame(tick);
-    else raf = null;
+    raf = requestAnimationFrame(tick);
   }
   function startPlay(fromProg) {
     prog = fromProg;
@@ -13853,6 +13860,15 @@ window.StepGuide = StepGuide;
     if (!o) return;
     o.style.display = (o.style.display === "none") ? "" : "none";
   }
+  // v645: 화면 전체가 애니메이션 화면일 때는 박스 밖이 항상 보인다 — 한 번 누르면 토글하지 않고, 두 번 빠르게 누르면 장세박스로 돌아간다
+  function enterFullAnim() {
+    try { document.body.classList.add("posanim-full"); } catch (e) {}
+    setOutsideVisible(true);
+  }
+  function exitFullAnim() {
+    try { document.body.classList.remove("posanim-full"); } catch (e) {}
+    setOutsideVisible(false);
+  }
   // v643: 버튼 없이 장세박스로 돌아가는 방법 — 창을 두 번 빠르게 누르면 장세박스로 돌아간다. 한 번 누르면 기존 애니메이션 화면이 뜬다.
   var lastBoxTapTime = 0, boxTapTimer = null;
   function boxTap(ev) {
@@ -13869,6 +13885,8 @@ window.StepGuide = StepGuide;
     }
     lastBoxTapTime = now;
     if (boxTapTimer) clearTimeout(boxTapTimer);
+    // v645: 전체 화면일 때는 한 번 눌러도 박스 밖을 숨기지 않는다 — 전체 화면 자체가 기존 애니메이션 화면이다
+    if (document.body.classList.contains("posanim-full")) { boxTapTimer = null; return; }
     boxTapTimer = setTimeout(function () { boxTapTimer = null; toggleOutside(); }, 350);
   }
   // v643: 애니메이션 박스 크기를 기존 장세박스와 똑같이 — 장세박스 높이를 재서 박스·차트 높이에 그대로 쓴다
@@ -13893,7 +13911,8 @@ window.StepGuide = StepGuide;
     if (bar && !bar.classList.contains("hidden")) regimeBoxH = bar.offsetHeight;
     if (slot) slot.classList.remove("hidden");
     if (bar) bar.classList.add("hidden");
-    setOutsideVisible(false);
+    // v645: 전환 시 화면 전체가 기존 애니메이션 화면으로 바뀐다
+    enterFullAnim();
     syncAnimBoxSize();
     var box = document.getElementById("posAnimBox");
     if (box) {
@@ -13932,7 +13951,7 @@ window.StepGuide = StepGuide;
       var chart = document.getElementById("posAnimChart");
       if (chart) chart.style.height = "";
       regimeBoxH = 0;
-      setOutsideVisible(false);
+      exitFullAnim();
       try { if (typeof Regime !== "undefined" && Regime.renderBar) Regime.renderBar(); } catch (e) {}
       activePos = null; pinned = null;
     }, 300);
@@ -13943,6 +13962,7 @@ window.StepGuide = StepGuide;
       var slot = document.getElementById("posAnimSlot");
       if (slot && !slot.classList.contains("hidden")) {
         slot.classList.add("hidden");
+        exitFullAnim();
         try { if (typeof Regime !== "undefined" && Regime.renderBar) Regime.renderBar(); } catch (e) {}
       }
       playing = false;
@@ -13989,7 +14009,7 @@ window.StepGuide = StepGuide;
     fromStart: function () { startPlay(0); },
     togglePause: function () {
       if (playing) { playing = false; if (raf) { cancelAnimationFrame(raf); raf = null; } }
-      else { playing = true; lastTs = 0; if (raf) cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); }
+      else { if (prog >= 1) prog = 0; playing = true; lastTs = 0; if (raf) cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); }
       renderFrame();
     },
     tapMarker: tapMarker,
