@@ -153,9 +153,10 @@
     html:not(.dark) [id^="box-icon-"] svg, html:not(.dark) .chart-marker-palette-btn svg { filter: brightness(0.93) saturate(1.45) contrast(1.1); }
       /* 장세 배지 2단 개편 (v260 -> v261: 삽입 위치·라이트 시인성 수정) */
     .regime-bar { border-color:#94a3b8; background:#f8fafc; color:#0f172a; }
-    /* v649: 장세박스가 커져도 하단에 빈 공간이 남지 않게 — 장세설명을 아래쪽으로 정렬한다. 봉 줄은 위에, 설명 줄은 아래에 붙는다. */
-    #regimeBar { display:flex; flex-direction:column; }
-    #regimeDescRow { margin-top:auto; }
+    /* v650: 장세박스 숨김이 안 먹던 원인 — #regimeBar display:flex가 hidden보다 세서 2단계에서도 장세박스가 계속 보였다. hidden일 때는 flex를 쓰지 않는다. */
+    #regimeBar:not(.hidden) { display:flex; flex-direction:column; }
+    /* v650: 아래쪽 정렬은 설명 칩 줄만 한다. 채널 아이콘·채널 그림 줄은 위에 그대로 둔다. */
+    #regimeChipRow { margin-top:auto; }
     .regime-bar.regime-up { border-color:#10b981; background:linear-gradient(135deg, rgba(16,185,129,.22), rgba(16,185,129,.07)); }
     .regime-bar.regime-down { border-color:#f43f5e; background:linear-gradient(135deg, rgba(244,63,94,.20), rgba(244,63,94,.06)); }
     .regime-bar.regime-flat { border-color:#64748b; background:linear-gradient(135deg, rgba(100,116,139,.18), rgba(100,116,139,.06)); }
@@ -420,7 +421,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v649 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v650 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -596,7 +597,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
         <div id="regimeViz" class="flex-1 min-w-[72px] h-14 mx-0.5"></div>
       </div>
-      <div class="flex flex-wrap items-center gap-1.5 px-3 pb-1.5">
+      <div id="regimeChipRow" class="flex flex-wrap items-center gap-1.5 px-3 pb-1.5">
         <span id="regimeDivChip" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-black border-2 regime-chip-off">다이버 없음</span>
         <span id="regimePathText" style="display:none" class="regime-chip-pos inline-flex items-center px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-black border-2"></span>
       </div>
@@ -9239,7 +9240,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v649 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v650 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -10866,7 +10867,11 @@ window.FlowSync = (function(){
         const bar = document.getElementById("regimeBar");
         if (!bar) return;
         if (!data) { bar.classList.add("hidden"); return; }
-        bar.classList.remove("hidden");
+        // v650: 2단계에서 애니메이션이 보일 때는 장세박스를 다시 보이지 않게 한다 — 장세박스와 애니메이션이 따로 보이는 분리 방지
+        const animSlot = document.getElementById("posAnimSlot");
+        const animVisible = animSlot && !animSlot.classList.contains("hidden");
+        if (animVisible) bar.classList.add("hidden");
+        else bar.classList.remove("hidden");
         bar.classList.remove("regime-up", "regime-down", "regime-flat", "regime-expired");
         if (data.dir === "up") bar.classList.add("regime-up");
         else if (data.dir === "down") bar.classList.add("regime-down");
