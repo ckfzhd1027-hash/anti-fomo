@@ -417,7 +417,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v645 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v646 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9236,7 +9236,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v645 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v646 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13860,10 +13860,14 @@ window.StepGuide = StepGuide;
     if (!o) return;
     o.style.display = (o.style.display === "none") ? "" : "none";
   }
-  // v645: 화면 전체가 애니메이션 화면일 때는 박스 밖이 항상 보인다 — 한 번 누르면 토글하지 않고, 두 번 빠르게 누르면 장세박스로 돌아간다
+  // v646: 전체화면 전환은 애니메이션 차트를 터치했을 때만 — 자동 진입·장세박스 누름 때는 전체화면이 아니다
   function enterFullAnim() {
     try { document.body.classList.add("posanim-full"); } catch (e) {}
     setOutsideVisible(true);
+    try {
+      var slot = document.getElementById("posAnimSlot");
+      if (slot && slot.parentElement) slot.parentElement.scrollTop = 0;
+    } catch (e) {}
   }
   function exitFullAnim() {
     try { document.body.classList.remove("posanim-full"); } catch (e) {}
@@ -13885,9 +13889,10 @@ window.StepGuide = StepGuide;
     }
     lastBoxTapTime = now;
     if (boxTapTimer) clearTimeout(boxTapTimer);
-    // v645: 전체 화면일 때는 한 번 눌러도 박스 밖을 숨기지 않는다 — 전체 화면 자체가 기존 애니메이션 화면이다
+    // v646: 전체 화면일 때는 한 번 눌러도 박스 밖을 숨기지 않는다 — 전체 화면 자체가 기존 애니메이션 화면이다
     if (document.body.classList.contains("posanim-full")) { boxTapTimer = null; return; }
-    boxTapTimer = setTimeout(function () { boxTapTimer = null; toggleOutside(); }, 350);
+    // v646: 전체 화면이 아닐 때 차트를 한 번 누르면 전체화면으로 전환된다 — 자동 진입·장세박스 누름이 아니다
+    boxTapTimer = setTimeout(function () { boxTapTimer = null; enterFullAnim(); }, 350);
   }
   // v643: 애니메이션 박스 크기를 기존 장세박스와 똑같이 — 장세박스 높이를 재서 박스·차트 높이에 그대로 쓴다
   var regimeBoxH = 0;
@@ -13911,8 +13916,8 @@ window.StepGuide = StepGuide;
     if (bar && !bar.classList.contains("hidden")) regimeBoxH = bar.offsetHeight;
     if (slot) slot.classList.remove("hidden");
     if (bar) bar.classList.add("hidden");
-    // v645: 전환 시 화면 전체가 기존 애니메이션 화면으로 바뀐다
-    enterFullAnim();
+    // v646: 자동 진입·장세박스 누름 때는 박스만 보인다 — 전체화면은 애니메이션 차트를 눌렀을 때만 된다
+    setOutsideVisible(false);
     syncAnimBoxSize();
     var box = document.getElementById("posAnimBox");
     if (box) {
@@ -13929,9 +13934,8 @@ window.StepGuide = StepGuide;
     if (bar) bar.classList.add("posanim-regime-hl");
     setTimeout(function () {
       if (bar) bar.classList.remove("posanim-regime-hl");
+      // v646: 장세박스 미니 차트를 누르면 박스만 보인다 — 전체화면은 애니메이션 차트를 눌렀을 때만 된다
       show(true);
-      // v643: 장세박스 창을 누르면 기존 애니메이션 화면이 바로 뜬다 — 자동 진입(박스만)과 달리, 직접 누른 경우는 박스 밖 화면까지 바로 보여준다
-      setOutsideVisible(true);
     }, 300);
   }
   function backToRegime(ev) {
