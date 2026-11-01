@@ -180,6 +180,9 @@
     .dark .regime-chip-div-short { border-color:#fb7185 !important; color:#fda4af; }
     @keyframes regimeBlink { 0%,100% { opacity:1; } 50% { opacity:.4; } }
     .regime-blink { animation: regimeBlink 0.9s ease-in-out infinite; }
+    /* v681: 장세박스 채널 그림 은은한 점멸 — 터치 유도 (채널 그림만, 전체 박스·봉 박스 아님) */
+    @keyframes regimeVizSoftBlink { 0%,100% { opacity:1; } 50% { opacity:.7; } }
+    #regimeViz { animation: regimeVizSoftBlink 2.4s ease-in-out infinite; }
     .regime-chip-pos { border-color:#94a3b8 !important; }
     .dark .regime-chip-pos { border-color:rgba(148,163,184,.55) !important; }
 
@@ -464,7 +467,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v677 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v681 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -477,8 +480,10 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       <h1 class="text-base sm:text-lg font-black tracking-tight uppercase text-emerald-600 dark:text-emerald-400 whitespace-nowrap cursor-pointer" onclick="MainScreen.goHome()" title="홈으로">ANTI-FOMO</h1>
     </div>
 
-    <!-- 헤더 단계 제목 (v677: 제목박스가 없어진 단계도 헤더 빈공간에서 단계 확인) -->
-    <div id="headerStepTitle" class="flex-1 min-w-0 text-center text-sm sm:text-base font-black tracking-tight text-slate-900 dark:text-white truncate px-1"></div>
+    <!-- 헤더 단계 제목 (v680: 제목답게 알약 형태로 차별화, 가운데 정렬) -->
+    <div class="flex-1 min-w-0 flex justify-center px-1">
+      <span id="headerStepTitle" class="hidden min-w-0 max-w-full truncate text-xs sm:text-sm font-black tracking-tight px-3 py-1 rounded-full border bg-slate-500/10 dark:bg-slate-400/15 text-slate-700 dark:text-slate-300 border-slate-500/40 dark:border-slate-400/40"></span>
+    </div>
 
     <!-- 우측 컨트롤 -->
     <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-1 min-w-0">
@@ -4334,7 +4339,10 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         "step_2_alt_slow_box": "저점상승 다이버"
       };
       const headerTitleEl = document.getElementById("headerStepTitle");
-      if (headerTitleEl) headerTitleEl.textContent = HEADER_TYPE_BADGE[stepKey] || step.category;
+      if (headerTitleEl) {
+        headerTitleEl.className = `min-w-0 max-w-full truncate text-xs sm:text-sm font-black tracking-tight px-3 py-1 rounded-full border transition-all ${step.badgeStyle}`;
+        headerTitleEl.textContent = HEADER_TYPE_BADGE[stepKey] || step.category;
+      }
       
       const categoryIconEl = document.getElementById("stepCategoryIcon");
       if (step.categoryIcon && step.categoryIcon.trim() !== "") {
@@ -9342,7 +9350,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v677 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v681 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
