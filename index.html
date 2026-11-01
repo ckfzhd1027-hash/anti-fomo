@@ -283,6 +283,12 @@
       #step2IntroOverlay.on { display: flex; }
       /* v668: 2단계 진입 후에는 제목박스가 없다. 제목박스가 없어진 만큼 예시차트·체크박스가 위로 올라온다. 장세박스 간격 4px은 건드리지 않는다. */
       body[data-current-step="step_2"] #stepTitleBox { display: none !important; }
+      /* v669: 3단계 각 유형 화면에서도 제목박스를 지운다. 제목박스가 없어진 만큼 예시차트·체크박스가 위로 올라온다. 장세박스와 아래 박스 간격을 4px로 유지하기 위해, 3단계에서는 장세박스 아래 여백 4px만 남기고 그 아래 여백(섹션 아래·메인 위·예시차트 위·체크박스 목록 위)을 0으로 한다. */
+      body[data-current-step^="step_3"] #stepTitleBox { display: none !important; }
+      body[data-current-step^="step_3"] section { padding-bottom: 0 !important; }
+      body[data-current-step^="step_3"] main { padding-top: 0 !important; }
+      body[data-current-step^="step_3"] main [id$="ExampleCard"] { margin-top: 0 !important; }
+      body[data-current-step^="step_3"] #boxListContainer { margin-top: 0 !important; }
       #guideCompleteCenter { display: none; }
       #guideCompleteCenter.on { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; } /* v552: 완료 화면을 여백 중앙으로 */
       #guideCompleteCenter > div { text-align: center; padding: 24px 20px; border-color: #34d399; } /* v559: 완료 박스 글자 가운데 정렬 + 전체 크게 (패딩 확대) + 박스 색 에메랄드로 */
@@ -452,7 +458,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v668 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v670 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9302,7 +9308,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v668 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v670 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13585,7 +13591,7 @@ window.StepGuide = StepGuide;
     return fracAt(cfg.path, pathLen(cfg.path), pt.vi);
   }
   function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-  var activePos = null, activeSlope = "flat", prog = 0, playing = false, pinned = null, raf = null, lastTs = 0, userWentBack = false;
+  var activePos = null, activeSlope = "flat", prog = 0, playing = false, pinned = null, raf = null, lastTs = 0, userWentBack = false, lastOnStepKey = null;
   var marksByPos = { top: [], mid: [], bottom: [] };
   // v634: 돌파타점 조건부 표시 — 돌파롱은 상단 돌파 몸통마감일 때만, 돌파숏은 하단 돌파 몸통마감일 때만 나온다
   function visiblePoints(cfg) {
@@ -14067,32 +14073,29 @@ window.StepGuide = StepGuide;
       activePos = null; pinned = null;
     }, 300);
   }
+  // v670: 단계에 들어가도 애니메이션으로 저절로 바뀌지 않는다 — 무조건 장세박스부터 나온다. 장세박스 채널을 눌러야만 애니메이션이 그 자리에서 뜬다. 단계가 바뀌면 장세박스로 돌아가고, 같은 단계에서 다시 불리면 이미 떠 있는 애니메이션은 더블터치 전까지 유지한다. 앱을 다시 키면 처음부터 장세박스다(애니메이션 상태는 저장하지 않는다).
   function onStep(stepKey) {
-    if (stepKey !== "step_2") {
-      userWentBack = false;
-      // v647: 전체화면이 1단계 등에 남지 않게, 단계가 바뀌면 항상 전체화면을 푼다
-      exitFullAnim();
-      var slot = document.getElementById("posAnimSlot");
-      if (slot && !slot.classList.contains("hidden")) {
-        slot.classList.add("hidden");
-        try { if (typeof Regime !== "undefined" && Regime.renderBar) Regime.renderBar(); } catch (e) {}
-      }
-      // v649: 단계를 벗어나면 키운 장세박스 높이를 지워서, 돌아올 때 원래 높이에서 다시 계산하게 한다
-      var rb3 = document.getElementById("regimeBar");
-      if (rb3) { rb3.style.height = ""; rb3.style.paddingBottom = ""; }
-      playing = false;
-      if (raf) { cancelAnimationFrame(raf); raf = null; }
-      activePos = null; pinned = null;
-      return;
+    if (stepKey === lastOnStepKey) {
+      var slotSame = document.getElementById("posAnimSlot");
+      var declSame = getDecl();
+      if (slotSame && !slotSame.classList.contains("hidden") && declSame && activePos === declSame.pos && activeSlope === declSame.slope) return;
+      if (!slotSame || slotSame.classList.contains("hidden")) return;
+    } else {
+      lastOnStepKey = stepKey;
     }
-    if (userWentBack) return;
-    var decl = getDecl();
-    if (!decl) return;
-    if (activePos === decl.pos && activeSlope === decl.slope) {
-      var slot2 = document.getElementById("posAnimSlot");
-      if (slot2 && !slot2.classList.contains("hidden")) return;
+    // v647: 전체화면이 다른 단계에 남지 않게, 단계가 바뀌면 항상 전체화면을 푼다
+    exitFullAnim();
+    var slot = document.getElementById("posAnimSlot");
+    if (slot && !slot.classList.contains("hidden")) {
+      slot.classList.add("hidden");
+      try { if (typeof Regime !== "undefined" && Regime.renderBar) Regime.renderBar(); } catch (e) {}
     }
-    show(false);
+    // v649: 단계를 벗어나면 키운 장세박스 높이를 지워서, 돌아올 때 원래 높이에서 다시 계산하게 한다
+    var rb3 = document.getElementById("regimeBar");
+    if (rb3) { rb3.style.height = ""; rb3.style.paddingBottom = ""; }
+    playing = false;
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    activePos = null; pinned = null;
   }
   function init() {
     var box0 = document.getElementById("posAnimBox");
@@ -14105,8 +14108,9 @@ window.StepGuide = StepGuide;
     }
     var viz = document.getElementById("regimeViz");
     if (viz) {
+      // v670: 장세박스 채널 눌러 애니메이션으로 가는 건 2단계에서만이 아니라 전 단계 모두에서 된다
       viz.addEventListener("click", function (ev) {
-        if (typeof currentStepKey !== "undefined" && currentStepKey === "step_2" && getDecl()) {
+        if (getDecl()) {
           ev.stopPropagation();
           showFromRegime();
         }
