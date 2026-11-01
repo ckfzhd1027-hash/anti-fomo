@@ -464,7 +464,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v672 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v675 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9336,7 +9336,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v672 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v675 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13786,7 +13786,8 @@ window.StepGuide = StepGuide;
       h += '<line x1="' + lx0 + '" y1="' + ly + '" x2="' + (x + 60) + '" y2="' + ly + '" stroke="' + col + '" stroke-width="2" stroke-dasharray="8 5"/>';
       h += '<circle cx="' + lx0 + '" cy="' + ly + '" r="6" fill="#ffffff" stroke="' + col + '" stroke-width="2"/>';
       h += '<circle cx="' + x + '" cy="' + y + '" r="19" fill="none" stroke="#ffa502" stroke-width="2"/>';
-      h += '<text x="' + (x + 26) + '" y="' + (y - 12) + '" font-size="16">리테 지점</text>';
+      // v673: 차트 라벨 '리테 지점'을 설명란에 나오는 이름(리테 롱 / 리테 숏)으로 바꾼다
+      h += '<text x="' + (x + 26) + '" y="' + (y - 12) + '" font-size="16">' + esc(pt.name) + '</text>';
       h += '<text x="' + (lx0 + 10) + '" y="' + (ly - 10) + '" font-size="16">' + (pt.type === "retestLong" ? "수평저항 → 지지" : "수평지지 → 저항") + '</text>';
       // v634: 수평 돌파 지점의 장대 캔들 — 리테롱은 장대양봉, 중단 리테숏은 지지 돌파 장대음봉 (상단 숏타점 장대음봉과 동일 형태)
       (function () {
@@ -13824,7 +13825,13 @@ window.StepGuide = StepGuide;
       h += '<text x="' + (cxB - 10) + '" y="' + (pt.lineY - 16) + '" font-size="16">돌파</text>';
       h += '<line x1="' + (pt.x - 180) + '" y1="' + pt.lineY + '" x2="' + (pt.x + 60) + '" y2="' + pt.lineY + '" stroke="' + colB + '" stroke-width="2" stroke-dasharray="8 5"/>';
       h += '<circle cx="' + pt.x + '" cy="' + pt.y + '" r="19" fill="none" stroke="#ffa502" stroke-width="2"/>';
-      h += '<text x="' + (pt.x + 26) + '" y="' + (pt.y - 12) + '" font-size="16">리테 지점</text>';
+      // v673: 차트 라벨 '리테 지점'을 설명란에 나오는 이름(채널 돌파 롱 / 채널 돌파 숏)으로 바꾼다
+      h += '<text x="' + (pt.x + 26) + '" y="' + (pt.y - 12) + '" font-size="16">' + esc(pt.name) + '</text>';
+    }
+    // v673: 리테 지점처럼 나머지 번호에도 차트에 이름을 표시한다 — 1강·다이버·2강·중단 복귀는 기존 가이드에 이름만 추가한다
+    if (pt.type === "gang1" || pt.type === "divLong" || pt.type === "divShort" || pt.type === "gang2" || pt.type === "return") {
+      var nameLeft = x > 600;
+      h += '<text x="' + (nameLeft ? (x - 26) : (x + 26)) + '" y="' + (y - 12) + '" font-size="16" text-anchor="' + (nameLeft ? "end" : "start") + '">' + esc(pt.name) + '</text>';
     }
     return h;
   }
@@ -13852,7 +13859,16 @@ window.StepGuide = StepGuide;
     var els = g.querySelectorAll("[data-marker]");
     for (var i = 0; i < els.length; i++) {
       (function (el) {
+        // v674: 폰 터치에서는 박스 touchend가 클릭을 막아 번호 누름이 안 먹혔던 문제 — 마커 자체 touchend로 바로 점프한다
+        el.addEventListener("touchend", function (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          lastTouchTime = Date.now();
+          var idx = parseInt(el.getAttribute("data-marker"), 10);
+          tapMarker(idx);
+        }, { passive: false });
         el.addEventListener("click", function (ev) {
+          if (Date.now() - lastTouchTime < 500) return;
           ev.stopPropagation();
           var idx = parseInt(el.getAttribute("data-marker"), 10);
           tapMarker(idx);
@@ -13930,7 +13946,7 @@ window.StepGuide = StepGuide;
       // v644: 5,6 수정 남기고 다 원복 — 2강만 빼고 나머지는 다 보인다. 다이버·1강·중단 복귀 포함, 원래 번호 그대로.
       if (pt.type === "gang2") return;
       var on = !!marks[idx];
-      h += '<button type="button" data-mark="' + idx + '" class="' + (on ? "posanim-marked" : "") + '">' + (idx + 1) + " · " + esc(pt.name) + " — " + (on ? "내가 표시함 ✓" : "내가 아직 표시 안 함") + '</button>';
+      h += '<button type="button" data-mark="' + idx + '" class="' + (on ? "posanim-marked" : "") + '">' + (idx + 1) + " · " + esc(pt.name) + " — " + (on ? "지나간 타점 ✓" : "내가 아직 표시 안 함") + '</button>';
     });
     host.innerHTML = h;
     var btns = host.querySelectorAll("[data-mark]");
@@ -13972,6 +13988,11 @@ window.StepGuide = StepGuide;
     var cfg = POS[activePos];
     var pt = visiblePoints(cfg)[idx];
     if (!pt) return;
+    // v674: 번호를 누르면 그 번호 타점을 초록으로 표시한다 — 목록 누를 때와 똑같이, 표시 안 된 번호를 누르면 앞 번호까지 함께 표시되고, 표시된 번호를 다시 누르면 뒤 번호까지 함께 표시 해제된다
+    var mk = ensureMarks(activePos);
+    if (!mk[idx]) { for (var mj = 0; mj <= idx; mj++) mk[mj] = true; }
+    else { for (var mk2 = idx; mk2 < mk.length; mk2++) mk[mk2] = false; }
+    renderMarks();
     if (pinned === idx) {
       pinned = null;
       prog = pointAtFrac(cfg, pt);
