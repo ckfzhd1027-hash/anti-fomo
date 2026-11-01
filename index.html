@@ -417,7 +417,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v646 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v648 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9236,7 +9236,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v646 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v648 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -12497,7 +12497,6 @@ const StepGuide = (() => {
     }
     return -1;
   }
-
   // v531: 미리보기 대상 박스 점멸 (지금 떠 있는 애니메이션이 어떤 박스인지 표시)
   function blinkBox(idx) {
     clearBlink();
@@ -13023,15 +13022,27 @@ const StepGuide = (() => {
 })();
 window.StepGuide = StepGuide;
 
-  /* v543: 1단계에서 박스가 들어갈 공간을 정확히 한 박스분으로 맞추고, 남은 공간은 장세박스 높이로 채움.
-     박스 상단~하단 + 하단 여유(10px)까지가 들어가는 높이가 되도록 장세박스 하단 여백을 조절. 간격 축소분과 상쇄돼 장세박스 크기는 그대로.
-     다른 단계·장세박스 숨김 상태에서는 동작하지 않음. */
+  /* v648: 예전 방식(v543) — 체크박스가 보이는 구역을 줄이고, 줄인 만큼 장세박스를 키워서 덮는다.
+     다음 박스를 숨기는 게 아니라, 다음 박스 데이터는 그대로 두고 화면에 들어가는 공간만 한 박스분으로 맞춘다.
+     체크박스 구역(main)이 한 박스보다 크면, 그 차이만큼 장세박스 높이를 키워서 main을 한 박스분으로 줄인다.
+     전체화면·장세박스 숨김 상태에서는 동작하지 않는다. */
   function fitRegimeToOneBox(boxEl) {
-    // v584: 장세박스 여백 방식 폐기 — 장세박스는 원래 크기로 두고, 첫 박스 위치는 scrollToBox의 scrollTop으로만 맞춤.
-    // (기존 fit은 장세박스에 padding-bottom을 넣어 박스를 길게 만들었음. 안 맞으면 v583 fit으로 롤백.)
     try {
       const rb = document.getElementById("regimeBar");
-      if (rb) rb.style.paddingBottom = "";
+      const main = document.querySelector("main");
+      if (!rb || !main || !boxEl) return;
+      if (document.body.classList.contains("posanim-full")) return;
+      if (rb.offsetParent === null) return;
+      rb.style.paddingBottom = "";
+      rb.style.height = "";
+      const mainRect = main.getBoundingClientRect();
+      const cs = getComputedStyle(main);
+      const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+      const need = boxEl.offsetHeight + pad;
+      const excess = mainRect.height - need;
+      if (excess > 0) {
+        rb.style.height = (rb.offsetHeight + excess) + "px";
+      }
     } catch (e) {}
   }
   function fitTopmostBox() {
@@ -13535,6 +13546,7 @@ window.StepGuide = StepGuide;
       vol += '<rect data-volslot="' + i + '" x="' + x + '" y="' + (VOL_BASE - BASE_VOL[i]) + '" width="12" height="' + BASE_VOL[i] + '" fill="#475569" rx="1"/>';
     }
     var svg = '<svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'
+      + '<rect x="0" y="0" width="720" height="360" fill="transparent" pointer-events="all"/>'
       + '<path d="' + topD + '" fill="none" stroke="#94a3b8" stroke-width="2"/>'
       + '<path d="' + botD + '" fill="none" stroke="#94a3b8" stroke-width="2"/>'
       + '<text x="8" y="48" font-size="16">상단선 · 저항</text>'
@@ -13873,8 +13885,8 @@ window.StepGuide = StepGuide;
     try { document.body.classList.remove("posanim-full"); } catch (e) {}
     setOutsideVisible(false);
   }
-  // v643: 버튼 없이 장세박스로 돌아가는 방법 — 창을 두 번 빠르게 누르면 장세박스로 돌아간다. 한 번 누르면 기존 애니메이션 화면이 뜬다.
-  var lastBoxTapTime = 0, boxTapTimer = null;
+  // v647: 애니메이션 박스는 누르자마자 바로 전체화면으로 바뀐다 — 0.35초 기다림 없음. 두 번 빠르게 누르면 장세박스로 돌아간다.
+  var lastBoxTapTime = 0;
   function boxTap(ev) {
     if (ev) {
       var t = ev.target;
@@ -13882,17 +13894,13 @@ window.StepGuide = StepGuide;
     }
     var now = Date.now();
     if (now - lastBoxTapTime < 350) {
-      if (boxTapTimer) { clearTimeout(boxTapTimer); boxTapTimer = null; }
       lastBoxTapTime = 0;
       backToRegime();
       return;
     }
     lastBoxTapTime = now;
-    if (boxTapTimer) clearTimeout(boxTapTimer);
-    // v646: 전체 화면일 때는 한 번 눌러도 박스 밖을 숨기지 않는다 — 전체 화면 자체가 기존 애니메이션 화면이다
-    if (document.body.classList.contains("posanim-full")) { boxTapTimer = null; return; }
-    // v646: 전체 화면이 아닐 때 차트를 한 번 누르면 전체화면으로 전환된다 — 자동 진입·장세박스 누름이 아니다
-    boxTapTimer = setTimeout(function () { boxTapTimer = null; enterFullAnim(); }, 350);
+    if (document.body.classList.contains("posanim-full")) return;
+    enterFullAnim();
   }
   // v643: 애니메이션 박스 크기를 기존 장세박스와 똑같이 — 장세박스 높이를 재서 박스·차트 높이에 그대로 쓴다
   var regimeBoxH = 0;
@@ -13963,10 +13971,11 @@ window.StepGuide = StepGuide;
   function onStep(stepKey) {
     if (stepKey !== "step_2") {
       userWentBack = false;
+      // v647: 전체화면이 1단계 등에 남지 않게, 단계가 바뀌면 항상 전체화면을 푼다
+      exitFullAnim();
       var slot = document.getElementById("posAnimSlot");
       if (slot && !slot.classList.contains("hidden")) {
         slot.classList.add("hidden");
-        exitFullAnim();
         try { if (typeof Regime !== "undefined" && Regime.renderBar) Regime.renderBar(); } catch (e) {}
       }
       playing = false;
