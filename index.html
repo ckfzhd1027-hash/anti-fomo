@@ -439,39 +439,32 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       </div>
       <div class="text-xs text-slate-500 dark:text-slate-400 font-bold">뇌동매매 방지 게이트웨이</div>
     </div>
-    <div class="space-y-3">
-      <button onclick="MainScreen.enterMode('entry')" class="w-full text-left p-5 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border-2 border-emerald-500/50 hover:border-emerald-400 hover:from-emerald-500/30 transition-all cursor-pointer group">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg></div>
-          <div class="flex-1">
-            <div class="text-lg font-black text-white mb-1">진입 체크</div>
-            <div class="text-xs text-slate-400 font-bold">실전 매매 진입 게이트웨이</div>
-          </div>
-          <div class="text-emerald-400 text-xl group-hover:translate-x-1 transition-transform">→</div>
-        </div>
+    <div class="relative w-full max-w-[340px] aspect-square mx-auto">
+      <svg viewBox="0 0 100 100" class="absolute inset-0 w-full h-full" fill="none">
+        <defs><marker id="cycleArrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#d4af37"/></marker></defs>
+        <circle cx="50" cy="50" r="38" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+        <path d="M63,14.3 A38,38 0 0 1 87.4,56.6" stroke="#d4af37" stroke-width="1.5" marker-end="url(#cycleArrow)"/>
+        <path d="M74.4,79.1 A38,38 0 0 1 25.6,79.1" stroke="#d4af37" stroke-width="1.5" marker-end="url(#cycleArrow)"/>
+        <path d="M12.6,56.6 A38,38 0 0 1 37,14.3" stroke="#d4af37" stroke-width="1.5" marker-end="url(#cycleArrow)"/>
+      </svg>
+      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+        <div class="text-amber-300 font-black text-base tracking-tight">선순환</div>
+        <div class="text-[10px] text-slate-400 font-bold mt-1">진입 → 복기 → 공부</div>
+      </div>
+      <button onclick="MainScreen.enterMode('entry')" style="left:50%;top:12%" class="absolute -translate-x-1/2 -translate-y-1/2 w-[104px] h-[104px] rounded-full bg-gradient-to-br from-[#0f3d2e] to-[#071a12] border-2 border-emerald-400/60 shadow-xl flex flex-col items-center justify-center gap-1 cursor-pointer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg>
+        <span class="text-sm font-black text-white">진입 체크</span>
       </button>
-      <button onclick="MainScreen.enterMode('study')" class="w-full text-left p-5 rounded-2xl bg-gradient-to-br from-violet-500/20 to-violet-600/10 border-2 border-violet-500/50 hover:border-violet-400 hover:from-violet-500/30 transition-all cursor-pointer group">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-violet-500 flex items-center justify-center shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/></svg></div>
-          <div class="flex-1">
-            <div class="text-lg font-black text-white mb-1">로드맵 스터디</div>
-            <div class="text-xs text-slate-400 font-bold">퀴즈로 배우는 진입 로드맵</div>
-          </div>
-          <div class="text-violet-400 text-xl group-hover:translate-x-1 transition-transform">→</div>
-        </div>
+      <button onclick="MainScreen.enterMode('review')" style="left:82.9%;top:69%" class="absolute -translate-x-1/2 -translate-y-1/2 w-[104px] h-[104px] rounded-full bg-gradient-to-br from-[#3a2c0a] to-[#1a1405] border-2 border-amber-300/60 shadow-xl flex flex-col items-center justify-center gap-1 cursor-pointer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7" y1="20" x2="7" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="17" y1="20" x2="17" y2="9"/></svg>
+        <span class="text-sm font-black text-white">복기 도감</span>
       </button>
-      <button onclick="MainScreen.enterMode('review')" class="w-full text-left p-5 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-2 border-amber-500/50 hover:border-amber-400 hover:from-amber-500/30 transition-all cursor-pointer group">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7" y1="20" x2="7" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="17" y1="20" x2="17" y2="9"/></svg></div>
-          <div class="flex-1">
-            <div class="text-lg font-black text-white mb-1">복기 도감</div>
-            <div class="text-xs text-slate-400 font-bold">매매 복기 · 스터디 · 대조</div>
-          </div>
-          <div class="text-amber-400 text-xl group-hover:translate-x-1 transition-transform">→</div>
-        </div>
+      <button onclick="MainScreen.enterMode('study')" style="left:17.1%;top:69%" class="absolute -translate-x-1/2 -translate-y-1/2 w-[104px] h-[104px] rounded-full bg-gradient-to-br from-[#2a1a4a] to-[#120a24] border-2 border-violet-400/60 shadow-xl flex flex-col items-center justify-center gap-1 cursor-pointer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/></svg>
+        <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v692 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v694 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -7502,6 +7495,290 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
 
     };
 
+    // ===== 복기 스터디 모듈 (v693: 로드맵 스터디 칸을 복기 스터디로 교체) =====
+    // 흐름: 랜덤 유형 → 복기 이미지 → 성공/실패 맞히기 → 핵심 문장 펼치기(있을 때만) → 다음 유형 → 전부 끝나면 달력 오늘 체크
+    // 퀴즈 데이터: 백업 분석으로 검증한 텍스트 시드(REVIEW_STUDY_QUIZ_SEED). 이미지는 폰 저장 복기에서 가져오므로 시드에 이미지 없음.
+    const REVIEW_STUDY_QUIZ_SEED = {"seed_20260929":{"setupKey":"step_3_alt","typeName":"다이버 돌파 리테 롱","result":"success","win":1,"loss":0,"date":"2026-09-29","cover":["1시간/15분 다이버","저점 올림","직전 수평 돌파 후 지지 확인","고점 부근 수평에서 매도 종료 (R:R 1:2.55)"],"note":"1시간/15분 다이버 → 저점 올림 → 직전 수평 돌파 후 지지 확인, 고점 부근 수평에서 매도 종료 (R:R 1:2.55)"},"seed_20261001_2":{"setupKey":"step_3_type_d","typeName":"리테 롱","result":"success","win":2,"loss":0,"date":"2026-10-01","cover":["2번: 저점 지속 올림 + 직전봉 대비 거래량 터지며 직전 고점 돌파 + 수평 지지 확인 후 진입","85K 저항 반익 후 올려둔 스탑에 종료 (R:R 1:5.91)"],"note":"2번: 저점 지속 올림 + 직전봉 대비 거래량 터지며 직전 고점 돌파 + 수평 지지 확인 후 진입, 85K 저항 반익 후 올려둔 스탑에 종료 (R:R 1:5.91)"},"seed_20261008":{"setupKey":"step_3_fast","typeName":"다이버 롱","result":"success","win":2,"loss":0,"date":"2026-10-08","cover":["다이버 1차 진입 후 재차 하락","전고 지지선 거래량 확인 후 물타기 2차 진입","전저점 스탑","평단 위 물량 반절","상단 직전 수평 익절 (LTF 수평 돌파 리테스트 진입 병행)"],"note":"다이버 1차 진입 후 재차 하락 → 전고 지지선 거래량 확인 후 물타기 2차 진입, 전저점 스탑, 평단 위 물량 반절·상단 직전 수평 익절 (LTF 수평 돌파 리테스트 진입 병행)"},"seed_20261013":{"setupKey":"step_3","typeName":"크트키","result":"success","win":2,"loss":0,"date":"2026-10-13","cover":["전저점 안 깨고 추세전환캔들 밑꼬리 + 거래량 양봉 + 15분 매우 과매도 컨펌 후 진입","수평 저항 순서대로 부분익절 (다이버 숏은 거래량 없어 관망)"],"note":"전저점 안 깨고 추세전환캔들 밑꼬리 + 거래량 양봉 + 15분 매우 과매도 컨펌 후 진입, 수평 저항 순서대로 부분익절 (다이버 숏은 거래량 없어 관망)"},"seed_20261016":{"setupKey":"step_3","typeName":"크트키","result":"success","win":2,"loss":0,"date":"2026-10-16","cover":["크트키: 거래량 폭발 + 장대 캔들 + RSI 과매도 + 4H 장기 지지선 확인","1차(피보 1.382)","2차(1.618) 진입 모두 수평선에서 익절 종료"],"note":"크트키: 거래량 폭발 + 장대 캔들 + RSI 과매도 + 4H 장기 지지선 확인, 1차(피보 1.382)·2차(1.618) 진입 모두 수평선에서 익절 종료"},"seed_20261016s":{"setupKey":"step_3_type_f","typeName":"리테 숏","result":"success","win":1,"loss":0,"date":"2026-10-16","cover":["뉴스 하락 장대빔으로 박스권 이탈(붕괴)","되돌림 상승 시 거래량 급감 + 수평 저항에서 고점 못 올리는 것 확인 후 숏 진입","수평 반익 후 차례로 저항 확인하며 부분익절"],"note":"뉴스 하락 장대빔으로 박스권 이탈(붕괴) → 되돌림 상승 시 거래량 급감 + 수평 저항에서 고점 못 올리는 것 확인 후 숏 진입, 수평 반익 후 차례로 저항 확인하며 부분익절"},"seed_20261020":{"setupKey":"step_3_alt","typeName":"다이버 돌파 리테 롱","result":"success","win":1,"loss":0,"date":"2026-10-20","cover":["거래량 폭발","상승 다이버전스 파동 전환(HL)","돌파 리테스트 타점 컨펌","목표 83,333 도달 (R:R 1:6.89)"],"note":"거래량 폭발 → 상승 다이버전스 파동 전환(HL) → 돌파 리테스트 타점 컨펌, 목표 83,333 도달 (R:R 1:6.89)"},"r_1792968777883_0":{"setupKey":"step_3","typeName":"크트키","result":"fail","win":0,"loss":1,"date":"2026-10-25","cover":[],"note":""},"r_1793014450968_0":{"setupKey":"step_3_type_f","typeName":"리테 숏","result":"success","win":2,"loss":0,"date":"2026-10-26","cover":[],"note":""},"r_1793083410204_0":{"setupKey":"step_3_type_g","typeName":"1강","result":"success","win":1,"loss":0,"date":"2026-10-27","cover":[],"note":""},"r_1793083478577_0":{"setupKey":"step_3_alt","typeName":"다이버 돌파 리테 롱","result":"fail","win":0,"loss":1,"date":"2026-10-27","cover":[],"note":""},"r_1793083493531_0":{"setupKey":"step_3_type_f","typeName":"리테 숏","result":"fail","win":0,"loss":1,"date":"2026-10-27","cover":[],"note":""},"r_1793282283347_0":{"setupKey":"step_3","typeName":"크트키","result":"success","win":1,"loss":0,"date":"2026-10-29","cover":[],"note":""}};
+    const ReviewStudy = {
+      TYPE_NAMES: { step_3: "크트키", step_3_fast: "다이버 롱", step_3_alt: "다이버 돌파 리테 롱", step_3_type_d: "리테 롱", step_3_type_f: "리테 숏", step_3_type_g: "1강" },
+      CAL_KEY: "antifomo_review_study_calendar_v1",
+      types: [], typeIdx: 0, list: [], idx: 0, phase: "guess", revealed: {}, correct: 0, totalReviews: 0, lastActual: null, lastCorrect: false,
+      shuffle: function(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+        return a;
+      },
+      typeName: function(k) { return this.TYPE_NAMES[k] || k; },
+      resultOf: function(r) {
+        try {
+          if (typeof reviewCounts === "function") {
+            var c = reviewCounts(r);
+            if (c.win > 0 && c.loss === 0) return "success";
+            if (c.loss > 0 && c.win === 0) return "fail";
+          }
+        } catch (e) {}
+        if (r.result === "success") return "success";
+        if (r.result === "fail") return "fail";
+        return null;
+      },
+      splitNote: function(note) {
+        var out = [];
+        (note || "").split("→").forEach(function(part) {
+          part.split(", ").forEach(function(sub) {
+            sub.split("·").forEach(function(chunk) {
+              var t = chunk.trim();
+              if (t && out.indexOf(t) < 0) out.push(t);
+            });
+          });
+        });
+        return out;
+      },
+      coverOf: function(r) {
+        var q = REVIEW_STUDY_QUIZ_SEED[r.id];
+        if (q && q.cover && q.cover.length) return q.cover;
+        return this.splitNote(r.note || "");
+      },
+      esc: function(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); },
+      loadCalendar: function() {
+        try { var v = JSON.parse(localStorage.getItem(this.CAL_KEY) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+      },
+      saveCalendar: function(dates) { try { localStorage.setItem(this.CAL_KEY, JSON.stringify(dates)); } catch (e) {} },
+      todayStr: function() {
+        var d = new Date();
+        var m = String(d.getMonth() + 1); if (m.length < 2) m = "0" + m;
+        var day = String(d.getDate()); if (day.length < 2) day = "0" + day;
+        return d.getFullYear() + "-" + m + "-" + day;
+      },
+      calendarHtml: function() {
+        var now = new Date();
+        var y = now.getFullYear(), m = now.getMonth();
+        var done = this.loadCalendar();
+        var first = new Date(y, m, 1).getDay();
+        var days = new Date(y, m + 1, 0).getDate();
+        var today = this.todayStr();
+        var h = '<div class="text-sm font-black text-slate-800 dark:text-white mb-2">' + y + '년 ' + (m + 1) + '월 스터디 달력</div>';
+        h += '<div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-400 mb-1"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>';
+        h += '<div class="grid grid-cols-7 gap-1 text-center">';
+        for (var i = 0; i < first; i++) h += '<span></span>';
+        for (var d = 1; d <= days; d++) {
+          var mm = String(m + 1); if (mm.length < 2) mm = "0" + mm;
+          var dd = String(d); if (dd.length < 2) dd = "0" + dd;
+          var key = y + "-" + mm + "-" + dd;
+          var isDone = done.indexOf(key) >= 0;
+          var isToday = key === today;
+          var cls = "py-2 rounded-lg text-sm font-bold ";
+          if (isDone) cls += "bg-emerald-500 text-white ";
+          else if (isToday) cls += "border-2 border-amber-400 text-slate-800 dark:text-white ";
+          else cls += "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 ";
+          h += '<span class="' + cls + '">' + d + (isDone ? ' ✓' : '') + '</span>';
+        }
+        h += '</div>';
+        return h;
+      },
+      showModal: function() {
+        var modal = document.getElementById("reviewStudyModal");
+        if (!modal) {
+          modal = document.createElement("div");
+          modal.id = "reviewStudyModal";
+          modal.className = "fixed inset-0 z-[70] hidden flex-col items-center justify-center p-4 overflow-y-auto";
+          modal.innerHTML =
+            '<div class="absolute inset-0 bg-black/80" onclick="ReviewStudy.close()"></div>' +
+            '<div class="relative bg-white dark:bg-[#0c121d] rounded-2xl w-full max-w-md p-5 shadow-2xl max-h-[90vh] overflow-y-auto">' +
+            '<div class="flex items-center justify-between mb-4">' +
+            '<h3 class="text-lg font-black text-slate-800 dark:text-white">복기 스터디</h3>' +
+            '<button onclick="ReviewStudy.close()" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center cursor-pointer"><span class="text-slate-600 dark:text-slate-300 font-black">✕</span></button>' +
+            '</div>' +
+            '<div id="rs2Progress" class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-3"></div>' +
+            '<div id="rs2Body"></div>' +
+            '</div>';
+          document.body.appendChild(modal);
+        }
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      },
+      close: function() {
+        var modal = document.getElementById("reviewStudyModal");
+        if (modal) { modal.classList.add("hidden"); modal.classList.remove("flex"); }
+        try { localStorage.setItem("antifomo_last_mode", "entry"); } catch (e) {}
+      },
+      getReviews: function() {
+        try {
+          if (typeof reviewDatabase !== "undefined" && reviewDatabase.length) return reviewDatabase.slice();
+        } catch (e) {}
+        return [];
+      },
+      start: function() {
+        var self = this;
+        this.showModal();
+        var reviews = this.getReviews();
+        if (!reviews.length && typeof IdbKv !== "undefined") {
+          document.getElementById("rs2Progress").textContent = "복기를 불러오는 중…";
+          document.getElementById("rs2Body").innerHTML = '<div class="text-sm text-slate-500">잠시만 기다려줘.</div>';
+          IdbKv.get("antifomo_reviews_v1").then(function(saved) {
+            try {
+              if (saved && typeof applyReviewsJson === "function") { applyReviewsJson(saved); self.start(); return; }
+              var legacy = null;
+              try { legacy = localStorage.getItem("antifomo_reviews_v1"); } catch (e2) {}
+              if (legacy && typeof applyReviewsJson === "function") { applyReviewsJson(legacy); self.start(); return; }
+            } catch (e) {}
+            document.getElementById("rs2Body").innerHTML = '<div class="text-sm text-slate-500">복기를 불러오지 못했어. 복기 도감에서 복기가 있는지 확인해줘.</div>';
+          }).catch(function() {
+            document.getElementById("rs2Body").innerHTML = '<div class="text-sm text-slate-500">복기를 불러오지 못했어. 복기 도감에서 복기가 있는지 확인해줘.</div>';
+          });
+          return;
+        }
+        var eligible = reviews.filter(function(r) { return !r.missed && self.resultOf(r) !== null; });
+        var byType = {};
+        eligible.forEach(function(r) {
+          if (!byType[r.setupKey]) byType[r.setupKey] = [];
+          byType[r.setupKey].push(r);
+        });
+        var typeKeys = Object.keys(byType);
+        if (!typeKeys.length) {
+          document.getElementById("rs2Progress").textContent = "스터디할 복기가 없어";
+          document.getElementById("rs2Body").innerHTML = '<div class="text-sm text-slate-500 leading-relaxed">성공·실패가 있는 복기가 없어. 복기를 먼저 저장하면 여기서 스터디할 수 있어.</div>' +
+            '<button onclick="ReviewStudy.close()" class="mt-4 w-full py-3 rounded-2xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-black cursor-pointer">닫기</button>';
+          return;
+        }
+        this.allByType = byType;
+        this.totalReviews = eligible.length;
+        var h = '<div class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">내 복기로 맞히는 스터디야. 유형이 랜덤으로 나오고, 성공·실패를 맞히고 핵심 문장을 다 펼쳐야 다음으로 넘어가. 모든 유형이 끝나면 오늘 날짜에 스터디 완료가 체크돼.</div>';
+        h += '<div class="mt-4 text-center text-sm font-black text-slate-800 dark:text-white">유형 ' + typeKeys.length + '개 · 복기 ' + eligible.length + '개</div>';
+        h += '<div class="mt-3">' + this.calendarHtml() + '</div>';
+        h += '<button onclick="ReviewStudy.begin()" class="mt-4 w-full py-3.5 rounded-2xl bg-violet-500 hover:bg-violet-600 text-white font-black text-base cursor-pointer shadow-lg">스터디 시작</button>';
+        document.getElementById("rs2Progress").textContent = "복기 스터디";
+        document.getElementById("rs2Body").innerHTML = h;
+      },
+      begin: function() {
+        this.types = this.shuffle(Object.keys(this.allByType));
+        this.typeIdx = 0;
+        this.correct = 0;
+        this.loadType();
+        this.renderReview();
+      },
+      loadType: function() {
+        var key = this.types[this.typeIdx];
+        this.list = this.shuffle(this.allByType[key] || []);
+        this.idx = 0;
+      },
+      currentReview: function() { return this.list[this.idx]; },
+      renderReview: function() {
+        var r = this.currentReview();
+        if (!r) { this.complete(); return; }
+        var key = this.types[this.typeIdx];
+        this.phase = "guess";
+        this.revealed = {};
+        document.getElementById("rs2Progress").textContent = "유형 " + (this.typeIdx + 1) + "/" + this.types.length + " · " + this.typeName(key) + " · 복기 " + (this.idx + 1) + "/" + this.list.length;
+        var src = (r.images && (r.images.priceOriginal || r.images.price)) || "";
+        var h = "";
+        if (src) h += '<img src="' + src + '" class="w-full max-h-[280px] object-contain rounded-xl border border-slate-200 dark:border-slate-700 bg-black/20 mb-4" alt="복기 차트">';
+        else h += '<div class="w-full py-10 text-center text-sm text-slate-400 border rounded-xl mb-4">이미지가 없는 복기야</div>';
+        h += '<div class="text-base font-black text-slate-800 dark:text-white mb-3">이 복기는 성공일까, 실패일까?</div>';
+        h += '<div class="grid grid-cols-2 gap-2">';
+        h += '<button onclick="ReviewStudy.answer(\'success\')" class="py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black cursor-pointer">성공</button>';
+        h += '<button onclick="ReviewStudy.answer(\'fail\')" class="py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-black cursor-pointer">실패</button>';
+        h += '</div>';
+        h += '<div id="rs2Feedback" class="mt-4 hidden"></div>';
+        document.getElementById("rs2Body").innerHTML = h;
+      },
+      showFeedback: function(text, ok) {
+        var el = document.getElementById("rs2Feedback");
+        if (!el) return;
+        el.classList.remove("hidden");
+        el.innerHTML = '<div class="p-3 rounded-2xl font-bold text-sm ' + (ok ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300') + '">' + this.esc(text) + '</div>';
+      },
+      answer: function(choice) {
+        var r = this.currentReview();
+        var actual = this.resultOf(r);
+        var ok = choice === actual;
+        if (ok) this.correct++;
+        this.lastActual = actual;
+        this.lastCorrect = ok;
+        var actualText = actual === "success" ? "성공" : "실패";
+        var cover = this.coverOf(r);
+        var h = "";
+        if (cover.length) {
+          this.phase = "cover";
+          this.revealed = {};
+          h = this.coverHtml(r, cover);
+          document.getElementById("rs2Body").innerHTML = h;
+          this.showFeedback((ok ? "맞았어! " : "틀렸어. ") + "실제는 " + actualText + "야. 핵심 문장을 다 펼쳐봐.", ok);
+        } else {
+          this.phase = "done";
+          h = this.nextButtonHtml();
+          var body = document.getElementById("rs2Body");
+          var opts = body.querySelectorAll("button");
+          opts.forEach(function(b) { b.disabled = true; b.style.opacity = "0.5"; });
+          var fb = document.getElementById("rs2Feedback");
+          if (fb) {
+            fb.insertAdjacentHTML("afterend", h);
+            this.showFeedback((ok ? "맞았어! " : "틀렸어. ") + "실제는 " + actualText + "야.", ok);
+          }
+        }
+      },
+      coverHtml: function(r, cover) {
+        var self = this;
+        var key = this.types[this.typeIdx];
+        var h = "";
+        var src = (r.images && (r.images.priceOriginal || r.images.price)) || "";
+        if (src) h += '<img src="' + src + '" class="w-full max-h-[200px] object-contain rounded-xl border border-slate-200 dark:border-slate-700 bg-black/20 mb-4" alt="복기 차트">';
+        h += '<div class="text-sm font-black text-slate-800 dark:text-white mb-2">' + this.typeName(key) + ' · 핵심 문장을 다 펼쳐봐</div>';
+        h += '<div class="space-y-2">';
+        cover.forEach(function(chunk, i) {
+          if (self.revealed[i]) {
+            h += '<div class="p-3 rounded-2xl bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800 text-sm font-bold text-slate-800 dark:text-white">' + self.esc(chunk) + '</div>';
+          } else {
+            h += '<button onclick="ReviewStudy.reveal(' + i + ')" class="w-full p-3 rounded-2xl bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300 text-sm font-bold cursor-pointer">가려진 핵심 문장 ' + (i + 1) + ' — 눌러서 펼치기</button>';
+          }
+        });
+        h += '</div>';
+        h += '<div id="rs2Feedback" class="mt-4 hidden"></div>';
+        var revealedCount = Object.keys(this.revealed).length;
+        if (revealedCount >= cover.length) h += this.nextButtonHtml();
+        else h += '<div class="mt-4 text-center text-xs font-bold text-slate-400">다 펼쳐야 다음으로 넘어갈 수 있어 (' + revealedCount + '/' + cover.length + ')</div>';
+        return h;
+      },
+      reveal: function(i) {
+        this.revealed[i] = true;
+        var r = this.currentReview();
+        var cover = this.coverOf(r);
+        var fbText = null;
+        var fbEl = document.getElementById("rs2Feedback");
+        if (fbEl && !fbEl.classList.contains("hidden")) fbText = fbEl.innerHTML;
+        document.getElementById("rs2Body").innerHTML = this.coverHtml(r, cover);
+        if (fbText) {
+          var el = document.getElementById("rs2Feedback");
+          if (el) { el.classList.remove("hidden"); el.innerHTML = fbText; }
+        }
+      },
+      nextButtonHtml: function() {
+        var isLastType = this.typeIdx >= this.types.length - 1;
+        var isLastInType = this.idx >= this.list.length - 1;
+        var label = (isLastType && isLastInType) ? "스터디 완료" : (isLastInType ? "다음 유형으로 →" : "다음 복기로 →");
+        return '<button onclick="ReviewStudy.next()" class="mt-4 w-full py-3.5 rounded-2xl bg-violet-500 hover:bg-violet-600 text-white font-black cursor-pointer shadow-lg">' + label + '</button>';
+      },
+      next: function() {
+        this.idx++;
+        if (this.idx >= this.list.length) {
+          this.typeIdx++;
+          if (this.typeIdx >= this.types.length) { this.complete(); return; }
+          this.loadType();
+        }
+        this.renderReview();
+      },
+      complete: function() {
+        var today = this.todayStr();
+        var dates = this.loadCalendar();
+        if (dates.indexOf(today) < 0) { dates.push(today); this.saveCalendar(dates); }
+        document.getElementById("rs2Progress").textContent = "스터디 완료 ✓";
+        var h = '<div class="text-center mb-4"><div class="text-lg font-black text-slate-800 dark:text-white">오늘 스터디 완료!</div>';
+        h += '<div class="text-sm text-slate-500 mt-1">맞힌 개수 ' + this.correct + ' / ' + this.totalReviews + '</div></div>';
+        h += this.calendarHtml();
+        h += '<button onclick="ReviewStudy.close()" class="mt-4 w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black cursor-pointer shadow-lg">닫기</button>';
+        document.getElementById("rs2Body").innerHTML = h;
+      }
+    };
+
     // ===== 차트 애니메이터 (2026-10-19 프로토타입: 2단계) =====
     // 체크리스트를 순차적으로 애니메이션으로 표현, 차트가 단계적으로 완성됨
     const ChartAnimator = {
@@ -9321,40 +9598,34 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '<div class="text-xs text-slate-500 dark:text-slate-400 font-bold">뇌동매매 방지 게이트웨이</div>' +
             '</div>' +
             // 모드 선택 카드들
-            '<div class="space-y-3">' +
-            // 진입체크
-            '<button onclick="MainScreen.enterMode(\'entry\')" class="w-full text-left p-5 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border-2 border-emerald-500/50 hover:border-emerald-400 hover:from-emerald-500/30 transition-all cursor-pointer group">' +
-            '<div class="flex items-center gap-4">' +
-            '<div class="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg></div>' +
-            '<div class="flex-1">' +
-            '<div class="text-lg font-black text-white mb-1">진입 체크</div>' +
-            '<div class="text-xs text-slate-400 font-bold">실전 매매 진입 게이트웨이</div>' +
-            '</div>' +
-            '<div class="text-emerald-400 text-xl group-hover:translate-x-1 transition-transform">→</div>' +
-            '</div></button>' +
-            // 스터디
-            '<button onclick="MainScreen.enterMode(\'study\')" class="w-full text-left p-5 rounded-2xl bg-gradient-to-br from-violet-500/20 to-violet-600/10 border-2 border-violet-500/50 hover:border-violet-400 hover:from-violet-500/30 transition-all cursor-pointer group">' +
-            '<div class="flex items-center gap-4">' +
-            '<div class="w-12 h-12 rounded-xl bg-violet-500 flex items-center justify-center shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/></svg></div>' +
-            '<div class="flex-1">' +
-            '<div class="text-lg font-black text-white mb-1">로드맵 스터디</div>' +
-            '<div class="text-xs text-slate-400 font-bold">퀴즈로 배우는 진입 로드맵</div>' +
-            '</div>' +
-            '<div class="text-violet-400 text-xl group-hover:translate-x-1 transition-transform">→</div>' +
-            '</div></button>' +
-            // 복기
-            '<button onclick="MainScreen.enterMode(\'review\')" class="w-full text-left p-5 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-2 border-amber-500/50 hover:border-amber-400 hover:from-amber-500/30 transition-all cursor-pointer group">' +
-            '<div class="flex items-center gap-4">' +
-            '<div class="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7" y1="20" x2="7" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="17" y1="20" x2="17" y2="9"/></svg></div>' +
-            '<div class="flex-1">' +
-            '<div class="text-lg font-black text-white mb-1">복기 도감</div>' +
-            '<div class="text-xs text-slate-400 font-bold">매매 복기 · 스터디 · 대조</div>' +
-            '</div>' +
-            '<div class="text-amber-400 text-xl group-hover:translate-x-1 transition-transform">→</div>' +
-            '</div></button>' +
+            '    <div class="relative w-full max-w-[340px] aspect-square mx-auto">' +
+            '      <svg viewBox="0 0 100 100" class="absolute inset-0 w-full h-full" fill="none">' +
+            '        <defs><marker id="cycleArrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#d4af37"/></marker></defs>' +
+            '        <circle cx="50" cy="50" r="38" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>' +
+            '        <path d="M63,14.3 A38,38 0 0 1 87.4,56.6" stroke="#d4af37" stroke-width="1.5" marker-end="url(#cycleArrow)"/>' +
+            '        <path d="M74.4,79.1 A38,38 0 0 1 25.6,79.1" stroke="#d4af37" stroke-width="1.5" marker-end="url(#cycleArrow)"/>' +
+            '        <path d="M12.6,56.6 A38,38 0 0 1 37,14.3" stroke="#d4af37" stroke-width="1.5" marker-end="url(#cycleArrow)"/>' +
+            '      </svg>' +
+            '      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">' +
+            '        <div class="text-amber-300 font-black text-base tracking-tight">선순환</div>' +
+            '        <div class="text-[10px] text-slate-400 font-bold mt-1">진입 → 복기 → 공부</div>' +
+            '      </div>' +
+            '      <button onclick="MainScreen.enterMode(\'entry\')" style="left:50%;top:12%" class="absolute -translate-x-1/2 -translate-y-1/2 w-[104px] h-[104px] rounded-full bg-gradient-to-br from-[#0f3d2e] to-[#071a12] border-2 border-emerald-400/60 shadow-xl flex flex-col items-center justify-center gap-1 cursor-pointer">' +
+            '        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg>' +
+            '        <span class="text-sm font-black text-white">진입 체크</span>' +
+            '      </button>' +
+            '      <button onclick="MainScreen.enterMode(\'review\')" style="left:82.9%;top:69%" class="absolute -translate-x-1/2 -translate-y-1/2 w-[104px] h-[104px] rounded-full bg-gradient-to-br from-[#3a2c0a] to-[#1a1405] border-2 border-amber-300/60 shadow-xl flex flex-col items-center justify-center gap-1 cursor-pointer">' +
+            '        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><line x1="4" y1="20" x2="20" y2="20"/><line x1="7" y1="20" x2="7" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="17" y1="20" x2="17" y2="9"/></svg>' +
+            '        <span class="text-sm font-black text-white">복기 도감</span>' +
+            '      </button>' +
+            '      <button onclick="MainScreen.enterMode(\'study\')" style="left:17.1%;top:69%" class="absolute -translate-x-1/2 -translate-y-1/2 w-[104px] h-[104px] rounded-full bg-gradient-to-br from-[#2a1a4a] to-[#120a24] border-2 border-violet-400/60 shadow-xl flex flex-col items-center justify-center gap-1 cursor-pointer">' +
+            '        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-white"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/></svg>' +
+            '        <span class="text-sm font-black text-white">복기 스터디</span>' +
+            '      </button>' +
+            '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v692 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v694 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -9379,7 +9650,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             loadStep("step_1");
           }
         } else if (mode === "study") {
-          if (typeof RoadmapStudy !== "undefined") RoadmapStudy.start();
+          if (typeof ReviewStudy !== "undefined") ReviewStudy.start();
+          else if (typeof RoadmapStudy !== "undefined") RoadmapStudy.start();
           else alert("스터디 모듈이 없습니다.");
         } else if (mode === "review") {
           if (typeof openReviewModal === "function") openReviewModal();
@@ -9391,6 +9663,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         try { localStorage.removeItem("antifomo_last_mode"); localStorage.removeItem("antifomo_tour_course"); localStorage.removeItem("antifomo_tour_step"); localStorage.removeItem("antifomo_liq_direction"); } catch(e) {}
         // 복기/스터디 모달 닫기
         if (typeof RoadmapStudy !== "undefined") RoadmapStudy.close();
+        if (typeof ReviewStudy !== "undefined") ReviewStudy.close();
         if (typeof Liquidation !== "undefined") Liquidation.hide();
         var rm = document.getElementById("reviewModal");
         if (rm) { rm.classList.add("hidden"); }
