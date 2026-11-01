@@ -464,7 +464,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v675 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v677 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -476,6 +476,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
       <h1 class="text-base sm:text-lg font-black tracking-tight uppercase text-emerald-600 dark:text-emerald-400 whitespace-nowrap cursor-pointer" onclick="MainScreen.goHome()" title="홈으로">ANTI-FOMO</h1>
     </div>
+
+    <!-- 헤더 단계 제목 (v677: 제목박스가 없어진 단계도 헤더 빈공간에서 단계 확인) -->
+    <div id="headerStepTitle" class="flex-1 min-w-0 text-center text-sm sm:text-base font-black tracking-tight text-slate-900 dark:text-white truncate px-1"></div>
 
     <!-- 우측 컨트롤 -->
     <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-1 min-w-0">
@@ -1304,6 +1307,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     role="dialog"
     aria-modal="true"
   >
+    <div class="w-full max-w-md flex justify-end pb-1">
+      <button onclick="closeBranchModal()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm border border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer tracking-tight">선택 취소 (2단계로 복귀)</button>
+    </div>
     <div class="w-full max-w-md flex flex-col items-center text-center pt-1">
       <div class="flex items-center space-x-2 bg-indigo-100 dark:bg-indigo-950 border-2 border-indigo-300 dark:border-indigo-500 px-4 py-1.5 rounded-full shadow-md dark:shadow-lg mb-2 transition-colors">
         <i class="ph-bold ph-compass text-indigo-600 dark:text-indigo-400 text-lg sm:text-xl animate-spin"></i>
@@ -1964,16 +1970,6 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       </button>
 
     </div>
-
-    <!-- 하단 닫기/취소 버튼 -->
-    <div class="w-full max-w-md pb-1">
-      <button 
-        onclick="closeBranchModal()" 
-        class="w-full py-3 rounded-xl bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm border border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer tracking-tight"
-      >
-        선택 취소 (2단계로 복귀)
-      </button>
-    </div>
   </div>
   <!-- ==================== 7-1. 모달: 파동 형태 선택 (2-ALT 트랙 분기) ==================== -->
     <!-- 방향 선택 모달 (2-ALT 롱/숏) -->
@@ -1985,6 +1981,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     role="dialog"
     aria-modal="true"
   >
+    <div class="w-full max-w-md flex justify-end pb-1">
+      <button onclick="closeTrackModal()" class="px-4 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 font-bold text-xs sm:text-sm border border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer tracking-tight">이전 단계로 이동</button>
+    </div>
     <div class="w-full max-w-md flex flex-col items-center text-center pt-1">
       <div class="flex items-center space-x-2 bg-cyan-100 dark:bg-cyan-950 border-2 border-cyan-300 dark:border-cyan-500 px-4 py-1.5 rounded-full shadow-md dark:shadow-lg mb-2 transition-colors">
         <i class="ph-bold ph-waves text-cyan-600 dark:text-cyan-400 text-lg sm:text-xl"></i>
@@ -2205,15 +2204,6 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </div>
       </button>
 
-    </div>
-
-    <div class="w-full max-w-md flex justify-center pb-1">
-      <button
-        onclick="closeTrackModal()"
-        class="px-6 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 font-bold text-xs sm:text-sm border border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer tracking-tight"
-      >
-        이전 단계로 이동
-      </button>
     </div>
   </div>
 
@@ -4329,6 +4319,22 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       const categoryBadge = document.getElementById("stepCategoryBadge");
       categoryBadge.className = `inline-flex items-center justify-center text-center gap-2.5 sm:gap-3 px-5 py-1.5 rounded-full text-base sm:text-lg font-black tracking-tight transition-all border ${step.badgeStyle}`;
       document.getElementById("stepCategoryTitle").innerHTML = step.category;
+
+      // v677: 헤더 빈공간 단계 제목 — 일반 단계는 알약 글자(카테고리), 유형 단계는 선택 화면 뱃지 이름
+      const HEADER_TYPE_BADGE = {
+        "step_3_type_g": "1강",
+        "step_3": "크트키",
+        "step_3_fast": "다이버 롱",
+        "step_3_type_e": "다이버 숏",
+        "step_3_type_d": "리테 롱",
+        "step_3_type_f": "리테 숏",
+        "step_2_alt_db": "쌍바닥",
+        "step_2_alt": "저점상승 돌파리테",
+        "step_2_alt_slow": "질질질",
+        "step_2_alt_slow_box": "저점상승 다이버"
+      };
+      const headerTitleEl = document.getElementById("headerStepTitle");
+      if (headerTitleEl) headerTitleEl.textContent = HEADER_TYPE_BADGE[stepKey] || step.category;
       
       const categoryIconEl = document.getElementById("stepCategoryIcon");
       if (step.categoryIcon && step.categoryIcon.trim() !== "") {
@@ -9336,7 +9342,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '</div></button>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v675 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v677 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
