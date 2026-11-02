@@ -464,7 +464,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v714 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v715 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -5475,6 +5475,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
           if (ov) ov.classList.remove("on");
           if (window.PosAnim && PosAnim.restart) PosAnim.restart();
         } catch (e) {}
+        // v715: 진입창이 닫히고 화면이 완전히 보인 뒤 마커 다시 그리기
+        if (window.ChartMarkers) ChartMarkers.renderAll();
       }
     };
     function confirmProceedToNextStep() {
@@ -9771,7 +9773,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v714 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v715 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -9860,6 +9862,10 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             var cur = document.body.dataset.currentStep;
             if (cur) localStorage.setItem("antifomo_resume_v1", JSON.stringify({ step: cur, t: Date.now() }));
           }
+        } catch (e) {}
+        // v715: 앱으로 돌아왔을 때(숨김→보임) 마커 다시 그리기
+        try {
+          if (!document.hidden && window.ChartMarkers) ChartMarkers.renderAll();
         } catch (e) {}
       });
       function showMain() {
