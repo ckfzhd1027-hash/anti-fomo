@@ -464,7 +464,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v709 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v712 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1986,15 +1986,18 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     role="dialog"
     aria-modal="true"
   >
-    <div class="w-full max-w-md flex justify-end pb-1">
-      <button onclick="closeTrackModal()" class="px-4 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 font-bold text-xs sm:text-sm border border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer tracking-tight">이전 단계로 이동</button>
-    </div>
     <div class="w-full max-w-md flex flex-col items-center text-center pt-1">
-      <div class="flex items-center space-x-2 bg-cyan-100 dark:bg-cyan-950 border-2 border-cyan-300 dark:border-cyan-500 px-4 py-1.5 rounded-full shadow-md dark:shadow-lg mb-2 transition-colors">
-        <i class="ph-bold ph-waves text-cyan-600 dark:text-cyan-400 text-lg sm:text-xl"></i>
-        <span class="text-sm sm:text-base font-black text-cyan-800 dark:text-cyan-200 tracking-tight">
-          파동 형태 판별
-        </span>
+      <div class="grid items-center mb-2 w-full" style="grid-template-columns: 1fr auto 1fr;">
+        <div></div>
+        <div class="flex items-center space-x-2 bg-cyan-100 dark:bg-cyan-950 border-2 border-cyan-300 dark:border-cyan-500 px-4 py-1.5 rounded-full shadow-md dark:shadow-lg transition-colors">
+          <i class="ph-bold ph-waves text-cyan-600 dark:text-cyan-400 text-lg sm:text-xl"></i>
+          <span class="text-sm sm:text-base font-black text-cyan-800 dark:text-cyan-200 tracking-tight">
+            파동 형태 판별
+          </span>
+        </div>
+        <div class="flex items-center pl-2">
+          <button onclick="closeTrackModal()" class="px-4 py-1.5 rounded-full bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-black text-sm sm:text-base border border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer tracking-tight shrink-0">선택취소</button>
+        </div>
       </div>
       <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
         포착된 <span class="text-cyan-500 dark:text-cyan-300">파동 형태</span>는?
@@ -4298,6 +4301,10 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
 
   <!-- [4] UI 렌더링 및 상태 업데이트 -->
   <script id="logic-ui-render">
+    // v711: 단계 유효성 검증 (전역 함수 — stepDatabase와 같은 블록에 두어야 보임)
+    function __antiFomoIsValidStep(stepKey) {
+      try { return !!(typeof stepDatabase !== "undefined" && stepDatabase[stepKey]); } catch (e) { return false; }
+    }
     function loadStep(stepKey, pushToHistory = true) {
       try { localStorage.setItem("antifomo_last_step", stepKey); } catch(e) {}
       if (pushToHistory && currentStepKey && currentStepKey !== stepKey) {
@@ -4307,6 +4314,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       document.body.dataset.currentStep = stepKey;
       const step = stepDatabase[stepKey];
       if (!step) return;
+      // v711: 이어지기 기록 — 유효한 단계로 진입할 때만 저장
+      try { localStorage.setItem("antifomo_resume_v1", JSON.stringify({ step: stepKey, t: Date.now() })); } catch(e) {}
 
       checkedStates = new Array(step.items.length).fill(false);
       if (window.FlowSync) FlowSync.onStepLoad(stepKey);
@@ -9754,7 +9763,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v709 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v712 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -9789,7 +9798,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       
       // 홈으로 돌아가기 (헤더에 버튼 추가용)
       goHome: function() {
-        try { localStorage.removeItem("antifomo_last_mode"); localStorage.removeItem("antifomo_tour_course"); localStorage.removeItem("antifomo_tour_step"); localStorage.removeItem("antifomo_liq_direction"); } catch(e) {}
+        try { localStorage.removeItem("antifomo_last_mode"); localStorage.removeItem("antifomo_tour_course"); localStorage.removeItem("antifomo_tour_step"); localStorage.removeItem("antifomo_liq_direction"); localStorage.removeItem("antifomo_resume_v1"); } catch(e) {}
         // 복기/스터디 모달 닫기
         if (typeof RoadmapStudy !== "undefined") RoadmapStudy.close();
         if (typeof ReviewStudy !== "undefined") ReviewStudy.close();
@@ -9825,8 +9834,35 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
           btn.style.display = "";
         }
       }
+      // v711: 돌아왔을 때 이어지기 — 최근 30분 안에 하던 단계가 있으면 그 단계로
+      var RESUME_WINDOW_MS = 30 * 60 * 1000;
+      function getResumeStep() {
+        try {
+          var rec = JSON.parse(localStorage.getItem("antifomo_resume_v1") || "null");
+          if (!rec || !rec.step || !rec.t) return null;
+          if (Date.now() - rec.t >= RESUME_WINDOW_MS) return null;
+          if (typeof __antiFomoIsValidStep !== "function" || !__antiFomoIsValidStep(rec.step)) return null;
+          return rec.step;
+        } catch (e) { return null; }
+      }
+      // 다른 앱으로 나가는 시점(숨김 전환)에 마지막 본 시각 갱신 — 단계 화면일 때만
+      document.addEventListener("visibilitychange", function() {
+        try {
+          if (document.hidden && !document.body.classList.contains("main-screen-active")) {
+            var cur = document.body.dataset.currentStep;
+            if (cur) localStorage.setItem("antifomo_resume_v1", JSON.stringify({ step: cur, t: Date.now() }));
+          }
+        } catch (e) {}
+      });
       function showMain() {
         // v177: 시작 시 항상 메인화면(모드 선택) 표시 — 마지막 모드 자동 복원 제거 (사용자 요청: 첫화면은 메인화면)
+        // v711: 단, 최근에 하던 단계가 있으면 메인 대신 그 단계로 바로 이어감 (모달은 복원 안 됨)
+        var resumeStep = getResumeStep();
+        if (resumeStep && typeof loadStep === "function") {
+          if (typeof MainScreen !== "undefined" && MainScreen.hide) MainScreen.hide();
+          loadStep(resumeStep);
+          return;
+        }
         MainScreen.show();
       }
       if (document.readyState === "loading") {
