@@ -464,7 +464,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v705 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v708 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1309,15 +1309,15 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     role="dialog"
     aria-modal="true"
   >
-    <div class="w-full max-w-md flex justify-end pb-1">
-      <button onclick="closeBranchModal()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm border border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer tracking-tight">선택 취소 (2단계로 복귀)</button>
-    </div>
     <div class="w-full max-w-md flex flex-col items-center text-center pt-1">
-      <div class="flex items-center space-x-2 bg-indigo-100 dark:bg-indigo-950 border-2 border-indigo-300 dark:border-indigo-500 px-4 py-1.5 rounded-full shadow-md dark:shadow-lg mb-2 transition-colors">
-        <i class="ph-bold ph-compass text-indigo-600 dark:text-indigo-400 text-lg sm:text-xl animate-spin"></i>
-        <span class="text-sm sm:text-base font-black text-indigo-800 dark:text-indigo-200 tracking-tight">
-          차트 배경 및 위치 판별
-        </span>
+      <div class="flex items-center justify-center gap-2 mb-2">
+        <div class="flex items-center space-x-2 bg-indigo-100 dark:bg-indigo-950 border-2 border-indigo-300 dark:border-indigo-500 px-4 py-1.5 rounded-full shadow-md dark:shadow-lg transition-colors">
+          <i class="ph-bold ph-compass text-indigo-600 dark:text-indigo-400 text-lg sm:text-xl animate-spin"></i>
+          <span class="text-sm sm:text-base font-black text-indigo-800 dark:text-indigo-200 tracking-tight">
+            차트 배경 및 위치 판별
+          </span>
+        </div>
+        <button onclick="closeBranchModal()" class="px-4 py-1.5 rounded-full bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-black text-sm sm:text-base border border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer tracking-tight shrink-0">선택취소</button>
       </div>
       <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
         현재 포착된 <span class="text-amber-500 dark:text-yellow-300">캔들 패턴과 위치</span>는?
@@ -7843,7 +7843,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         var h = "";
         var src = (r.images && (r.images.priceOriginal || r.images.price)) || "";
         if (src) h += this.plainImgHtml(src);
-        h += '<div class="text-sm font-black text-slate-800 dark:text-white mb-2">' + this.typeName(key) + ' · 찰콩 의견</div>';
+        h += '<div class="text-sm font-black text-slate-800 dark:text-white mb-2">' + this.typeName(key) + '</div>';
         h += '<div class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">차트와 네 복기를 보고 내가 짚은 부분이야. 다 읽고 이해했어에 체크하면 다음으로 넘어가.</div>';
         h += '<div class="space-y-2">';
         opinions.forEach(function(op, i) {
@@ -9751,7 +9751,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v705 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v708 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -9994,7 +9994,17 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         if (oldLayer) oldLayer.remove();
         if (!wrap) return;
         // v592: 숨겨진 슬롯은 크기가 0이라 마커가 모서리에 뭉쳐 그려짐. 그리지 않고, 보일 때 탭 전환 다시 그리기가 그림.
-        if (!slot.offsetParent || wrap.offsetWidth === 0 || wrap.offsetHeight === 0) return;
+        if (!slot.offsetParent) return;
+        // v708: 보이는 슬롯인데 wrap 크기가 아직 0이면 이미지 디코딩 전. 그냥 건너뛰지 말고
+        // 이미지 로드 완료 시 다시 그리도록 예약 (안 그러면 복원 직후 마커가 영원히 안 뜸).
+        if (wrap.offsetWidth === 0 || wrap.offsetHeight === 0) {
+          var pendingImg = wrap.querySelector("img");
+          if (pendingImg && !pendingImg.complete) {
+            var selfPending = this;
+            pendingImg.addEventListener("load", function() { selfPending.renderSlot(slot); }, { once: true });
+          }
+          return;
+        }
         // v199: 레이어를 슬롯 기준으로 얹어 핀(아이콘+꼬리)이 이미지 위쪽으로 넘어가도 잘리지 않게 함
         slot.style.position = "relative";
         var layer = document.createElement("div");
