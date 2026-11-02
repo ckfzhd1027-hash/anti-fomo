@@ -464,7 +464,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v712 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v713 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9763,7 +9763,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v712 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v713 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -10498,7 +10498,18 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         }
       }
 
-      loadStep("step_1", false);
+      // v713: 이어지기 기록이 유효하면 1단계를 먼저 그리지 않는다.
+      // loadStep이 이어지기 기록을 1단계로 덮어써서 돌아올 때 무조건 1단계로
+      // 가던 버그 수정. 유효한 기록이 있으면 시작 화면 쪽이 그 단계를 불러오고,
+      // 없으면 기존대로 1단계부터 그린다.
+      var __resumeValid713 = false;
+      try {
+        var __rec713 = JSON.parse(localStorage.getItem("antifomo_resume_v1") || "null");
+        __resumeValid713 = !!(__rec713 && __rec713.step && __rec713.t
+          && (Date.now() - __rec713.t < 30 * 60 * 1000)
+          && (typeof __antiFomoIsValidStep === "function" && __antiFomoIsValidStep(__rec713.step)));
+      } catch (e) { __resumeValid713 = false; }
+      if (!__resumeValid713) loadStep("step_1", false);
     });
   </script>
 
