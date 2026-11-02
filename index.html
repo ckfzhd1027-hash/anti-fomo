@@ -464,7 +464,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v713 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v714 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -8350,6 +8350,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         const mode = isStacked ? "stacked" : "tab";
         localStorage.setItem("antifomo_chart_mode_" + cid, mode);
       } catch (e) {}
+      // v714: 표시가 바뀐 뒤 마커 다시 그리기 (전환 때 지워진 레이어 복원)
+      if (window.ChartMarkers) ChartMarkers.renderAll();
     }
 
 
@@ -8508,6 +8510,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
           });
         }
       }
+      // v714: 표시가 바뀐 뒤 마커 다시 그리기 (전환 때 지워진 레이어 복원)
+      if (window.ChartMarkers) ChartMarkers.renderAll();
     }
 
     function initTabLongPress(btn, cid, tabInfo) {
@@ -8757,6 +8761,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         });
       }
       try { localStorage.setItem("antifomo_chart_mode_" + cid, isStacked ? "stacked" : "tab"); } catch (e) {}
+      // v714: 표시가 바뀐 뒤 마커 다시 그리기 (전환 때 지워진 레이어 복원)
+      if (window.ChartMarkers) ChartMarkers.renderAll();
     }
 
     function initCustomTabButtons() {
@@ -8865,6 +8871,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
           indicator.style.display = "none";
         }
       }
+      // v714: 표시가 바뀐 뒤 마커 다시 그리기 (전환 때 지워진 레이어 복원)
+      if (window.ChartMarkers) ChartMarkers.renderAll();
     }
 
 
@@ -9763,7 +9771,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v713 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v714 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
