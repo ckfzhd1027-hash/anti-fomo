@@ -464,7 +464,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v708 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v709 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1310,14 +1310,17 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     aria-modal="true"
   >
     <div class="w-full max-w-md flex flex-col items-center text-center pt-1">
-      <div class="flex items-center justify-center gap-2 mb-2">
+      <div class="grid items-center mb-2 w-full" style="grid-template-columns: 1fr auto 1fr;">
+        <div></div>
         <div class="flex items-center space-x-2 bg-indigo-100 dark:bg-indigo-950 border-2 border-indigo-300 dark:border-indigo-500 px-4 py-1.5 rounded-full shadow-md dark:shadow-lg transition-colors">
           <i class="ph-bold ph-compass text-indigo-600 dark:text-indigo-400 text-lg sm:text-xl animate-spin"></i>
           <span class="text-sm sm:text-base font-black text-indigo-800 dark:text-indigo-200 tracking-tight">
             차트 배경 및 위치 판별
           </span>
         </div>
-        <button onclick="closeBranchModal()" class="px-4 py-1.5 rounded-full bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-black text-sm sm:text-base border border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer tracking-tight shrink-0">선택취소</button>
+        <div class="flex items-center pl-2">
+          <button onclick="closeBranchModal()" class="px-4 py-1.5 rounded-full bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-black text-sm sm:text-base border border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer tracking-tight shrink-0">선택취소</button>
+        </div>
       </div>
       <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
         현재 포착된 <span class="text-amber-500 dark:text-yellow-300">캔들 패턴과 위치</span>는?
@@ -9751,7 +9754,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v708 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v709 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
