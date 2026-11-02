@@ -331,6 +331,9 @@
     /* v666: 1단계 아래 박스(stepTitleBox, 가이드 미리보기 들어가는 박스) 10px 더 늘리기 — 장세박스에서 줄인 10px만큼. v664 18px에서 28px로, 큰 화면은 20px에서 30px로. */
     body[data-current-step="step_1"] #stepTitleBox { padding-bottom: 28px !important; }
     @media (min-width: 640px) { body[data-current-step="step_1"] #stepTitleBox { padding-bottom: 30px !important; } }
+    /* v716: 미리보기일 때만 위쪽 여백을 아래쪽과 같게 해서 내용 전체를 카드 가운데로 */
+    body[data-current-step="step_1"] #stepTitleBox.preview-on { padding-top: 28px !important; }
+    @media (min-width: 640px) { body[data-current-step="step_1"] #stepTitleBox.preview-on { padding-top: 30px !important; } }
 
 /* v575: 15분 봉 마감 5초 전부터 점멸 (카운트다운), 바뀔 때 한 번 더 강조 */
 @keyframes candleBlinkPulse {
@@ -464,7 +467,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v715 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v716 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -4364,6 +4367,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       }
 
       document.getElementById("mainQuestionText").innerText = step.question;
+      var tbL = document.getElementById("stepTitleBox"); if (tbL) tbL.classList.remove("preview-on"); /* v716 */
       document.getElementById("btnNoSub").innerText = step.noBtnSub || "뇌동매매 즉시 중단";
 
             // 예시차트 카드 토글 (중앙 매핑 - 새 카드 추가 시 EXAMPLE_CHART_MAP에만 추가)
@@ -9773,7 +9777,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v715 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v716 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -13429,6 +13433,7 @@ const StepGuide = (() => {
     if (!q || !st || !st.items[idx]) return;
     const tbP = titleBox();
     if (tbP) tbP.style.display = ""; /* v595: 미리보기가 뜰 때는 제목박스 표시 복원 (완료/다시 보기 후 숨겨진 경우) */
+    if (tbP) tbP.classList.add("preview-on"); /* v716: 미리보기일 때 위아래 여백 균등 */
     hidePill(); // 미리보기가 보일 때만 알약 숨김
     current = idx;
     const it = st.items[idx];
@@ -13441,6 +13446,7 @@ const StepGuide = (() => {
 
   function restoreQuestion() {
     clearBlink();
+    var tbR = titleBox(); if (tbR) tbR.classList.remove("preview-on"); /* v716 */
     showPill(); // 질문이 보일 때는 알약 항상 표시
     const q = questionEl(), st = step();
     if (!q) return;
