@@ -467,7 +467,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v717 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v718 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -7630,7 +7630,23 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         var first = new Date(y, m, 1).getDay();
         var days = new Date(y, m + 1, 0).getDate();
         var today = this.todayStr();
+        /* v718: 총 완료일(중복 제거) + 연속일(오늘 기준, 오늘 미완료면 어제부터 거슬러 셈) */
+        var doneSet718 = {};
+        done.forEach(function(k) { doneSet718[k] = true; });
+        var total718 = Object.keys(doneSet718).length;
+        var streak718 = 0;
+        var anchor718 = new Date();
+        if (!doneSet718[today]) anchor718.setDate(anchor718.getDate() - 1);
+        while (true) {
+          var am718 = String(anchor718.getMonth() + 1); if (am718.length < 2) am718 = "0" + am718;
+          var ad718 = String(anchor718.getDate()); if (ad718.length < 2) ad718 = "0" + ad718;
+          var akey718 = anchor718.getFullYear() + "-" + am718 + "-" + ad718;
+          if (!doneSet718[akey718]) break;
+          streak718++;
+          anchor718.setDate(anchor718.getDate() - 1);
+        }
         var h = '<div class="text-sm font-black text-slate-800 dark:text-white mb-2">' + y + '년 ' + (m + 1) + '월 스터디 달력</div>';
+        h += '<div class="flex gap-2 mb-2"><span class="flex-1 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-black text-center">총 완료 ' + total718 + '일</span><span class="flex-1 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-black text-center">연속 ' + streak718 + '일</span></div>';
         h += '<div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-400 mb-1"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>';
         h += '<div class="grid grid-cols-7 gap-1 text-center">';
         for (var i = 0; i < first; i++) h += '<span></span>';
@@ -9777,7 +9793,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v717 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v718 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
