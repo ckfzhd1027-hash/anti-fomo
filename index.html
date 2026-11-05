@@ -267,6 +267,8 @@
       body.gang1-gate-open #oxGate, body.gang1-gate-open #oxFloat, body.gang1-gate-open #stickyCheckBar, body.gang1-gate-open #oxMiniX { display: none !important; }
       /* v405: 1강 게이트 예시 강조 펄스 (완성 차트 + 중요 부분 점멸) */
       @keyframes gang1ExPulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+      /* v724: 빠른 1강 예시 — 장대 캔들이 위쪽 고정·아래로 길어지며 내려가는 애니메이션 (빠름 0.9s / 느림 3s) */
+      @keyframes fg1Grow { 0% { transform: scaleY(0.12); } 55% { transform: scaleY(1); } 100% { transform: scaleY(1); } }
       /* v433: 추천 카드 테두리 점멸 (뱃지가 약하다는 지적 — 방향별 색상, 1.5s 무한) */
       /* v434: 점멸 강화 (글로우 확대 + 테두리 명암폭 확대) + 추천 아닌 카드 dim */
       @keyframes recBlinkLong { 0%,100% { border-color: #34d399; box-shadow: 0 0 0 0 rgba(16,185,129,0.6), 0 0 18px 3px rgba(16,185,129,0.45); } 50% { border-color: #047857; box-shadow: 0 0 0 5px rgba(16,185,129,0.25), 0 0 28px 8px rgba(16,185,129,0.75); } }
@@ -467,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v723 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v724 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9937,7 +9939,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v723 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v724 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -10181,30 +10183,30 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         1: {
           labels: ["짧은 캔들", "초장대 캔들"],
           ok: { caption: "거래량 폭발 + 짧은 캔들", hl: [{t:"v", i:5},{t:"c", i:5}],
-            candles: [[18,14,26,24],[24,22,28,25],[25,20,34,32],[32,30,36,33],[33,28,40,38],[38,37,39,38]], vols: [5,4,8,6,9,16] },
+            candles: [[18,14,26,24],[24,22,28,25],[25,20,34,32],[32,30,36,33],[33,28,40,38],[38,37,39,38]], vols: [5,4,8,6,9,32] },
           bad: { caption: "캔들은 짧은데 거래량 없음", hl: [{t:"v", i:5}],
             candles: [[18,14,26,24],[24,22,28,25],[25,20,34,32],[32,30,36,33],[33,28,40,38],[38,37,39,38]], vols: [5,4,8,6,9,5] },
-          ok2: { caption: "거래량 폭발 + 초장대 캔들", hl: [{t:"v", i:5},{t:"c", i:5}],
-            candles: [[18,14,26,24],[24,22,28,25],[25,20,34,32],[32,30,36,33],[33,28,40,38],[38,34,64,62]], vols: [5,4,8,6,9,16] },
-          bad2: { caption: "초장대인데 거래량 없음", hl: [{t:"v", i:5}],
-            candles: [[18,14,26,24],[24,22,28,25],[25,20,34,32],[32,30,36,33],[33,28,40,38],[38,34,64,62]], vols: [5,4,8,6,9,5] }
+          ok2: { caption: "거래량 폭발 + 초장대 캔들", hl: [{t:"v", i:5},{t:"c", i:5}], vbH: 132, volBase: 130,
+            candles: [[12,8,22,18],[18,16,24,19],[19,14,30,28],[28,26,34,29],[29,24,38,36],[36,30,78,74]], vols: [6,5,9,7,10,44] },
+          bad2: { caption: "초장대인데 거래량 없음", hl: [{t:"v", i:5}], vbH: 132, volBase: 130,
+            candles: [[12,8,22,18],[18,16,24,19],[19,14,30,28],[28,26,34,29],[29,24,38,36],[36,30,78,74]], vols: [6,5,9,7,10,8] }
         },
         2: {
-          ok: { caption: "몇 개 봉 만에 쭉 움직임", hl: [{t:"c", i:4},{t:"c", i:5}],
+          ok: { caption: "장대가 빠르게 내려감", hl: [{t:"c", i:5}], anim: {i: 5, dur: 0.9},
             candles: [[14,12,20,19],[19,16,28,27],[27,25,30,28],[28,24,40,38],[38,36,42,39],[39,36,58,56]], vols: [5,8,6,12,9,16] },
-          bad: { caption: "봉마다 조금씩 기어감", hl: [],
-            candles: [[30,28,32,31],[31,28,34,33],[33,31,36,32],[32,30,35,34],[34,32,37,33],[33,31,36,35]], vols: [4,5,4,5,4,5] }
+          bad: { caption: "장대가 느리게 내려감", hl: [{t:"c", i:5}], anim: {i: 5, dur: 3},
+            candles: [[30,28,32,31],[31,28,34,33],[33,31,36,32],[32,30,35,34],[34,32,37,33],[33,30,58,56]], vols: [4,5,4,5,4,6] }
         },
         3: {
-          ok: { caption: "가격은 제자리, 거래량만 폭발", hl: [{t:"v", i:3},{t:"v", i:5}],
-            candles: [[30,27,33,31],[31,29,34,30],[30,26,33,32],[32,30,35,31],[31,28,34,33],[33,30,35,32]], vols: [12,15,13,16,14,15] },
+          ok: { caption: "내려가다 거래량 폭발, 가격은 제자리", hl: [{t:"c", i:5},{t:"v", i:5}],
+            candles: [[16,12,24,22],[22,18,32,30],[30,26,40,38],[38,36,42,39],[39,37,41,38],[38,36,40,39]], vols: [5,7,9,18,24,28] },
           bad: { caption: "거래량 터지는데 가격도 같이 움직임", hl: [{t:"c", i:5}],
-            candles: [[30,27,36,34],[34,32,42,40],[40,38,44,41],[41,38,50,48],[48,46,52,49],[49,46,58,56]], vols: [12,14,11,15,13,15] }
+            candles: [[16,12,24,22],[22,18,32,30],[30,26,40,38],[38,34,48,46],[46,42,54,52],[52,48,62,60]], vols: [5,7,9,14,18,20] }
         }
       };
       function candleSvg(sc, good) {
-        var vbH = 88;
-        var volBase = 86;
+        var vbH = sc.vbH || 88;
+        var volBase = sc.volBase || 86;
         var parts = [];
         for (var j = 0; j < sc.candles.length; j++) {
           var c = sc.candles[j], cx = XS[j];
@@ -10212,9 +10214,12 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
           var col = up ? "#22c55e" : "#ef4444";
           var top = Math.min(c[0], c[3]), h = Math.max(Math.abs(c[3] - c[0]), 2);
           var v = sc.vols[j];
-          parts.push('<g>'
-            + '<line x1="' + cx + '" y1="' + c[1] + '" x2="' + cx + '" y2="' + c[2] + '" stroke="' + col + '" stroke-width="1.2" />'
-            + '<rect x="' + (cx - 5) + '" y="' + top + '" width="10" height="' + h + '" fill="' + col + '" />'
+          var candlePart = '<line x1="' + cx + '" y1="' + c[1] + '" x2="' + cx + '" y2="' + c[2] + '" stroke="' + col + '" stroke-width="1.2" />'
+            + '<rect x="' + (cx - 5) + '" y="' + top + '" width="10" height="' + h + '" fill="' + col + '" />';
+          if (sc.anim && sc.anim.i === j) {
+            candlePart = '<g style="transform-box: fill-box; transform-origin: 50% 0; animation: fg1Grow ' + sc.anim.dur + 's ease-in infinite">' + candlePart + '</g>';
+          }
+          parts.push('<g>' + candlePart
             + '<rect x="' + (cx - 5) + '" y="' + (volBase - v) + '" width="10" height="' + v + '" fill="' + col + '" opacity="0.65" />'
             + '</g>');
         }
