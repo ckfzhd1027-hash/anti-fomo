@@ -469,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v729 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v731 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -9668,7 +9668,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         const jobs = [];
         for (const key in data) {
           if (!key.startsWith("antifomo_")) continue;
-          if (isSeed && key === "antifomo_reviews_v1") {
+          if (key === "antifomo_reviews_v1") {
+            // v731: 복기는 시드·백업 모두 id 기준 병합 (폰 setupKey 우선, v251 규칙).
+            // 백업 파일을 열어도 폰의 신규 복기가 지워지지 않음.
             jobs.push(IdbKv.get(key).then(function(cur) {
               let seedArr = [];
               try { seedArr = JSON.parse(data[key] || "[]"); } catch (e) {}
@@ -9704,9 +9706,43 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
               });
             }).catch(function() {}));
           } else if (IDB_BIG_KEYS.indexOf(key) >= 0) {
-            jobs.push(IdbKv.set(key, data[key]).catch(function() {}));
+            if (isSeed) {
+              // v731: 시드는 차트를 병합 — 폰 슬롯에 이미지가 있으면 폰 것 유지,
+              // 빈 슬롯만 시드로 채움. 시드가 폰의 원본 차트를 덮지 않음.
+              jobs.push(IdbKv.get(key).then(function(cur) {
+                let seedCharts = {};
+                try { seedCharts = JSON.parse(data[key] || "{}"); } catch (e) {}
+                let curCharts = {};
+                try { if (cur) curCharts = JSON.parse(cur); } catch (e) {}
+                try {
+                  const lg = localStorage.getItem(key);
+                  if (lg) { const lgo = JSON.parse(lg); for (const cid in lgo) { if (!curCharts[cid]) curCharts[cid] = lgo[cid]; } }
+                } catch (e) {}
+                const merged = {};
+                for (const cid in curCharts) merged[cid] = curCharts[cid];
+                for (const cid in seedCharts) {
+                  if (!merged[cid]) { merged[cid] = seedCharts[cid]; continue; }
+                  for (const sname in seedCharts[cid]) {
+                    const slot = merged[cid][sname];
+                    if (!slot || !slot.length) merged[cid][sname] = seedCharts[cid][sname];
+                  }
+                }
+                return IdbKv.set(key, JSON.stringify(merged)).then(function() {
+                  try { localStorage.removeItem(key); } catch (e) {}
+                });
+              }).catch(function() {}));
+            } else {
+              // 백업 파일은 스냅샷 복원: 교체
+              jobs.push(IdbKv.set(key, data[key]).catch(function() {}));
+            }
           } else {
-            try { localStorage.setItem(key, data[key]); } catch (e) {}
+            if (isSeed) {
+              // v731: 시드는 폰에 없는 키만 채움 (폰 값 우선)
+              try { if (localStorage.getItem(key) === null) localStorage.setItem(key, data[key]); } catch (e) {}
+            } else {
+              // 백업 파일은 스냅샷 복원: 교체
+              try { localStorage.setItem(key, data[key]); } catch (e) {}
+            }
           }
         }
         Promise.all(jobs).then(signalIdbBootDone, signalIdbBootDone);
@@ -9939,7 +9975,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v729 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v731 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
