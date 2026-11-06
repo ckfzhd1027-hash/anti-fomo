@@ -469,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v731 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v732 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -6953,7 +6953,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
 
     function loadExampleChartsFromStorage() {
       idbBootReady.then(function() { return IdbKv.get(EXAMPLE_STORAGE_KEY); }).then(function(saved) {
-        if (saved) { applyExampleJson(saved); return; }
+        if (saved) { applyExampleJson(saved); fetchFullChartsOnce(); return; }
         try {
           const legacy = localStorage.getItem(EXAMPLE_STORAGE_KEY);
           if (legacy) {
@@ -6963,12 +6963,55 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             }).catch(function() {});
           }
         } catch (e) {}
+        fetchFullChartsOnce();
       }).catch(function() {
         try {
           const legacy = localStorage.getItem(EXAMPLE_STORAGE_KEY);
           if (legacy) applyExampleJson(legacy);
         } catch (e) {}
+        fetchFullChartsOnce();
       });
+    }
+
+    // v732: 원본 차트(JSON 2개)를 Pages에서 가져와 폰 차트와 합침 — 1회만.
+    // 백업 파일을 사파리로 열 수 없어서, 푸시 한도 안에 드는 JSON 2개로 나눠 올리고
+    // 앱이 부팅할 때 가져오는 방식. 슬롯별 최적 버전 유지(원본 o 있음 / c 더 긺).
+    function fetchFullChartsOnce() {
+      try { if (localStorage.getItem('antifomo_full_charts_v1') === '1') return; } catch (e) { return; }
+      Promise.all([
+        fetch('charts-full-1.json').then(function(r) { if (!r.ok) throw new Error('full1'); return r.json(); }),
+        fetch('charts-full-2.json').then(function(r) { if (!r.ok) throw new Error('full2'); return r.json(); })
+      ]).then(function(parts) {
+        var full = {};
+        parts.forEach(function(p) { Object.keys(p).forEach(function(k) { full[k] = p[k]; }); });
+        var changed = false;
+        Object.keys(full).forEach(function(cid) {
+          if (!exampleChartImages[cid]) exampleChartImages[cid] = {};
+          Object.keys(full[cid]).forEach(function(sname) {
+            var incoming = Array.isArray(full[cid][sname]) ? full[cid][sname] : [full[cid][sname]];
+            var phone = exampleChartImages[cid] ? exampleChartImages[cid][sname] : null;
+            var phoneArr = Array.isArray(phone) ? phone : (phone ? [phone] : []);
+            var merged = [];
+            var maxLen = Math.max(phoneArr.length, incoming.length);
+            for (var i = 0; i < maxLen; i++) {
+              var p = phoneArr[i], n = incoming[i];
+              if (p && n) {
+                var nBetter = (n.o && !p.o) || (n.c && p.c && n.c.length > p.c.length) || (n.c && !p.c);
+                merged.push(nBetter ? n : p);
+                if (nBetter) changed = true;
+              } else if (n) { merged.push(n); changed = true; }
+              else if (p) { merged.push(p); }
+            }
+            exampleChartImages[cid][sname] = merged;
+          });
+        });
+        try { localStorage.setItem('antifomo_full_charts_v1', '1'); } catch (e) {}
+        if (changed) {
+          saveExampleChartsToStorage();
+          applyExampleChartImages();
+          if (window.ChartMarkers) ChartMarkers.renderAll();
+        }
+      }).catch(function() { /* 오프라인 / JSON 아직 없음 — 조용히 다음 부팅에 재시도 */ });
     }
 
     function applyExampleJson(saved) {
@@ -9975,7 +10018,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v731 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v732 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
