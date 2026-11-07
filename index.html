@@ -469,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v737 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v738 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1296,7 +1296,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     </div>
   </div>
 
-  <div id="fastGang1GateModal" class="fixed inset-0 z-[110] hidden flex-col items-center justify-center overflow-y-auto p-4 sm:p-6 bg-black/70" role="dialog" aria-modal="true">
+  <div id="fastGang1GateModal" class="fixed inset-0 z-[110] hidden flex-col items-center overflow-y-auto p-4 sm:p-6 bg-black/70" role="dialog" aria-modal="true">
     <div class="w-full max-w-md my-auto bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-2xl border-2 border-lime-400">
       <p class="text-lg font-black mb-1 text-lime-600 dark:text-lime-400">빠른 1강 롱 진입 확인</p>
       <p class="text-base font-bold leading-snug mb-4 break-keep">다음 항목을 모두 확인했습니까?</p>
@@ -5432,7 +5432,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       m.classList.remove("hidden");
       m.classList.add("flex");
       // v736: 창 처음 진입 시 스크롤 맨 위로 고정 (전에 내렸던 스크롤 위치가 남아있지 않게)
+      // v738: v736만으로는 안 됐음 — justify-center가 제목을 스크롤 영역 밖으로 밀어냈던 게 진짜 원인. 레이아웃 뒤 한 번 더 0으로.
       m.scrollTop = 0;
+      if (typeof requestAnimationFrame === "function") requestAnimationFrame(function() { m.scrollTop = 0; });
     }
     function closeFastGang1Gate() {
       document.body.classList.remove("gang1-gate-open");
@@ -10147,7 +10149,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v737 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v738 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
