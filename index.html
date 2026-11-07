@@ -469,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v734 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v735 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1319,6 +1319,17 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       <div class="flex gap-2.5 mt-4">
         <button id="fastGang1GateConfirmBtn" type="button" onclick="confirmFastGang1Gate()" class="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-black text-base break-keep cursor-pointer opacity-40" disabled>O · 확인했어</button>
         <button type="button" onclick="rejectFastGang1Gate()" class="flex-1 py-3 rounded-xl bg-rose-500 text-white font-black text-base break-keep cursor-pointer">X · 다시 선택</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="fastGang1MissedModal" class="fixed inset-0 z-[110] hidden flex-col items-center justify-center p-4 sm:p-6 bg-black/70" role="dialog" aria-modal="true">
+    <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-2xl border-2 border-amber-400">
+      <p class="text-lg font-black mb-1 text-amber-600 dark:text-amber-400">자리를 놓쳤나요?</p>
+      <p class="text-base font-bold leading-snug mb-4 break-keep">포모오지말고 크트키 진입 준비를 하세요.</p>
+      <div class="flex flex-col gap-2.5">
+        <button type="button" onclick="chooseFastGang1Missed(true)" class="w-full py-3 rounded-xl bg-emerald-500 text-white font-black text-base break-keep cursor-pointer">자리를 놓쳤다 · 포모오지말고 크트키 진입 준비</button>
+        <button type="button" onclick="chooseFastGang1Missed(false)" class="w-full py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white font-black text-base break-keep cursor-pointer">지금 바로 진입</button>
       </div>
     </div>
   </div>
@@ -5431,17 +5442,55 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     function confirmFastGang1Gate() {
       if (!(fastGang1Checks[0] && fastGang1Checks[1] && fastGang1Checks[2])) return;
       closeFastGang1Gate();
-      // v720: 스텝 페이지를 거치지 않고 진입티켓으로 직행 — 티켓이 새 유형 기준으로 만들어지도록 스텝 상태만 넘긴다
+      // v735: O를 눌러도 진입티켓이 바로 안 뜸 — 선택박스 먼저 (자리를 놓쳤으면 포모오지말고 크트키 진입 준비)
+      openFastGang1MissedModal();
+    }
+    function rejectFastGang1Gate() {
+      closeFastGang1Gate();
+      openBranchModal();
+    }
+    // v735: 빠른 1강 게이트 O 뒤 선택박스 — 자리를 놓쳤으면 포모오지말고 크트키 진입 준비
+    function openFastGang1MissedModal() {
+      playBranchSound();
+      var m = document.getElementById("fastGang1MissedModal");
+      if (!m) return;
+      m.classList.remove("hidden");
+      m.classList.add("flex");
+    }
+    function closeFastGang1MissedModal() {
+      var m = document.getElementById("fastGang1MissedModal");
+      if (!m) return;
+      m.classList.add("hidden");
+      m.classList.remove("flex");
+    }
+    function chooseFastGang1Missed(missed) {
+      closeFastGang1MissedModal();
+      if (missed) {
+        // v735: 크트키 진입된 상태로 3단계로 — 앱의 크트키 진입 경로 그대로 (다이버 유지 시 크트키 게이트가 먼저 뜸)
+        handleBranchSelect("B");
+        // 장세 규칙으로 크트키 진입이 차단되면 아무 화면도 안 뜨므로 차단 경고 표시
+        var landed735 = (currentStepKey === "step_3");
+        var gate735 = document.getElementById("divGateModal");
+        var gateOpen735 = gate735 && !gate735.classList.contains("hidden");
+        if (!landed735 && !gateOpen735) {
+          var reason735 = null;
+          try { if (typeof Regime !== "undefined" && Regime.hideReasonB) reason735 = Regime.hideReasonB(); } catch (e) {}
+          document.getElementById("warningDetailReason").innerText =
+            (reason735 || "장세 선언에 따라 크트키를 선택할 수 없습니다.") + " 진입이 차단됐습니다. 장세를 다시 선언하거나 이전 단계로 돌아가세요.";
+          var warningModal735 = document.getElementById("warningModal");
+          warningModal735.classList.remove("hidden");
+          warningModal735.classList.add("flex");
+          playAlertSiren();
+        }
+        return;
+      }
+      // v735: 자리가 아직 있으면 기존 v720대로 진입티켓 직행
       if (currentStepKey && currentStepKey !== "step_3_type_h") stepHistory.push(currentStepKey);
       currentStepKey = "step_3_type_h";
       document.body.dataset.currentStep = "step_3_type_h";
       try { localStorage.setItem("antifomo_last_step", "step_3_type_h"); } catch (e) {}
       playBranchSound();
       openEntryTicketModal();
-    }
-    function rejectFastGang1Gate() {
-      closeFastGang1Gate();
-      openBranchModal();
     }
     // v720: 2단계 이후 거래량 등급 분기 — 평일 수준이면 기존 흐름(분기 선택), 압도적이면 새 유형 게이트로
     function openVolTierModal() {
@@ -10033,7 +10082,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v734 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v735 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
