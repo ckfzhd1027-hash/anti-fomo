@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v758 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v759 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1577,7 +1577,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         class="w-full text-left p-3 sm:p-3.5 rounded-2xl border-2 border-emerald-300 dark:border-emerald-500 bg-emerald-50 dark:bg-[#0b1614] hover:border-emerald-400 transition-all btn-touch shadow-md dark:shadow-xl flex flex-col group gap-2.5 cursor-pointer"
       >
         <!-- v455: 크트키 금지 스티커 (글자만큼 작게 + 뒤 카드 어둡게) -->
-        <div id="branchBannedPopup" class="hidden absolute inset-0 z-20 flex items-center justify-center p-3">
+        <div id="branchBannedPopup" class="hidden absolute inset-0 z-20 flex items-center justify-center p-3 pointer-events-none">
           <div class="absolute inset-0 bg-black/50 rounded-2xl"></div>
           <div class="relative rounded-xl border-2 border-rose-400 dark:border-rose-500 bg-rose-50 dark:bg-[#1a0b0e] shadow-lg px-3 py-2 max-w-full">
             <p id="branchBannedPopupText" class="text-xs sm:text-sm font-bold text-rose-700 dark:text-rose-200 break-keep leading-snug text-center"></p>
@@ -5068,8 +5068,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       const bCard = document.getElementById("branchCardB");
       const bPopup = document.getElementById("branchBannedPopup");
       const bPopupText = document.getElementById("branchBannedPopupText");
+      let hideB = false;
       if (bCard) {
-        let hideB = false, reason = null;
+        let reason = null;
         try {
           hideB = typeof Regime !== "undefined" && Regime.hidesTypeB();
           if (hideB && Regime.hideReasonB) reason = Regime.hideReasonB();
@@ -5086,7 +5087,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       }
       updateBranchRecommendation();
       // v454: 스티커 기준 — updateBranchRecommendation이 모든 카드의 relative를 걷어내므로, 금지된 B는 다시 붙임
-      if (bCard && bCard.disabled) bCard.classList.add("relative");
+      // v759: bCard.disabled는 updateBranchRecommendation이 false로 되돌려서 못 믿음 — hideB로 판단
+      if (bCard && hideB) bCard.classList.add("relative");
       reorderBranchCards(); // v499
       updateWaitPickBtn(); // v503
       const modal = document.getElementById("branchSelectModal");
@@ -10287,7 +10289,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v758 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v759 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
