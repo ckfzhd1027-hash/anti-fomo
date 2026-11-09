@@ -469,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v748 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v749 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1354,6 +1354,26 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <button type="button" onclick="chooseVolTier(true)" class="w-full py-3 rounded-xl bg-emerald-500 text-white font-black text-base break-keep cursor-pointer">그보다 더 압도적인 거래량</button>
         <button type="button" onclick="closeVolTierModal()" class="w-full py-2 rounded-xl text-slate-500 dark:text-slate-400 font-bold text-sm cursor-pointer">닫기</button>
       </div>
+    </div>
+  </div>
+
+  <div id="volLocModal" class="fixed inset-0 z-[110] hidden flex-col items-center justify-center p-4 sm:p-6 bg-black/70" role="dialog" aria-modal="true">
+    <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-2xl border-2 border-amber-400">
+      <p class="text-lg font-black mb-1 text-amber-600 dark:text-amber-400">어디서 터졌는지 확인</p>
+      <p class="text-base font-bold leading-snug mb-4 break-keep">차트와 같은 모양을 눌러주세요</p>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button type="button" onclick="chooseVolLoc('breakdown')" class="rounded-xl border-2 border-rose-400 bg-rose-50/70 dark:bg-rose-950/30 p-2 cursor-pointer">
+          <svg viewBox="0 0 120 110" class="w-full h-auto block"><rect x="4" y="14" width="112" height="40" fill="none" stroke="#64748b" stroke-width="1.5" /><line x1="12" y1="24" x2="12" y2="34" stroke="#22c55e" stroke-width="1.2" /><rect x="7" y="26" width="10" height="6" fill="#22c55e" /><line x1="30" y1="28" x2="30" y2="38" stroke="#ef4444" stroke-width="1.2" /><rect x="25" y="30" width="10" height="6" fill="#ef4444" /><line x1="48" y1="32" x2="48" y2="42" stroke="#22c55e" stroke-width="1.2" /><rect x="43" y="34" width="10" height="6" fill="#22c55e" /><line x1="66" y1="38" x2="66" y2="48" stroke="#ef4444" stroke-width="1.2" /><rect x="61" y="40" width="10" height="6" fill="#ef4444" /><g style="transform-box: fill-box; transform-origin: 50% 0; animation: fg1Grow 2s ease-in infinite"><line x1="84" y1="20" x2="84" y2="78" stroke="#ef4444" stroke-width="1.2" /><rect x="79" y="24" width="10" height="48" fill="#ef4444" /></g><rect x="7" y="100" width="10" height="8" fill="#22c55e" opacity="0.65" /><rect x="25" y="98" width="10" height="10" fill="#ef4444" opacity="0.65" /><rect x="43" y="100" width="10" height="8" fill="#22c55e" opacity="0.65" /><rect x="61" y="96" width="10" height="12" fill="#ef4444" opacity="0.65" /><rect x="79" y="78" width="10" height="30" fill="#ef4444" opacity="0.65" /><g style="animation: gang1ExPulse 1.6s ease-in-out infinite"><rect x="76" y="46" width="16" height="16" rx="3" fill="none" stroke="#f43f5e" stroke-width="1.5" /></g></svg>
+          <span class="block text-center font-black text-sm text-rose-700 dark:text-rose-300 break-keep mt-1">박스권 하단 수평 이탈</span>
+          <span class="block text-center font-bold text-xs text-rose-600 dark:text-rose-400">2강 · 크트키</span>
+        </button>
+        <button type="button" onclick="chooseVolLoc('support')" class="rounded-xl border-2 border-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/30 p-2 cursor-pointer">
+          <svg viewBox="0 0 120 110" class="w-full h-auto block"><line x1="4" y1="62" x2="116" y2="62" stroke="#10b981" stroke-width="2" /><line x1="12" y1="28" x2="12" y2="38" stroke="#22c55e" stroke-width="1.2" /><rect x="7" y="30" width="10" height="6" fill="#22c55e" /><line x1="30" y1="32" x2="30" y2="42" stroke="#ef4444" stroke-width="1.2" /><rect x="25" y="34" width="10" height="6" fill="#ef4444" /><line x1="48" y1="36" x2="48" y2="46" stroke="#22c55e" stroke-width="1.2" /><rect x="43" y="38" width="10" height="6" fill="#22c55e" /><line x1="66" y1="42" x2="66" y2="52" stroke="#ef4444" stroke-width="1.2" /><rect x="61" y="44" width="10" height="6" fill="#ef4444" /><g style="transform-box: fill-box; transform-origin: 50% 0; animation: fg1Grow 2s ease-in infinite"><line x1="84" y1="16" x2="84" y2="62" stroke="#ef4444" stroke-width="1.2" /><rect x="79" y="20" width="10" height="40" fill="#ef4444" /></g><line x1="102" y1="52" x2="102" y2="62" stroke="#22c55e" stroke-width="1.2" /><rect x="97" y="54" width="10" height="6" fill="#22c55e" /><rect x="7" y="100" width="10" height="8" fill="#22c55e" opacity="0.65" /><rect x="25" y="98" width="10" height="10" fill="#ef4444" opacity="0.65" /><rect x="43" y="100" width="10" height="8" fill="#22c55e" opacity="0.65" /><rect x="61" y="96" width="10" height="12" fill="#ef4444" opacity="0.65" /><rect x="79" y="78" width="10" height="30" fill="#ef4444" opacity="0.65" /><rect x="97" y="94" width="10" height="14" fill="#22c55e" opacity="0.65" /><g style="animation: gang1ExPulse 1.6s ease-in-out infinite"><rect x="76" y="54" width="16" height="16" rx="3" fill="none" stroke="#10b981" stroke-width="1.5" /></g></svg>
+          <span class="block text-center font-black text-sm text-emerald-700 dark:text-emerald-300 break-keep mt-1">하단 장기지지선 지지</span>
+          <span class="block text-center font-bold text-xs text-emerald-600 dark:text-emerald-400">1강 빠른진입</span>
+        </button>
+      </div>
+      <button type="button" onclick="closeVolLocModal()" class="w-full py-2 mt-2.5 rounded-xl text-slate-500 dark:text-slate-400 font-bold text-sm cursor-pointer">닫기</button>
     </div>
   </div>
 
@@ -5524,8 +5544,26 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     }
     function chooseVolTier(overwhelming) {
       closeVolTierModal();
-      if (overwhelming) { playBranchSound(); openFastGang1Gate(); }
+      if (overwhelming) { playBranchSound(); openVolLocModal(); }
       else { openBranchModal(); }
+    }
+    function openVolLocModal() {
+      playBranchSound();
+      var m = document.getElementById("volLocModal");
+      if (!m) return;
+      m.classList.remove("hidden");
+      m.classList.add("flex");
+    }
+    function closeVolLocModal() {
+      var m = document.getElementById("volLocModal");
+      if (!m) return;
+      m.classList.add("hidden");
+      m.classList.remove("flex");
+    }
+    function chooseVolLoc(loc) {
+      closeVolLocModal();
+      if (loc === "support") { playBranchSound(); openFastGang1Gate(); }
+      else { handleBranchSelect("A"); }
     }
     function handleBranchSelect(branchType) {
       // v453: 금지된 B는 선택 불가 (버튼 disabled로 클릭 자체가 막히지만, 혹시 호출돼도 모달을 닫지 않고 무시)
@@ -10240,7 +10278,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v748 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v749 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
