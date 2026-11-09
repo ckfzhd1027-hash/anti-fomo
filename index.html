@@ -469,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v742 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v743 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -7244,7 +7244,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       editWrap.className = "chart-ctl absolute top-1.5 left-1.5 flex gap-1 z-10";
       editWrap.innerHTML =
         '<button onclick="event.stopPropagation();uploadExampleChart(this)" title="이미지 추가" class="w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white text-sm font-black flex items-center justify-center cursor-pointer backdrop-blur-sm">+</button>' +
-        '<button onclick="event.stopPropagation();deleteExampleChart(this)" title="현재 이미지 삭제" class="w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white text-sm font-black flex items-center justify-center cursor-pointer backdrop-blur-sm">×</button>';
+        '<button onclick="event.stopPropagation();deleteExampleChart(this)" title="현재 이미지 삭제" class="w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white text-sm font-black flex items-center justify-center cursor-pointer backdrop-blur-sm">×</button>' +
+        (images.length > 1 ? '<button data-move="-1" onclick="event.stopPropagation();moveExampleChart(this,-1)" title="앞으로 이동" class="w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white text-sm font-black flex items-center justify-center cursor-pointer backdrop-blur-sm opacity-40 cursor-not-allowed" disabled>앞</button>' +
+        '<button data-move="1" onclick="event.stopPropagation();moveExampleChart(this,1)" title="뒤로 이동" class="w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white text-sm font-black flex items-center justify-center cursor-pointer backdrop-blur-sm">뒤</button>' : '');
       slideWrap.appendChild(editWrap);
 
       // v193: 차트 위 체크리스트 아이콘 마커 렌더링
@@ -7268,6 +7270,14 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         }
       }
       if (slot._slideCounter) slot._slideCounter.innerText = (idx + 1) + "/" + images.length;
+      // v743: 순서 바꾸기 버튼 비활성화 동기화 (맨 앞에서는 앞, 맨 뒤에서는 뒤 비활성화)
+      slot.querySelectorAll('[data-move]').forEach(function(b) {
+        const d = parseInt(b.getAttribute('data-move'), 10);
+        const dis = (d < 0 && idx <= 0) || (d > 0 && idx >= images.length - 1);
+        b.disabled = dis;
+        b.classList.toggle('opacity-40', dis);
+        b.classList.toggle('cursor-not-allowed', dis);
+      });
       if (window.ChartMarkers) ChartMarkers.renderSlot(slot);
     }
 
@@ -9525,6 +9535,25 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       updateSlide(slot);
     }
 
+    // v743: 예시차트 순서 바꾸기 — 현재 차트를 앞/뒤로 한 칸 이동 (저장 즉시 반영, 옮긴 차트에 머무름)
+    function moveExampleChart(btn, dir) {
+      const slot = btn.closest("[data-cslot]");
+      if (!slot) return;
+      const cid = getChartContainerId(slot);
+      const sname = slot.getAttribute("data-cslot");
+      const images = getSlotImages(cid, sname);
+      if (images.length < 2) return;
+      const idx = slot._slideIndex || 0;
+      const target = idx + dir;
+      if (target < 0 || target >= images.length) return;
+      const tmp = images[idx]; images[idx] = images[target]; images[target] = tmp;
+      exampleChartImages[cid][sname] = images;
+      saveExampleChartsToStorage();
+      showExampleChartImage(slot, images);
+      slot._slideIndex = target;
+      updateSlide(slot);
+    }
+
 
     // 탭 순서 드래그로 변경
     function initTabOrderDrag() {
@@ -10149,7 +10178,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v742 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v743 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
