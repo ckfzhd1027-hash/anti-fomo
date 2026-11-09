@@ -469,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v741 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v742 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -3045,9 +3045,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         category: "리테 숏",
         categoryIcon: "ph-trend-down",
         badgeStyle: "bg-orange-500/10 dark:bg-orange-400/15 text-orange-700 dark:text-orange-300 border-orange-500/40 dark:border-orange-400/40",
-        question: "거래량이 실린 장대 음봉으로 주요 지지를 붕괴한 후, 거래량이 급감하며 되돌림(리테스트) 저항을 확인했는가?",
+        question: "거래량이 실린 장대 음봉으로 주요 지지를 붕괴한 후, 거래량이 급감하거나 폭발하며 되돌림(리테스트) 저항을 확인했는가?",
         rejectAction: "warning",
-        rejectReason: "붕괴 후 거래량 급감(되돌림) 확인 없는 추격 숏은 반등에 당하기 쉽습니다!",
+        rejectReason: "붕괴 후 거래량 급감 또는 폭발(되돌림) 확인 없는 추격 숏은 반등에 당하기 쉽습니다!",
         nextStepId: "step_final",
         nextTitle: "최종 진입 승인",
         nextDesc: "스탑로스를 설정하고 진입 비중을 관리하세요.",
@@ -3056,7 +3056,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         noBtnSub: "뇌동매매 즉시 중단",
         items: [
           { title: "강력한 거래량을 동반한 주요 지지선 하향 붕괴", desc: "의미 있는 수평 지지나 추세선을 대량의 거래량과 함께 장대 음봉으로 붕괴", botCapable: true, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-red-500 dark:text-red-300" stroke="currentColor" stroke-width="2"><polyline points="4,6 12,14 16,10 24,22" stroke="#ef4444" stroke-linecap="round" stroke-linejoin="round"/><polyline points="16,22 24,22 24,14" stroke="#ef4444" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
-          { title: "붕괴 후 이어지는 캔들에서 거래량 급감", desc: "붕괴 이후 캔들(양봉 등)에서 거래량이 확연히 줄어들며 매수세 고갈 확인", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-red-500 dark:text-red-300" stroke="currentColor" stroke-width="2"><line x1="14" y1="4" x2="14" y2="24" stroke="#ef4444" stroke-dasharray="2,2"/><circle cx="14" cy="14" r="3" fill="#ef4444"/></svg>` },
+          { title: "붕괴 후 리테스트 작도 부근에서 거래량 급감 또는 거래량 폭발로 매도세 확인", desc: "리테스트 작도 부근 캔들(양봉 등)에서 거래량이 급감하거나 폭발하며 매도세 확인", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-red-500 dark:text-red-300" stroke="currentColor" stroke-width="2"><line x1="14" y1="4" x2="14" y2="24" stroke="#ef4444" stroke-dasharray="2,2"/><circle cx="14" cy="14" r="3" fill="#ef4444"/></svg>` },
           { title: "지지선이 저항선으로 바뀌는(S/R Flip) 리테스트 타점 진입", desc: "이전 지지선 부근까지 올라온 되돌림에서 윗꼬리를 잡고 진입", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-red-500 dark:text-red-300" stroke="currentColor" stroke-width="2"><path d="M4 14 Q 14 24 24 14" stroke="#ef4444" fill="none" stroke-linecap="round"/><circle cx="4" cy="14" r="2" fill="#ef4444"/></svg>` },
           { title: "손익비 1:1 이상 확보", desc: "진입가 대비 TP까지의 거리가 SL까지의 거리 이상인지 확인", iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-emerald-500 dark:text-emerald-300" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4 L14 24" stroke-width="1.5"/><path d="M6 8 L22 8" stroke-width="1.5"/><path d="M6 8 L3 16 L9 16 Z" fill="#10b981" fill-opacity="0.3" stroke-width="1.2"/><path d="M22 8 L19 16 L25 16 Z" fill="#ef4444" fill-opacity="0.3" stroke-width="1.2"/><circle cx="14" cy="4" r="1.5" fill="#fbbf24"/></svg>` }
         ]
@@ -10149,7 +10149,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v741 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v742 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
