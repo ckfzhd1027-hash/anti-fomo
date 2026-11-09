@@ -469,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v744 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v745 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -7267,8 +7267,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       editWrap.innerHTML =
         '<button onclick="event.stopPropagation();uploadExampleChart(this)" title="이미지 추가" class="w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white text-sm font-black flex items-center justify-center cursor-pointer backdrop-blur-sm">+</button>' +
         '<button onclick="event.stopPropagation();deleteExampleChart(this)" title="현재 이미지 삭제" class="w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white text-sm font-black flex items-center justify-center cursor-pointer backdrop-blur-sm">×</button>' +
-        (images.length > 1 ? '<button data-move="-1" onclick="event.stopPropagation();moveExampleChart(this,-1)" title="앞으로 이동" class="w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white text-sm font-black flex items-center justify-center cursor-pointer backdrop-blur-sm opacity-40 cursor-not-allowed" disabled>앞</button>' +
-        '<button data-move="1" onclick="event.stopPropagation();moveExampleChart(this,1)" title="뒤로 이동" class="w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white text-sm font-black flex items-center justify-center cursor-pointer backdrop-blur-sm">뒤</button>' : '');
+        (images.length > 1 ? '<button data-move="-1" onclick="event.stopPropagation();moveExampleChart(this,-1)" title="앞으로 이동" class="w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white text-sm font-black flex items-center justify-center cursor-pointer backdrop-blur-sm opacity-40 cursor-not-allowed" disabled>◀</button>' +
+        '<button data-move="1" onclick="event.stopPropagation();moveExampleChart(this,1)" title="뒤로 이동" class="w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white text-sm font-black flex items-center justify-center cursor-pointer backdrop-blur-sm">▶</button>' : '');
       slideWrap.appendChild(editWrap);
 
       // v193: 차트 위 체크리스트 아이콘 마커 렌더링
@@ -9570,6 +9570,18 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       if (target < 0 || target >= images.length) return;
       const tmp = images[idx]; images[idx] = images[target]; images[target] = tmp;
       exampleChartImages[cid][sname] = images;
+      // v745: 마커도 이미지 따라 이동 (마커 키가 이미지 번호라 순서만 바꾸면 엇갈림)
+      if (window.ChartMarkers) {
+        const allMarkers = ChartMarkers.loadAll();
+        const keyA = cid + "|" + sname + "|" + idx;
+        const keyB = cid + "|" + sname + "|" + target;
+        const tmpM = allMarkers[keyA];
+        allMarkers[keyA] = allMarkers[keyB];
+        allMarkers[keyB] = tmpM;
+        if (allMarkers[keyA] === undefined) delete allMarkers[keyA];
+        if (allMarkers[keyB] === undefined) delete allMarkers[keyB];
+        ChartMarkers.saveAll(allMarkers);
+      }
       saveExampleChartsToStorage();
       showExampleChartImage(slot, images);
       slot._slideIndex = target;
@@ -10200,7 +10212,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v744 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v745 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
