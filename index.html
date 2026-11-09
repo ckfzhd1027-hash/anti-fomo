@@ -469,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v743 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v744 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1236,6 +1236,17 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       </button>
     </div>
 
+    <!-- v744: 유형 A 전용 — 2강 뒤 반등 크트키 진입 경로 (A 경고에서만 표시, 진입 순서상 리테 숏보다 위) -->
+    <div id="krtkiFrom2GangWrap" class="hidden w-full max-w-lg mt-2">
+      <button
+        id="krtkiFrom2GangBtn"
+        onclick="goKrtkiFromWarning()"
+        class="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-black text-base sm:text-lg shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-emerald-300"
+      >
+        <i class="ph-bold ph-trend-up text-xl"></i>
+        <span>반등 확인 후 크트키 진입 →</span>
+      </button>
+    </div>
     <!-- v237: 유형 A 전용 — 붕괴 리테스트 숏 대기 경로 (A 경고에서만 표시) -->
     <div id="retestShortWrap" class="hidden w-full max-w-lg mt-2">
       <button
@@ -5338,6 +5349,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     }
     function rejectDivGate() {
       closeDivGate();
+      window.__bypassRegimeBlock2Gang = false; // v744: 게이트 거절 시 우회 플래그 소진
       loadStep("step_1");
       playAlertSiren();
       document.getElementById("warningDetailReason").innerText =
@@ -5518,10 +5530,10 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     function handleBranchSelect(branchType) {
       // v453: 금지된 B는 선택 불가 (버튼 disabled로 클릭 자체가 막히지만, 혹시 호출돼도 모달을 닫지 않고 무시)
       try {
-        if (branchType === "B" && typeof Regime !== "undefined" && Regime.hidesTypeB()) return;
+        if (branchType === "B" && typeof Regime !== "undefined" && Regime.hidesTypeB() && !window.__bypassRegimeBlock2Gang) return;
       } catch (e) {}
       // v625: 1강 대기 중에는 1강(G) 외 선택 불가 (버튼 disabled와 별개로 호출 자체를 차단)
-      try { if (typeof Regime !== "undefined" && Regime._data() && Regime._data().wait === "waiting" && branchType !== "G") return; } catch (e) {}
+      try { if (typeof Regime !== "undefined" && Regime._data() && Regime._data().wait === "waiting" && branchType !== "G" && !(branchType === "B" && window.__bypassRegimeBlock2Gang)) return; } catch (e) {}
       // v626: 1강 연쇄 미완료 시 다이버 롱(C) 선택 차단 (구 선언 미답변은 제외)
       try { const dd3 = (typeof Regime !== "undefined" && Regime._data()) ? Regime._data() : null; if (dd3 && dd3.wait === "done" && dd3.second != null && dd3.oversold != null && (dd3.second !== "yes" || dd3.oversold !== "yes") && branchType === "C") return; } catch (e) {}
       closeBranchModal();
@@ -5539,18 +5551,21 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         body.classList.add("animate-impact");
 
         document.getElementById("warningDetailReason").innerText =
-          "🚨 [2강 경고] 4시간봉 주요 추세선이나 장기 박스 바닥을 하향 이탈하며 터진 장대음봉은 반등용 거래량이 아니라 '롱 청산 연쇄반응(Liquidation Waterfall)' 구간입니다. 15분 양봉이 떠도 역추세 롱을 절대 잡지 마세요! 뉴스로 인한 하락인지 확인하세요. 추가적인 하락이 있을 수 있습니다. 숏을 노린다면 붕괴 직후 추격하지 말고, 되돌림이 리테스트에서 막히는 걸 컨펌한 뒤 아래 '붕괴 리테스트 숏 대기'로만 들어가세요.";
+          "🚨 [2강 경고] 4시간봉 주요 추세선이나 장기 박스 바닥을 하향 이탈하며 터진 장대음봉은 반등용 거래량이 아니라 '롱 청산 연쇄반응(Liquidation Waterfall)' 구간입니다. 15분 양봉이 떴다고 바로 롱을 잡지 마세요. 반등은 크트키 체크(과매도·양봉 컨펌·밑꼬리)를 다 확인한 뒤에만 위 크트키 버튼으로 들어가세요. 뉴스로 인한 하락인지 확인하세요. 추가적인 하락이 있을 수 있습니다. 숏을 노린다면 붕괴 직후 추격하지 말고, 되돌림이 리테스트에서 막히는 걸 컨펌한 뒤 아래 '붕괴 리테스트 숏 대기'로 들어가세요.";
 
         const warningModal = document.getElementById("warningModal");
         warningModal.classList.remove("hidden");
         warningModal.classList.add("flex");
         const retestWrap = document.getElementById("retestShortWrap");
         if (retestWrap) retestWrap.classList.remove("hidden");
+        const krtkiWrap = document.getElementById("krtkiFrom2GangWrap");
+        if (krtkiWrap) krtkiWrap.classList.remove("hidden");
         startEmergencyLockdown(5);
       } else if (branchType === 'B') {
         playReadySound();
         // v671: 분기 선택 화면에서 들어온 표시 — 다음 단계에서 이전을 누르면 분기 선택 화면으로 돌아간다
         stepHistory.push("__branch__");
+        window.__bypassRegimeBlock2Gang = false; // v744: 2강 우회 1회용 소진
         loadStep("step_3", false);
       } else if (branchType === 'C') {
         playBranchSound();
@@ -5579,6 +5594,13 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       dismissWarning();
       playBranchSound();
       SpeedGuide.open("step_3_type_f", "short");
+    }
+
+    // v744: 유형 A 경고에서 2강 뒤 반등 크트키(step_3) 진입 — 장세 차단(숨김·대기)만 우회, 다이버 게이트는 그대로
+    function goKrtkiFromWarning() {
+      window.__bypassRegimeBlock2Gang = true;
+      dismissWarning();
+      handleBranchSelect("B");
     }
 
     function openTrackModal() {
@@ -10178,7 +10200,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v743 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v744 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -10935,6 +10957,14 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         retestBtn.disabled = true;
         retestBtn.classList.add("opacity-40", "cursor-not-allowed");
       }
+      // v744: 크트키 버튼도 락다운 동안 비활성
+      const krtkiBtn = document.getElementById("krtkiFrom2GangBtn");
+      const krtkiWrap = document.getElementById("krtkiFrom2GangWrap");
+      const krtkiVisible = krtkiBtn && krtkiWrap && !krtkiWrap.classList.contains("hidden");
+      if (krtkiVisible) {
+        krtkiBtn.disabled = true;
+        krtkiBtn.classList.add("opacity-40", "cursor-not-allowed");
+      }
       timerText.innerHTML = `${remain}초 후 잠금 해제`;
       btnText.innerText = `${remain}초간 화면 잠김 (진정하세요)`;
 
@@ -10953,6 +10983,10 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             retestBtn.disabled = false;
             retestBtn.classList.remove("opacity-40", "cursor-not-allowed");
           }
+          if (krtkiVisible) {
+            krtkiBtn.disabled = false;
+            krtkiBtn.classList.remove("opacity-40", "cursor-not-allowed");
+          }
         }
       }, 1000);
     }
@@ -10964,6 +10998,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       warningModal.classList.remove("flex");
       const retestWrap = document.getElementById("retestShortWrap");
       if (retestWrap) retestWrap.classList.add("hidden");
+      const krtkiWrap = document.getElementById("krtkiFrom2GangWrap");
+      if (krtkiWrap) krtkiWrap.classList.add("hidden");
     }
 
     function handleCharacterUpload(event) {
