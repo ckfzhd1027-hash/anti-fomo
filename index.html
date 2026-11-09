@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v753 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v754 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1352,11 +1352,11 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
 
   <div id="volTierModal" class="fixed inset-0 z-[110] hidden flex-col items-center justify-center p-4 sm:p-6 bg-black/70" role="dialog" aria-modal="true">
     <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-2xl border-2 border-amber-400">
-      <p class="text-lg font-black mb-1 text-amber-600 dark:text-amber-400">거래량 등급 확인</p>
-      <p class="text-base font-bold leading-snug mb-4 break-keep">거래량이 어느 수준인가?</p>
+      <p class="text-lg font-black mb-1 text-amber-600 dark:text-amber-400">거래량 확인</p>
+      <p class="text-base font-bold leading-snug mb-4 break-keep">거래량이 압도적으로 터졌나?</p>
       <div class="flex flex-col gap-2.5">
-        <button type="button" onclick="chooseVolTier(false)" class="w-full py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white font-black text-base break-keep cursor-pointer">평일 추세반전 최소충족 거래량 수준</button>
-        <button type="button" onclick="chooseVolTier(true)" class="w-full py-3 rounded-xl bg-emerald-500 text-white font-black text-base break-keep cursor-pointer">그보다 더 압도적인 거래량</button>
+        <button type="button" onclick="chooseVolTier(true)" class="w-full py-3 rounded-xl bg-emerald-500 text-white font-black text-base break-keep cursor-pointer">그렇다</button>
+        <button type="button" onclick="chooseVolTier(false)" class="w-full py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white font-black text-base break-keep cursor-pointer">아니다</button>
         <button type="button" onclick="closeVolTierModal()" class="w-full py-2 rounded-xl text-slate-500 dark:text-slate-400 font-bold text-sm cursor-pointer">닫기</button>
       </div>
     </div>
@@ -5533,7 +5533,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       playBranchSound();
       openEntryTicketModal();
     }
-    // v720: 2단계 이후 거래량 등급 분기 — 평일 수준이면 기존 흐름(분기 선택), 압도적이면 새 유형 게이트로
+    // v754: 2단계 이후 거래량 확인 — 압도적이면 위치 확인(지지=빠른 1강, 이탈=2강), 아니면 분기 선택
     function openVolTierModal() {
       playBranchSound();
       var m = document.getElementById("volTierModal");
@@ -10283,7 +10283,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v753 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v754 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
