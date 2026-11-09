@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v755 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v756 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1161,7 +1161,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
   <div 
     id="warningModal" 
     class="fixed inset-0 z-50 hidden flex-col items-center p-4 sm:p-6 animate-danger-flash text-white overflow-y-auto"
-    style="padding-top: calc(env(safe-area-inset-top, 0px) + 24px); padding-bottom: max(16px, env(safe-area-inset-bottom)); background-color: rgba(0,0,0,0.85); justify-content: safe center;"
+    style="padding-top: calc(env(safe-area-inset-top, 0px) + 24px); padding-bottom: max(16px, env(safe-area-inset-bottom)); background-color: rgba(0,0,0,0.85);"
     role="dialog"
     aria-modal="true"
   >
@@ -4977,6 +4977,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         const inner = document.getElementById("warningContent");
         if (!modal || !inner || modal.classList.contains("hidden")) return;
         inner.style.transform = "";
+        inner.style.marginBottom = "";
         const cs = window.getComputedStyle(modal);
         const avail = modal.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
         const ch = inner.scrollHeight;
@@ -4984,6 +4985,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
           const s = Math.max(0.6, avail / ch);
           inner.style.transformOrigin = "top center";
           inner.style.transform = "scale(" + s + ")";
+          // v756: transform은 레이아웃 높이를 줄이지 않아 스크롤 영역이 원본 높이로 남음.
+          // 음수 marginBottom으로 레이아웃 높이를 보이는 높이(s*ch)에 맞춤.
+          inner.style.marginBottom = ((s - 1) * ch) + "px";
         }
       }
       function schedule() { requestAnimationFrame(fit); }
@@ -10283,7 +10287,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v755 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v756 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
