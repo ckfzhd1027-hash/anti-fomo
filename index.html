@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v757 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v758 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -10287,7 +10287,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v757 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v758 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -10546,9 +10546,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             candles: [[26,22,32,30],[30,26,40,36],[36,24,40,28],[28,18,32,22],[22,18,32,28],[28,24,60,58]], vols: [4,5,4,5,4,6] }
         },
         3: {
-          ok: { caption: "내려가다 거래량 폭발, 가격은 제자리", hl: [{t:"c", i:5},{t:"v", i:5}],
+          ok: { caption: "내려가다 거래량 폭발, 가격은 제자리", volAnim: {dur: 2}, hl: [{t:"c", i:5},{t:"v", i:5}],
             candles: [[18,14,26,24],[24,20,34,32],[32,20,38,24],[24,18,28,20],[20,18,26,24],[24,23,27,24]], vols: [5,7,9,14,24,28] },
-          bad: { caption: "거래량 터지는데 가격도 같이 움직임", hl: [{t:"c", i:5}],
+          bad: { caption: "거래량 터지는데 가격도 같이 움직임", volAnim: {dur: 2}, hl: [{t:"c", i:5}],
             candles: [[18,14,26,24],[24,18,34,32],[32,20,38,24],[24,20,30,28],[28,24,40,38],[38,34,52,50]], vols: [5,7,9,14,18,20] }
         }
       };
@@ -10567,9 +10567,12 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
           if (sc.anim && sc.anim.i === j) {
             candlePart = '<g style="transform-box: fill-box; transform-origin: 50% 0; animation: fg1Grow ' + sc.anim.dur + 's ease-in infinite">' + candlePart + '</g>';
           }
-          parts.push('<g>' + candlePart
-            + '<rect x="' + (cx - 5) + '" y="' + (volBase - v) + '" width="10" height="' + v + '" fill="' + col + '" opacity="0.65" />'
-            + '</g>');
+          var volPart = '<rect x="' + (cx - 5) + '" y="' + (volBase - v) + '" width="10" height="' + v + '" fill="' + col + '" opacity="0.65" />';
+          if (sc.volAnim) {
+            var vDelay = (j * 0.2).toFixed(1);
+            volPart = '<g style="transform-box: fill-box; transform-origin: 50% 100%; animation: fg1Grow ' + sc.volAnim.dur + 's ease-in ' + vDelay + 's infinite">' + volPart + '</g>';
+          }
+          parts.push('<g>' + candlePart + volPart + '</g>');
         }
         var hlCol = good ? "#10b981" : "#f43f5e";
         for (var k = 0; k < sc.hl.length; k++) {
