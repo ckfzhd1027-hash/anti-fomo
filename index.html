@@ -469,7 +469,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v746 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v748 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -5559,7 +5559,10 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         const retestWrap = document.getElementById("retestShortWrap");
         if (retestWrap) retestWrap.classList.remove("hidden");
         const krtkiWrap = document.getElementById("krtkiFrom2GangWrap");
-        if (krtkiWrap) krtkiWrap.classList.remove("hidden");
+        // v748: 2강 경고창에서만 — 채널 상단(pos=top)에서는 크트키 버튼을 아예 보여주지 않음, 리테 숏 버튼만 보여줌
+        let isTop748 = false;
+        try { const rd748 = (typeof Regime !== "undefined" && Regime._data) ? Regime._data() : null; isTop748 = !!(rd748 && rd748.pos === "top"); } catch (e) {}
+        if (krtkiWrap && !isTop748) krtkiWrap.classList.remove("hidden");
         startEmergencyLockdown(5);
       } else if (branchType === 'B') {
         playReadySound();
@@ -10237,7 +10240,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v746 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v748 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
