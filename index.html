@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v764 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v765 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -7166,6 +7166,76 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       }).catch(function() { /* 오프라인 / JSON 아직 없음 — 조용히 다음 부팅에 재시도 */ });
     }
 
+    // ===== npc 메뉴얼 슬라이드 (v765: 43장 중 스터디마다 날짜 기준 한 장만) =====
+    // PPTX(43장)를 렌더링해 Pages JSON 3개(npc-manual-1/2/3.json)로 나눠 올리고
+    // 앱이 부팅할 때 가져와 IndexedDB에 저장. 스터디의 npc 메뉴얼 유형은
+    // 그날 날짜로 정해지는 한 장만 보여줌 (같은 날은 같은 장 = 이어하기 일관).
+    // 슬라이드를 아직 못 받았으면 기존 npc 복기가 그대로 나옴 (폴백).
+    // JSON이 바뀌면 플래그를 v2, v3... 으로 올려야 다시 가져옴 (v732 차트 방식과 동일).
+    const npcManualSlides = {};  // {"1": dataUrl, ..., "43": dataUrl}
+    const NPC_MANUAL_STORAGE_KEY = "antifomo_npc_manual_v1";
+    const NPC_MANUAL_TOTAL = 43;
+
+    function npcDateHash() {
+      // 날짜 기준 해시: 같은 날은 같은 값, 날짜마다 바뀜
+      var d = new Date();
+      var s = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+      var h = 0;
+      for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+      return h;
+    }
+
+    function npcSlideForToday() {
+      return (npcDateHash() % NPC_MANUAL_TOTAL) + 1; // 1..43
+    }
+
+    function npcPickForToday(poolSize) {
+      if (!poolSize || poolSize < 1) return -1;
+      return npcDateHash() % poolSize; // 0..poolSize-1
+    }
+
+    function npcManualSlideReview(n) {
+      var slideNum = (typeof n === "number" && n >= 1 && n <= NPC_MANUAL_TOTAL) ? n : npcSlideForToday();
+      var src = npcManualSlides[String(slideNum)];
+      if (!src) return null;
+      return { id: "npc_slide_" + slideNum, setupKey: "npc_manual", slideNum: slideNum, images: { price: src, priceOriginal: src }, note: "", date: "" };
+    }
+
+    function loadNpcManualFromStorage() {
+      if (typeof IdbKv === "undefined") { fetchNpcManualOnce(); return; }
+      idbBootReady.then(function() { return IdbKv.get(NPC_MANUAL_STORAGE_KEY); }).then(function(saved) {
+        if (saved) {
+          try {
+            var data = JSON.parse(saved);
+            if (data && data.slides) { Object.keys(data.slides).forEach(function(k) { npcManualSlides[k] = data.slides[k]; }); }
+          } catch (e) {}
+        }
+        fetchNpcManualOnce();
+      }).catch(function() { fetchNpcManualOnce(); });
+    }
+
+    function fetchNpcManualOnce() {
+      try { if (localStorage.getItem(NPC_MANUAL_STORAGE_KEY) === "1") return; } catch (e) { return; }
+      Promise.all([
+        fetch("npc-manual-1.json").then(function(r) { if (!r.ok) throw new Error("npc1"); return r.json(); }),
+        fetch("npc-manual-2.json").then(function(r) { if (!r.ok) throw new Error("npc2"); return r.json(); }),
+        fetch("npc-manual-3.json").then(function(r) { if (!r.ok) throw new Error("npc3"); return r.json(); })
+      ]).then(function(parts) {
+        var merged = {};
+        parts.forEach(function(p) {
+          var slides = p && p.npc_manual_slides_v1;
+          if (slides) Object.keys(slides).forEach(function(k) { merged[k] = slides[k]; });
+        });
+        var count = Object.keys(merged).length;
+        if (!count) return;
+        Object.keys(merged).forEach(function(k) { npcManualSlides[k] = merged[k]; });
+        try { localStorage.setItem(NPC_MANUAL_STORAGE_KEY, "1"); } catch (e) {}
+        if (typeof IdbKv !== "undefined") {
+          IdbKv.set(NPC_MANUAL_STORAGE_KEY, JSON.stringify({ slides: npcManualSlides })).catch(function() {});
+        }
+      }).catch(function() { /* 오프라인 / JSON 아직 없음 — 조용히 다음 부팅에 재시도 */ });
+    }
+
     function applyExampleJson(saved) {
       try {
         const obj = JSON.parse(saved);
@@ -8168,6 +8238,19 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
           if (!byType[r.setupKey]) byType[r.setupKey] = [];
           byType[r.setupKey].push(r);
         });
+        /* v765: npc 메뉴얼은 43장 슬라이드 + 기존 npc 복기를 합친 풀에서 오늘 날짜 기준 한 장만.
+           슬라이드가 뽑히면 크경 N장, 기존 복기가 뽑히면 npc 메뉴얼.
+           슬라이드를 못 받았으면 기존 복기 중에서만 한 장 뽑음. */
+        var npcExisting = byType["npc_manual"] || [];
+        var npcSlideCount = (typeof npcManualSlides !== "undefined" && Object.keys(npcManualSlides).length >= NPC_MANUAL_TOTAL) ? NPC_MANUAL_TOTAL : 0;
+        var npcPoolSize = npcSlideCount + npcExisting.length;
+        var npcPick = (typeof npcPickForToday === "function") ? npcPickForToday(npcPoolSize) : -1;
+        if (npcPick >= 0 && npcPick < npcSlideCount) {
+          var npcSlide = (typeof npcManualSlideReview === "function") ? npcManualSlideReview(npcPick + 1) : null;
+          if (npcSlide) byType["npc_manual"] = [npcSlide];
+        } else if (npcPick >= npcSlideCount && npcPick < npcPoolSize) {
+          byType["npc_manual"] = [npcExisting[npcPick - npcSlideCount]];
+        }
         var typeKeys = Object.keys(byType);
         if (!typeKeys.length) {
           document.getElementById("rs2Progress").textContent = "스터디할 복기가 없어";
@@ -8235,7 +8318,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
           this.saveProgress();
           if (src) h += this.plainImgHtml(src);
           else h += '<div class="w-full py-10 text-center text-sm text-slate-400 border rounded-xl mb-4">이미지가 없는 복기야</div>';
-          h += '<div class="text-base font-black text-slate-800 dark:text-white mb-2">npc 메뉴얼</div>';
+          var slideLabel = (r && r.slideNum) ? ("크경 " + r.slideNum + "장") : "npc 메뉴얼";
+          h += '<div class="text-base font-black text-slate-800 dark:text-white mb-2">' + slideLabel + '</div>';
           h += '<div class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">성공·실패 맞히기 없이 이미지만 보는 메뉴얼이야. 이미지를 확인하고 다음으로 넘어가.</div>';
           h += '<div id="rs2Feedback" class="mt-4 hidden"></div>';
           h += this.nextButtonHtml();
@@ -8479,10 +8563,12 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", function() {
         loadExampleChartsFromStorage();
+        loadNpcManualFromStorage();
         initExampleChartUploads();
       });
     } else {
       loadExampleChartsFromStorage();
+      loadNpcManualFromStorage();
       initExampleChartUploads();
     }
 
@@ -10290,7 +10376,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v764 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v765 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
