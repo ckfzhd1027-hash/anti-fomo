@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v763 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v764 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -657,7 +657,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       </div>
       <div id="regimeChipRow" class="flex flex-wrap items-center gap-1.5 px-3 pb-1.5">
         <span id="regimeDivChip" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-black border-2 regime-chip-off">다이버 없음</span>
-        <span id="regimePathText" style="display:none" class="regime-chip-pos inline-flex items-center px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-black border-2"></span>
+        <span id="regimePathText" style="display:none" class="regime-chip-pos inline-flex items-center px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-black border-2 min-w-0 flex-1 truncate"></span>
       </div>
       <div id="regimeExpiredRow" class="hidden px-3 pb-2.5 -mt-1 text-xs font-black text-red-500">⚠ 선언이 만료됐습니다 — 재선언 후 진행할 수 있습니다</div>
       <div id="regimeBrkWarn" class="hidden px-3 pb-2.5 -mt-1 text-xs font-black text-red-500"></div>
@@ -10290,7 +10290,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v763 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v764 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -12291,8 +12291,8 @@ window.FlowSync = (function(){
         if (out.divExhausted) path += " · " + (out.divExhausted === "bottom" ? "상승 다이버 소진" : "하락 다이버 소진");
         if (predDiv) path += " · 예측 다이버 " + (predDiv === "long" ? "롱" : "숏");
         if (volRev) path += " · 거래량 폭발 " + (volRev === "long" ? "상승 전환" : "하락 전환");
-        if (brk) path += " · " + (brk === "up" ? "상방 돌파 후 밖에 있음" : "하방 돌파 후 밖에 있음");
-        if (brk && wiz.brkBody === "yes") path += " · 일봉 몸통 마감";
+        if (brk) path += " · " + (brk === "up" ? "상방 돌파" : "하방 돌파");
+        if (brk && wiz.brkBody === "yes") path += " · 몸통 마감";
         // v632: 대기·두번째장대·과매도 경위 문구 폐지
         return { decl: out, note: note, path: path, viz: viz, evt: evt, volRev: volRev, brk: brk, brkBody: wiz.brkBody || null, predDiv: predDiv, wait: null, second: null, oversold: null };
       }
@@ -12585,7 +12585,7 @@ window.FlowSync = (function(){
             else if (fk === "ltf") vhtml = ltfVizHtml(vizHost);
             else if (fk === "pos") vhtml = vizStack([{ slope: wiz.slope || "up", event: "inside", flip: null, side: null, pos: "top" }, { slope: wiz.slope || "up", event: "inside", flip: null, side: null, pos: "mid" }, { slope: wiz.slope || "up", event: "inside", flip: null, side: null, pos: "bottom" }], "rv-alt3", vizHost);
             else if (fk === "volRev") vhtml = volRevVizHtml(vizHost);
-            else vhtml = vizScene({ slope: "up", event: "inside", flip: null, side: null, pos: "mid" }, false, vizHost);
+            else vhtml = vizScene({ slope: wiz.slope || "up", event: "inside", flip: null, side: null, pos: "mid" }, false, vizHost);
           }
           vizHost.innerHTML = vhtml;
         }
