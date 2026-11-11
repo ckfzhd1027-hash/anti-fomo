@@ -70,6 +70,7 @@
   var INST = "BTC-USDT-SWAP";
   var REST = "https://www.okx.com/api/v5/market/candles";
   var WS_URL = "wss://ws.okx.com/ws/v5/business";
+  var WS_URL_TRADES = "wss://ws.okx.com/ws/v5/public";
   var LIMIT = 60;          // 가져올 봉 수
   var MAX_SHOW = 52;       // 화면에 그릴 봉 수
   var UP = "#22c55e", DOWN = "#ef4444", GRID = "#1f2937", TXT = "#9ca3af";
@@ -80,6 +81,7 @@
   ];
   var data = { "15m": [], "5m": [], "1m": [] };   // 각 [ts,o,h,l,c,vol] (오름차순)
   var ws = null, wsLive = false, pollTimer = null, pingTimer = null, lastPx = null, resubDone = false;
+  var wsTrades = null, pingTradesTimer = null, redrawPending = false;
 
   function $(id) { return document.getElementById(id); }
   function fmt(n) { return Number(n).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
@@ -122,6 +124,25 @@
       arr.push(row);
       if (arr.length > LIMIT) arr.shift();
     }
+  }
+  // ---- 체결로 현재 봉을 바로 갱신 (최대 속도: 체결마다 종·고·저 갱신) ----
+  function applyTrade(px, ts) {
+    for (var i = 0; i < TF.length; i++) {
+      var tf = TF[i];
+      var arr = data[tf.key];
+      if (!arr.length) continue;
+      var last = arr[arr.length - 1];
+      if (ts >= last[0] && ts < last[0] + tf.ms) {
+        last[4] = px;
+        if (px > last[2]) last[2] = px;
+        if (px < last[3]) last[3] = px;
+      }
+    }
+  }
+  function requestRedraw() {
+    if (redrawPending) return;
+    redrawPending = true;
+    requestAnimationFrame(function () { redrawPending = false; drawAll(); });
   }
 
   // ---- 그리기 ----
@@ -246,12 +267,14 @@
       var msg;
       try { msg = JSON.parse(ev.data); } catch (e) { return; }
       if (msg.event) {
-        showErr("WS: " + JSON.stringify(msg));
-        if (msg.event === "error" && !resubDone) {
-          resubDone = true;
-          setTimeout(function () {
-            try { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ op: "subscribe", args: TF.map(function (tf) { return { channel: tf.ch, instId: INST }; }) })); } catch (e) {}
-          }, 1000);
+        if (msg.event === "error") {
+          showErr("WS: " + JSON.stringify(msg));
+          if (!resubDone) {
+            resubDone = true;
+            setTimeout(function () {
+              try { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ op: "subscribe", args: TF.map(function (tf) { return { channel: tf.ch, instId: INST }; }) })); } catch (e) {}
+            }, 1000);
+          }
         }
         return;
       }
@@ -272,6 +295,38 @@
       setTimeout(connectWs, 3000);
     };
     ws.onerror = function () { if (pingTimer) { clearInterval(pingTimer); pingTimer = null; } try { ws.close(); } catch (e) {} };
+  }
+
+  // ---- 체결 웹소켓 (public, 체결마다 현재 봉 갱신) ----
+  function connectTrades() {
+    try { wsTrades = new WebSocket(WS_URL_TRADES); } catch (e) { return; }
+    wsTrades.onopen = function () {
+      wsTrades.send(JSON.stringify({ op: "subscribe", args: [{ channel: "trades", instId: INST }] }));
+      if (pingTradesTimer) clearInterval(pingTradesTimer);
+      pingTradesTimer = setInterval(function () {
+        try { if (wsTrades && wsTrades.readyState === 1) wsTrades.send("ping"); } catch (e) {}
+      }, 25000);
+    };
+    wsTrades.onmessage = function (ev) {
+      if (ev.data === "pong") return;
+      var msg;
+      try { msg = JSON.parse(ev.data); } catch (e) { return; }
+      if (msg.event) {
+        if (msg.event === "error") showErr("WS 체결: " + JSON.stringify(msg));
+        return;
+      }
+      if (!msg.data || !msg.arg || msg.arg.channel !== "trades") return;
+      for (var i = 0; i < msg.data.length; i++) {
+        var t = msg.data[i];
+        applyTrade(Number(t.px), Number(t.ts));
+      }
+      requestRedraw();
+    };
+    wsTrades.onclose = function () {
+      if (pingTradesTimer) { clearInterval(pingTradesTimer); pingTradesTimer = null; }
+      setTimeout(connectTrades, 3000);
+    };
+    wsTrades.onerror = function () { if (pingTradesTimer) { clearInterval(pingTradesTimer); pingTradesTimer = null; } try { wsTrades.close(); } catch (e) {} };
   }
 
   // ---- 폴백: 2초 REST 폴링 ----
@@ -296,6 +351,7 @@
     hideErr();
     drawAll();
     connectWs();
+    connectTrades();
     // 웹소켓이 6초 안에 안 붙으면 폴링으로 전환
     setTimeout(function () { if (!wsLive) startPolling(); }, 6000);
   }).catch(function (e) {
