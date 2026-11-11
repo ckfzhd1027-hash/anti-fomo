@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v765 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v766 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -10376,7 +10376,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v765 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v766 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -11746,23 +11746,6 @@ window.FlowSync = (function(){
       <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-2xl max-h-[92vh] overflow-y-auto">
         <h3 class="text-lg font-black text-slate-800 dark:text-white mb-1">장세 선언</h3>
         <p id="regimeDeclareDesc" class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">아래 질문에 답하면 지금 장세가 자동으로 유도·선언됩니다. 선언은 8시간(4H봉 2개) 동안 유효하고, 채널 이탈이 확정되면 재선언해야 합니다.</p>
-        <div id="channelTracker" class="mb-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 py-2.5">
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-xs font-black tracking-tight text-slate-700 dark:text-slate-100">채널선 추적</span>
-            <span id="chTrackCount" class="text-[11px] font-black text-slate-500 dark:text-slate-400">뒤집기 0회</span>
-          </div>
-          <p id="chTrackStatus" class="mt-1 text-[12px] font-bold leading-snug text-slate-700 dark:text-slate-200">현재: 상단선 = 저항, 하단선 = 지지 (원래 채널)</p>
-          <p id="chTrackGuide" class="mt-0.5 text-[11px] font-bold leading-snug text-slate-500 dark:text-slate-400">일봉 몸통이 선 밖에서 마감하면 아래 버튼을 눌러 선 역할을 뒤집어. 꼬리만 삐져나온 건 돌파 아님.</p>
-          <div class="mt-2 flex gap-2">
-            <button type="button" onclick="ChannelTrack.flip('top')" class="flex-1 py-2.5 rounded-xl bg-red-100 dark:bg-red-950 border-2 border-red-400 text-red-700 dark:text-red-200 text-xs font-black cursor-pointer btn-touch">일봉 몸통 상단선 밖 마감</button>
-            <button type="button" onclick="ChannelTrack.flip('bottom')" class="flex-1 py-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-950 border-2 border-emerald-500 text-emerald-700 dark:text-emerald-200 text-xs font-black cursor-pointer btn-touch">일봉 몸통 하단선 밖 마감</button>
-          </div>
-          <div class="mt-1.5 flex items-center justify-between gap-2">
-            <button type="button" onclick="ChannelTrack.undo()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-[11px] font-black text-slate-600 dark:text-slate-300 cursor-pointer btn-touch">되돌리기</button>
-            <span id="chTrackHistory" class="flex-1 text-right text-[11px] font-bold text-slate-500 dark:text-slate-400">뒤집기 기록: 없음</span>
-            <button type="button" onclick="ChannelTrack.reset()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-[11px] font-black text-slate-600 dark:text-slate-300 cursor-pointer btn-touch">기록 지우기</button>
-          </div>
-        </div>
         <div id="regimeWizardViz" class="mb-3 h-28 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-hidden"></div>
         <div id="regimeWizard"></div>
         <div id="regimeDerivedBox" class="hidden mt-1 mb-4 px-3 py-3 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600">
@@ -14705,49 +14688,7 @@ window.StepGuide = StepGuide;
       return { open: open, pick: pick, next: next, prev: prev, closeSpeed: closeSpeed, closeSlides: closeSlides };
     })();
   </script>
-  <script>
-    // v627: 채널선 추적 (선 역할 상태 기계 — 가격 저장소가 아님)
-    (function () {
-      const KEY = "antifomo_channel_v1";
-      let state = { flips: [] };
-      try { const raw = localStorage.getItem(KEY); if (raw) { const p = JSON.parse(raw); if (p && Array.isArray(p.flips)) state = p; } } catch (e) {}
-      function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
-      function statusText() {
-        const last = state.flips.length ? state.flips[state.flips.length - 1] : null;
-        if (!last) return "현재: 상단선 = 저항, 하단선 = 지지 (원래 채널)";
-        if (last === "bottom") return "현재: 새 상단 = 뚫린 하단선 (저항), 새 하단 = 새로 그은 평행선 필요";
-        return "현재: 새 하단 = 뚫린 상단선 (지지), 새 상단 = 새로 그은 평행선 필요";
-      }
-      function guideText() {
-        const last = state.flips.length ? state.flips[state.flips.length - 1] : null;
-        if (!last) return "일봉 몸통이 선 밖에서 마감하면 아래 버튼을 눌러 선 역할을 뒤집어. 꼬리만 삐져나온 건 돌파 아님.";
-        if (last === "bottom") return "뚫린 하단선이 새 상단 저항선이 됐어. 그 선 리테 숏 대기 + 1강 대기 (장세 재선언에서 대기 중으로).";
-        return "뚫린 상단선이 새 하단 지지선이 됐어. 그 선 리테 롱 대기.";
-      }
-      function historyText() {
-        if (!state.flips.length) return "뒤집기 기록: 없음";
-        const names = state.flips.map(function (f) { return f === "bottom" ? "하단선 이탈" : "상단선 돌파"; });
-        return "뒤집기 기록: " + names.join(" → ");
-      }
-      function render() {
-        const st = document.getElementById("chTrackStatus");
-        const gd = document.getElementById("chTrackGuide");
-        const ct = document.getElementById("chTrackCount");
-        const hi = document.getElementById("chTrackHistory");
-        if (st) st.textContent = statusText();
-        if (gd) gd.textContent = guideText();
-        if (ct) ct.textContent = "뒤집기 " + state.flips.length + "회";
-        if (hi) hi.textContent = historyText();
-      }
-      window.ChannelTrack = {
-        flip: function (side) { if (side !== "top" && side !== "bottom") return; state.flips.push(side); save(); render(); },
-        undo: function () { if (!state.flips.length) return; state.flips.pop(); save(); render(); },
-        reset: function () { state.flips = []; save(); render(); },
-        render: render
-      };
-      render();
-    })();
-  </script>
+  
 
 <script>
 /* v631: 위치별 타점 애니매이션 (2단계 장세박스 자리) — 예시 동작을 본 앱에 통합, 장세박스 크기에 맞춤 */
