@@ -69,7 +69,7 @@
   "use strict";
   var INST = "BTC-USDT-SWAP";
   var REST = "https://www.okx.com/api/v5/market/candles";
-  var WS_URL = "wss://ws.okx.com:8443/ws/v5/public";
+  var WS_URL = "wss://ws.okx.com:443/ws/v5/public";
   var LIMIT = 60;          // 가져올 봉 수
   var MAX_SHOW = 52;       // 화면에 그릴 봉 수
   var UP = "#22c55e", DOWN = "#ef4444", GRID = "#1f2937", TXT = "#9ca3af";
@@ -79,7 +79,7 @@
     { key: "1m",  bar: "1m",  ch: "candle1m",  cv: "cv1",  cp: "cp1",  chg: "ch1",  tm: "tm1",  ms: 1 * 60 * 1000 }
   ];
   var data = { "15m": [], "5m": [], "1m": [] };   // 각 [ts,o,h,l,c,vol] (오름차순)
-  var ws = null, wsLive = false, pollTimer = null, lastPx = null;
+  var ws = null, wsLive = false, pollTimer = null, pingTimer = null, lastPx = null;
 
   function $(id) { return document.getElementById(id); }
   function fmt(n) { return Number(n).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
@@ -235,8 +235,13 @@
     ws.onopen = function () {
       var args = TF.map(function (tf) { return { channel: tf.ch, instId: INST }; });
       ws.send(JSON.stringify({ op: "subscribe", args: args }));
+      if (pingTimer) clearInterval(pingTimer);
+      pingTimer = setInterval(function () {
+        try { if (ws && ws.readyState === 1) ws.send("ping"); } catch (e) {}
+      }, 25000);
     };
     ws.onmessage = function (ev) {
+      if (ev.data === "pong") return;
       var msg;
       try { msg = JSON.parse(ev.data); } catch (e) { return; }
       if (!msg.data || !msg.arg) return;
@@ -250,21 +255,22 @@
     };
     ws.onclose = function () {
       wsLive = false;
+      if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
       setStatus("poll", "재연결 중…");
       startPolling();
       setTimeout(connectWs, 3000);
     };
-    ws.onerror = function () { try { ws.close(); } catch (e) {} };
+    ws.onerror = function () { if (pingTimer) { clearInterval(pingTimer); pingTimer = null; } try { ws.close(); } catch (e) {} };
   }
 
-  // ---- 폴백: 5초 REST 폴링 ----
+  // ---- 폴백: 2초 REST 폴링 ----
   function pollOnce() {
     Promise.all(TF.map(loadRest)).then(function () { drawAll(); }).catch(function () {});
   }
   function startPolling() {
     if (pollTimer) return;
-    setStatus("poll", "5초 갱신");
-    pollTimer = setInterval(pollOnce, 5000);
+    setStatus("poll", "2초 갱신");
+    pollTimer = setInterval(pollOnce, 2000);
   }
   function stopPolling() {
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
