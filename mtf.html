@@ -82,6 +82,9 @@
   var data = { "15m": [], "5m": [], "1m": [] };   // 각 [ts,o,h,l,c,vol] (오름차순)
   var ws = null, wsLive = false, pollTimer = null, pingTimer = null, lastPx = null, resubDone = false;
   var wsTrades = null, pingTradesTimer = null, redrawPending = false;
+  var viewEndTs = null;   // null이면 최신 따라감, 아니면 오른쪽 끝 시간(ms) — 세 시간대 공유
+  var zoomLevel = 1;      // 1 = 52봉, 클수록 확대(봉 수 감소) — 세 시간대 공유
+  var viewStep = {};      // 타임프레임별 px/봉 (팬 변환용)
 
   function $(id) { return document.getElementById(id); }
   function fmt(n) { return Number(n).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
@@ -163,7 +166,17 @@
     ctx.clearRect(0, 0, W, H);
     var arr = data[tf.key];
     if (!arr.length) return;
-    var show = arr.slice(-MAX_SHOW);
+    var count = Math.max(8, Math.min(LIMIT, Math.round(MAX_SHOW / zoomLevel)));
+    var endIdx = arr.length - 1;
+    if (viewEndTs !== null) {
+      endIdx = -1;
+      for (var k = arr.length - 1; k >= 0; k--) {
+        if (arr[k][0] <= viewEndTs) { endIdx = k; break; }
+      }
+      if (endIdx < 0) endIdx = 0;
+    }
+    var show = arr.slice(Math.max(0, endIdx - count + 1), endIdx + 1);
+    if (!show.length) return;
     var padR = 56;                       // 오른쪽 가격 눈금 폭
     var plotW = W - padR - 4, plotH = H - 4;
     var volH = Math.max(18, Math.round(plotH * 0.22));
@@ -181,6 +194,7 @@
     var n = show.length;
     var step = plotW / n;
     var bw = Math.max(2, Math.floor(step * 0.62));
+    viewStep[tf.key] = step;
     // 그리드 + 가격 눈금
     ctx.strokeStyle = GRID; ctx.fillStyle = TXT;
     ctx.lineWidth = 1; ctx.font = "10px -apple-system, sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
@@ -243,10 +257,13 @@
       tm.textContent = fmtTime(last[0]) + "봉";
       if (tf.key === "1m") {
         var hp = $("hdrPx");
-        hp.textContent = fmt(last[4]);
-        var dir = lastPx === null ? "" : (last[4] >= lastPx ? "up" : "down");
-        hp.className = "px " + dir;
-        lastPx = last[4];
+        var live = data["1m"][data["1m"].length - 1];
+        if (live) {
+          hp.textContent = fmt(live[4]);
+          var dir = lastPx === null ? "" : (live[4] >= lastPx ? "up" : "down");
+          hp.className = "px " + dir;
+          lastPx = live[4];
+        }
       }
     }
   }
@@ -350,11 +367,81 @@
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   }
 
+  // ---- 터치: 한 손가락 팬 + 두 손가락 핀치 줌 + 더블탭 리셋 (세 시간대 동기화) ----
+  function clampViewEnd() {
+    if (viewEndTs === null) return;
+    var latest = 0, earliest = Infinity;
+    for (var i = 0; i < TF.length; i++) {
+      var a = data[TF[i].key];
+      if (!a.length) continue;
+      if (a[a.length - 1][0] > latest) latest = a[a.length - 1][0];
+      if (a[0][0] < earliest) earliest = a[0][0];
+    }
+    if (latest && viewEndTs >= latest) { viewEndTs = null; return; }
+    if (earliest !== Infinity && viewEndTs < earliest) viewEndTs = earliest;
+  }
+  function attachTouch(tf) {
+    var cv = $(tf.cv);
+    var t1 = null;
+    var pinch = null;
+    var lastTap = 0, lastTapX = 0, lastTapY = 0;
+    cv.addEventListener("touchstart", function (ev) {
+      if (ev.touches.length === 1) {
+        var t = ev.touches[0];
+        t1 = { x: t.clientX, viewEndTs: viewEndTs };
+        var now = Date.now();
+        if (now - lastTap < 300 && Math.abs(t.clientX - lastTapX) < 30 && Math.abs(t.clientY - lastTapY) < 30) {
+          viewEndTs = null; zoomLevel = 1; drawAll();
+          lastTap = 0;
+        } else {
+          lastTap = now; lastTapX = t.clientX; lastTapY = t.clientY;
+        }
+      } else if (ev.touches.length === 2) {
+        var a = ev.touches[0], b = ev.touches[1];
+        pinch = { d0: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), zoom0: zoomLevel };
+        t1 = null;
+      }
+      ev.preventDefault();
+    }, { passive: false });
+    cv.addEventListener("touchmove", function (ev) {
+      if (ev.touches.length === 1 && t1) {
+        var t = ev.touches[0];
+        var dx = t.clientX - t1.x;
+        var step = viewStep[tf.key] || 10;
+        if (step > 0) {
+          var shiftMs = (dx / step) * tf.ms;
+          var base = t1.viewEndTs;
+          if (base === null) {
+            var arr = data[tf.key];
+            base = arr.length ? arr[arr.length - 1][0] : Date.now();
+          }
+          viewEndTs = base - shiftMs;
+          clampViewEnd();
+          drawAll();
+        }
+      } else if (ev.touches.length === 2 && pinch) {
+        var a2 = ev.touches[0], b2 = ev.touches[1];
+        var d = Math.hypot(a2.clientX - b2.clientX, a2.clientY - b2.clientY);
+        if (pinch.d0 > 0) {
+          zoomLevel = Math.max(0.5, Math.min(6, pinch.zoom0 * (d / pinch.d0)));
+          drawAll();
+        }
+      }
+      ev.preventDefault();
+    }, { passive: false });
+    cv.addEventListener("touchend", function (ev) {
+      if (ev.touches.length < 2) pinch = null;
+      if (ev.touches.length === 0) t1 = null;
+    });
+    cv.addEventListener("touchcancel", function () { t1 = null; pinch = null; });
+  }
+
   // ---- 시작 ----
   function resize() { drawAll(); }
   window.addEventListener("resize", resize);
   window.addEventListener("orientationchange", function () { setTimeout(resize, 300); });
   setStatus("poll", "불러오는 중…");
+  TF.forEach(attachTouch);
   Promise.all(TF.map(loadRest)).then(function () {
     hideErr();
     drawAll();
