@@ -176,6 +176,9 @@
       }
       if (endIdx < 0) endIdx = 0;
     }
+    // 창이 항상 count개로 차게: 끝이 너무 앞이면 count개가 보이도록 밀어줌 (1~2개만 보이면 거대하게 그려짐)
+    var minEnd = Math.min(count - 1, arr.length - 1);
+    if (endIdx < minEnd) endIdx = minEnd;
     var show = arr.slice(Math.max(0, endIdx - count + 1), endIdx + 1);
     if (!show.length) return;
     var padR = 56;                       // 오른쪽 가격 눈금 폭
