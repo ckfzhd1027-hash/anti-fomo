@@ -203,9 +203,9 @@
       // 심지
       ctx.strokeStyle = col; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(cx, y(c[2])); ctx.lineTo(cx, y(c[3])); ctx.stroke();
-      // 몸통
+      // 몸통 (y(bot)=위쪽 끝, y(top)=아래쪽 끝 — fillRect는 위쪽부터 그린다)
       ctx.fillStyle = col;
-      ctx.fillRect(x, y(top), bw, bh);
+      ctx.fillRect(x, y(bot), bw, bh);
       // 거래량 (하단)
       var vh = vmax > 0 ? (c[5] / vmax) * volH : 0;
       ctx.globalAlpha = 0.55;
