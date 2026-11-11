@@ -35,6 +35,7 @@
   .chart-label .cp.down { color: #ef4444; }
   .chart-label .ch { font-weight: 700; color: #9ca3af; font-variant-numeric: tabular-nums; }
   .chart-label .tm { margin-left: auto; color: #6b7280; font-size: 11px; font-variant-numeric: tabular-nums; }
+  .chart-label .cd { color: #f59e0b; font-weight: 800; font-size: 11px; font-variant-numeric: tabular-nums; margin-left: 6px; }
   canvas { flex: 1 1 auto; width: 100%; min-height: 0; display: block; touch-action: none; }
   #err {
     position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
@@ -51,15 +52,15 @@
     <span class="st"><span id="stDot" class="dot"></span><span id="stTxt">연결 중…</span></span>
   </header>
   <section class="chart" id="sec15">
-    <div class="chart-label"><span class="tf">15분봉</span><span class="cp" id="cp15">—</span><span class="ch" id="ch15"></span><span class="tm" id="tm15"></span></div>
+    <div class="chart-label"><span class="tf">15분봉</span><span class="cp" id="cp15">—</span><span class="ch" id="ch15"></span><span class="tm" id="tm15"></span><span class="cd" id="cd15"></span></div>
     <canvas id="cv15"></canvas>
   </section>
   <section class="chart" id="sec5">
-    <div class="chart-label"><span class="tf">5분봉</span><span class="cp" id="cp5">—</span><span class="ch" id="ch5"></span><span class="tm" id="tm5"></span></div>
+    <div class="chart-label"><span class="tf">5분봉</span><span class="cp" id="cp5">—</span><span class="ch" id="ch5"></span><span class="tm" id="tm5"></span><span class="cd" id="cd5"></span></div>
     <canvas id="cv5"></canvas>
   </section>
   <section class="chart" id="sec1">
-    <div class="chart-label"><span class="tf">1분봉</span><span class="cp" id="cp1">—</span><span class="ch" id="ch1"></span><span class="tm" id="tm1"></span></div>
+    <div class="chart-label"><span class="tf">1분봉</span><span class="cp" id="cp1">—</span><span class="ch" id="ch1"></span><span class="tm" id="tm1"></span><span class="cd" id="cd1"></span></div>
     <canvas id="cv1"></canvas>
   </section>
 </div>
@@ -75,9 +76,9 @@
   var MAX_SHOW = 52;       // 화면에 그릴 봉 수
   var UP = "#22c55e", DOWN = "#ef4444", GRID = "#1f2937", TXT = "#9ca3af";
   var TF = [
-    { key: "15m", bar: "15m", ch: "candle15m", cv: "cv15", cp: "cp15", chg: "ch15", tm: "tm15", ms: 15 * 60 * 1000 },
-    { key: "5m",  bar: "5m",  ch: "candle5m",  cv: "cv5",  cp: "cp5",  chg: "ch5",  tm: "tm5",  ms: 5 * 60 * 1000 },
-    { key: "1m",  bar: "1m",  ch: "candle1m",  cv: "cv1",  cp: "cp1",  chg: "ch1",  tm: "tm1",  ms: 1 * 60 * 1000 }
+    { key: "15m", bar: "15m", ch: "candle15m", cv: "cv15", cp: "cp15", chg: "ch15", tm: "tm15", cd: "cd15", ms: 15 * 60 * 1000 },
+    { key: "5m",  bar: "5m",  ch: "candle5m",  cv: "cv5",  cp: "cp5",  chg: "ch5",  tm: "tm5",  cd: "cd5",  ms: 5 * 60 * 1000 },
+    { key: "1m",  bar: "1m",  ch: "candle1m",  cv: "cv1",  cp: "cp1",  chg: "ch1",  tm: "tm1",  cd: "cd1",  ms: 1 * 60 * 1000 }
   ];
   var data = { "15m": [], "5m": [], "1m": [] };   // 각 [ts,o,h,l,c,vol] (오름차순)
   var ws = null, wsLive = false, pollTimer = null, pingTimer = null, lastPx = null, resubDone = false;
@@ -268,6 +269,27 @@
     }
   }
 
+  // ---- 봉 마감 카운터 (1초마다, 실시간 봉 기준 — 팬해도 라이브 기준) ----
+  function fmtCountdown(ms) {
+    if (ms <= 0) return "00:00";
+    var s = Math.floor(ms / 1000);
+    var m = Math.floor(s / 60);
+    var sec = s % 60;
+    return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+  }
+  function updateCountdowns() {
+    for (var i = 0; i < TF.length; i++) {
+      var tf = TF[i];
+      var el = $(tf.cd);
+      if (!el) continue;
+      var arr = data[tf.key];
+      if (!arr.length) { el.textContent = ""; continue; }
+      var last = arr[arr.length - 1];
+      var remain = (last[0] + tf.ms) - Date.now();
+      el.textContent = "마감 " + fmtCountdown(remain);
+    }
+  }
+
   // ---- 웹소켓 ----
   function connectWs() {
     try { ws = new WebSocket(WS_URL); } catch (e) { startPolling(); return; }
@@ -442,6 +464,7 @@
   window.addEventListener("orientationchange", function () { setTimeout(resize, 300); });
   setStatus("poll", "불러오는 중…");
   TF.forEach(attachTouch);
+  setInterval(updateCountdowns, 1000);
   Promise.all(TF.map(loadRest)).then(function () {
     hideErr();
     drawAll();
