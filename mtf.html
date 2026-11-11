@@ -121,6 +121,7 @@
       last[4] = row[4];
       last[5] = row[5];
     } else if (row[0] > last[0]) {
+      last[4] = row[1]; // 이전 봉 종가 = 새 봉 시가 (체인 유지)
       arr.push(row);
       if (arr.length > LIMIT) arr.shift();
     }
@@ -297,11 +298,11 @@
     ws.onerror = function () { if (pingTimer) { clearInterval(pingTimer); pingTimer = null; } try { ws.close(); } catch (e) {} };
   }
 
-  // ---- 체결 웹소켓 (public, 체결마다 현재 봉 갱신) ----
+  // ---- 실시간 웹소켓 (public, 체결+틱커로 현재 봉 갱신) ----
   function connectTrades() {
     try { wsTrades = new WebSocket(WS_URL_TRADES); } catch (e) { return; }
     wsTrades.onopen = function () {
-      wsTrades.send(JSON.stringify({ op: "subscribe", args: [{ channel: "trades", instId: INST }] }));
+      wsTrades.send(JSON.stringify({ op: "subscribe", args: [{ channel: "trades", instId: INST }, { channel: "tickers", instId: INST }] }));
       if (pingTradesTimer) clearInterval(pingTradesTimer);
       pingTradesTimer = setInterval(function () {
         try { if (wsTrades && wsTrades.readyState === 1) wsTrades.send("ping"); } catch (e) {}
@@ -315,10 +316,17 @@
         if (msg.event === "error") showErr("WS 체결: " + JSON.stringify(msg));
         return;
       }
-      if (!msg.data || !msg.arg || msg.arg.channel !== "trades") return;
-      for (var i = 0; i < msg.data.length; i++) {
-        var t = msg.data[i];
-        applyTrade(Number(t.px), Number(t.ts));
+      if (!msg.data || !msg.arg) return;
+      if (msg.arg.channel === "trades") {
+        for (var i = 0; i < msg.data.length; i++) {
+          var t = msg.data[i];
+          applyTrade(Number(t.px), Number(t.ts));
+        }
+      } else if (msg.arg.channel === "tickers") {
+        var d = msg.data[0];
+        applyTrade(Number(d.last), Number(d.ts));
+      } else {
+        return;
       }
       requestRedraw();
     };
