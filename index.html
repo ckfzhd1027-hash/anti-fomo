@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v766 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v767 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -8429,8 +8429,16 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         var today = this.todayStr();
         var dates = this.loadCalendar();
         if (dates.indexOf(today) < 0) { dates.push(today); this.saveCalendar(dates); }
+        /* v767: 오늘 공부한 복기 장수 표시 (allByType 기준 — npc는 하루 1장만 뽑히므로 totalReviews는 과대계상) */
+        var studiedCount = 0;
+        var _keys = Object.keys(this.allByType || {});
+        for (var _i = 0; _i < _keys.length; _i++) {
+          studiedCount += (this.allByType[_keys[_i]] || []).length;
+        }
+        if (!studiedCount) studiedCount = this.totalReviews || 0;
         document.getElementById("rs2Progress").textContent = "스터디 완료 ✓";
         var h = '<div class="text-center mb-4"><div class="text-lg font-black text-slate-800 dark:text-white">오늘 스터디 완료!</div>';
+        h += '<div class="mt-1 text-sm font-black text-violet-600 dark:text-violet-400">오늘 복기 ' + studiedCount + '장 공부했어</div>';
         h += '</div>';
         h += this.calendarHtml();
         h += '<button onclick="ReviewStudy.close()" class="mt-4 w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black cursor-pointer shadow-lg">닫기</button>';
@@ -10376,7 +10384,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v766 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v767 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
