@@ -186,53 +186,15 @@
     }
     return "rgb(30,58,138)";
   }
-  // ---- 스펙트럼 색 고정 스케일: 평균 대비 배수로 색 결정 (최대값 기준이 아니라 안 변함) ----
-  function multToT(mult) {
-    // 0배=파랑, 0.5배=청록, 1배=초록, 2배=노랑, 3배 이상=빨강 (고정)
-    if (mult <= 0.5) return (mult / 0.5) * 0.25;
-    if (mult <= 1) return 0.25 + ((mult - 0.5) / 0.5) * 0.25;
-    if (mult <= 2) return 0.5 + ((mult - 1) / 1) * 0.25;
-    if (mult <= 3) return 0.75 + ((mult - 2) / 1) * 0.25;
-    return 1;
+  // ---- 스펙트럼 완전 고정: 정적 24칸 (캔들·거래량 무관, 스와이프해도 안 변함) ----
+  // 칸 i (위에서 0번): 위=빨강, 아래=짙은 파랑. 점선 색은 그 높이의 칸 색과 맞춤.
+  function spectrumCellColor(yPos, bodyH) {
+    var N = 24;
+    var idx = Math.max(0, Math.min(N - 1, Math.floor((yPos - 2) / bodyH * N)));
+    var t = 1 - (idx + 0.5) / N;
+    return { color: spectrumColor(t), t: t };
   }
-  function computeBins(show, hi, lo) {
-    var N = 24; // 가격 구간 수
-    var binVol = new Array(N).fill(0);
-    for (var i = 0; i < show.length; i++) {
-      var c = show[i];
-      var v = c[5] || 0;
-      if (v <= 0) continue;
-      var cLo = c[3], cHi = c[2];
-      if (cHi <= cLo) {
-        var b0 = Math.max(0, Math.min(N - 1, Math.floor((c[4] - lo) / (hi - lo) * N)));
-        binVol[b0] += v;
-        continue;
-      }
-      var bA = Math.max(0, Math.floor((cLo - lo) / (hi - lo) * N));
-      var bB = Math.min(N - 1, Math.floor((cHi - lo) / (hi - lo) * N));
-      for (var b = bA; b <= bB; b++) {
-        var binLo = lo + b / N * (hi - lo);
-        var binHi = lo + (b + 1) / N * (hi - lo);
-        var ov = Math.min(cHi, binHi) - Math.max(cLo, binLo);
-        if (ov > 0) binVol[b] += v * ov / (cHi - cLo);
-      }
-    }
-    var maxBin = 0;
-    for (var j = 0; j < N; j++) if (binVol[j] > maxBin) maxBin = binVol[j];
-    var active = 0, sumActive = 0;
-    for (var k = 0; k < N; k++) { if (binVol[k] > 0) { active++; sumActive += binVol[k]; } }
-    var avgBin = active ? sumActive / active : 0;
-    return { N: N, binVol: binVol, avgBin: avgBin, maxBin: maxBin };
-  }
-  function spectrumColorForPrice(spec, price, lo, hi) {
-    // 해당 가격의 스펙트럼 칸 색 (고정 배수 스케일) — 실시간 점선 색 맞춤용
-    var N = spec.N;
-    var idx = Math.max(0, Math.min(N - 1, Math.floor((price - lo) / (hi - lo) * N)));
-    var mult = spec.avgBin > 0 ? spec.binVol[idx] / spec.avgBin : 0;
-    var t = multToT(mult);
-    return { color: spectrumColor(t), t: t, mult: mult };
-  }
-  function drawSpectrum(tf, show, hi, lo, bodyH, selClose, liveClose, spec) {
+  function drawSpectrum(tf, hi, lo, bodyH, selClose, liveClose) {
     var cv = $(tf.sp);
     if (!cv) return;
     var m = fitCanvas(cv);
@@ -240,37 +202,15 @@
     ctx.setTransform(m.dpr, 0, 0, m.dpr, 0, 0);
     var W = m.w, H = m.h;
     ctx.clearRect(0, 0, W, H);
-    var N = spec.N, binVol = spec.binVol, avgBin = spec.avgBin;
-    var maxBin = spec.maxBin;
-    if (maxBin <= 0) return;
+    var N = 24;
     function y(p) { return 2 + (hi - p) / (hi - lo) * bodyH; }
-    var hotIdx = -1, hotMult = 0;
-    for (var b = 0; b < N; b++) {
-      var mult = avgBin > 0 ? binVol[b] / avgBin : 0;
-      var t = multToT(mult);
-      var yTop = y(lo + (b + 1) / N * (hi - lo));
-      var yBot = y(lo + b / N * (hi - lo));
-      var hgt = Math.max(1, yBot - yTop);
-      ctx.fillStyle = binVol[b] <= 0 ? "rgba(148,163,184,0.10)" : spectrumColor(t);
-      ctx.fillRect(0, yTop, W, hgt);
-      if (mult >= 3) {
-        ctx.strokeStyle = "#facc15"; ctx.lineWidth = 1;
-        ctx.strokeRect(0.5, yTop + 0.5, W - 1, hgt - 1);
-        if (mult > hotMult) { hotMult = mult; hotIdx = b; }
-      }
-    }
-    // 가장 뜨거운 구간에 배수 표시 (평균 대비 몇 배)
-    if (hotIdx >= 0 && hotMult >= 3) {
-      var yC = (y(lo + (hotIdx + 1) / N * (hi - lo)) + y(lo + hotIdx / N * (hi - lo))) / 2;
-      var txt = hotMult.toFixed(1) + "x";
-      ctx.font = "bold 9px -apple-system, sans-serif";
-      var tw = ctx.measureText(txt).width;
-      ctx.fillStyle = "rgba(0,0,0,0.65)";
-      ctx.fillRect((W - tw) / 2 - 2, yC - 7, tw + 4, 13);
-      ctx.fillStyle = "#ffffff";
-      ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText(txt, W / 2, yC);
-      ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+    // 정적 칸 (위=빨강 → 아래=파랑, 고정)
+    for (var i = 0; i < N; i++) {
+      var t = 1 - (i + 0.5) / N;
+      var yTop = 2 + i / N * bodyH;
+      var yBot = 2 + (i + 1) / N * bodyH;
+      ctx.fillStyle = spectrumColor(t);
+      ctx.fillRect(0, yTop, W, Math.max(1, yBot - yTop));
     }
     // 표시선 마커 (선택한 봉 종가=호박, 없으면 실시간 가격=흰색)
     var refPx = selClose !== null ? selClose : liveClose;
@@ -370,12 +310,11 @@
         ctx.strokeRect(x - 1, by - 1, bw + 2, bh + 2);
       }
     }
-    // 현재가 점선 + 라벨 — 색은 실시간 가격이 있는 스펙트럼 칸 색과 맞춤 (고정 배수 스케일)
+    // 현재가 점선 + 라벨 — 색은 실시간 가격이 있는 스펙트럼 칸 색과 맞춤 (완전 고정 칸)
     var lastC = show[n - 1][4];
     var ly = y(lastC);
-    var spec = computeBins(show, hi, lo);
-    var liveSpec = spectrumColorForPrice(spec, lastC, lo, hi);
-    var lcol = liveSpec.color;
+    var liveCell = spectrumCellColor(ly, bodyH);
+    var lcol = liveCell.color;
     ctx.strokeStyle = lcol; ctx.setLineDash([4, 3]); ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(plotW, ly); ctx.stroke();
     ctx.setLineDash([]);
@@ -383,7 +322,7 @@
     var label = fmt(lastC);
     var tw = ctx.measureText(label).width + 10;
     ctx.fillRect(W - tw - 2, ly - 8, tw, 16);
-    ctx.fillStyle = liveSpec.t < 0.35 ? "#ffffff" : "#0b0e11"; ctx.textAlign = "center";
+    ctx.fillStyle = liveCell.t < 0.35 ? "#ffffff" : "#0b0e11"; ctx.textAlign = "center";
     ctx.fillText(label, W - tw / 2 - 2, ly);
     ctx.textAlign = "left";
     // 선택한 봉 종가 점선 (호박색)
@@ -393,8 +332,8 @@
       ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(plotW, sy); ctx.stroke();
       ctx.setLineDash([]);
     }
-    // 스펙트럼 (왼쪽 세로줄)
-    drawSpectrum(tf, show, hi, lo, bodyH, selClose, lastC, spec);
+    // 스펙트럼 (왼쪽 세로줄, 완전 고정)
+    drawSpectrum(tf, hi, lo, bodyH, selClose, lastC);
     // 탭 선택용 뷰 정보 저장
     tf.view = { step: step, show: show, endIdx: endIdx };
     return { last: show[n - 1], first: show[0] };
