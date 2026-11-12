@@ -76,6 +76,11 @@
     width: 100%; padding: 10px 0; border-radius: 10px; border: none;
     background: #f59e0b; color: #111827; font-size: 14px; font-weight: 900; cursor: pointer;
   }
+  #dragVal {
+    position: fixed; z-index: 60; display: none; pointer-events: none;
+    background: #f59e0b; color: #111827; font-size: 12px; font-weight: 800;
+    padding: 3px 8px; border-radius: 6px; white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
 </style>
 </head>
 <body>
@@ -116,6 +121,7 @@
     <button id="specClose" class="close" type="button">닫기</button>
   </div>
 </div>
+<div id="dragVal"></div>
 <script>
 (function () {
   "use strict";
@@ -263,21 +269,58 @@
     for (var i = 0; i < b.length; i++) { if (vol < b[i]) return i; }
     return b.length; // 최상위 구간 (무한대까지)
   }
+  // ---- 스펙트럼 바 세로축 = 거래량 로그 스케일 (기본모드처럼 연속 그라디언트, 경계선은 로그 위치) ----
+  // 아래=10 BTC, 위=최상위 경계×2 또는 20000 중 큰 값. 경계선을 드래그하면 이 스케일로 숫자가 바뀜.
+  var dragLogMax = null; // 드래그 중 스케일 고정용 (최상위 경계가 바뀌어도 중간에 안 튐)
+  var dragBound = null; // 드래그 중인 경계선 { idx, cv }
+  function specLogMin() { return 1; } // log10(10)
+  function specLogMax() {
+    if (dragLogMax !== null) return dragLogMax;
+    var top = specSettings.bounds[specSettings.bounds.length - 1] || 8000;
+    return Math.log10(Math.max(top * 2, 20000));
+  }
+  function volFrac(vol) {
+    // 거래량 → 바 위치 비율 (0=맨 아래 파랑, 1=맨 위 빨강)
+    if (!(vol > 0)) return 0;
+    var lo = specLogMin(), hi = specLogMax();
+    var f = (Math.log10(vol) - lo) / (hi - lo);
+    return f < 0 ? 0 : (f > 1 ? 1 : f);
+  }
+  function volToSpecY(vol, bodyH) {
+    return 2 + (1 - volFrac(vol)) * bodyH;
+  }
+  function specYToVol(y, bodyH) {
+    var frac = 1 - (y - 2) / bodyH;
+    if (frac < 0) frac = 0;
+    if (frac > 1) frac = 1;
+    var lo = specLogMin(), hi = specLogMax();
+    return Math.pow(10, lo + frac * (hi - lo));
+  }
+  function roundNice(v) {
+    // 드래그 숫자를 깔끔하게 (유효숫자 2자리)
+    if (!(v > 0)) return 1;
+    var exp = Math.floor(Math.log10(v));
+    var step = Math.pow(10, exp - 1);
+    return Math.max(1, Math.round(v / step) * step);
+  }
   function zoneT(zi) {
+    // 구간 중심의 그라디언트 위치 (로그 스케일 중심) — 캔들 색이 바의 해당 위치 색과 일치
+    var b = specSettings.bounds;
     var n = zoneCount();
-    if (n <= 1) return 0;
-    return zi / (n - 1); // 아래=0 파랑, 위=1 빨강
+    var lo = zi === 0 ? 0 : b[zi - 1];
+    var hi = zi >= n - 1 ? Infinity : b[zi];
+    return (volFrac(lo) + volFrac(hi)) / 2;
   }
   function zoneCenterY(zi, bodyH) {
-    var n = zoneCount();
-    return 2 + (n - zi - 0.5) / n * bodyH;
+    return 2 + (1 - zoneT(zi)) * bodyH;
   }
   function volumeT(vol, refAvg) {
     if (specSettings.mode === "zones") return zoneT(findZone(vol));
     return multToT(refAvg > 0 ? vol / refAvg : 0);
   }
   function drawSpectrum(tf, bodyH) {
-    // 왼쪽 스펙트럼 바: 배율 모드는 고정 무지개 그라디언트, 구간 모드는 구간별 색으로 나눔
+    // 왼쪽 스펙트럼 바: 두 모드 다 기본모드처럼 연속 무지개 그라디언트.
+    // 구간 모드는 그 위에 경계선(흰 선)을 로그 위치에 그림 — 선을 잡고 드래그하면 숫자 변경.
     var cv = $(tf.sp);
     if (!cv) return;
     var m = fitCanvas(cv);
@@ -285,24 +328,24 @@
     ctx.setTransform(m.dpr, 0, 0, m.dpr, 0, 0);
     var W = m.w;
     ctx.clearRect(0, 0, W, m.h);
-    if (specSettings.mode === "zones") {
-      var n = zoneCount();
-      for (var i = 0; i < n; i++) {
-        var yTop = 2 + (n - 1 - i) / n * bodyH;
-        var yBot = 2 + (n - i) / n * bodyH;
-        ctx.fillStyle = spectrumColor(zoneT(i));
-        ctx.fillRect(0, yTop, W, Math.max(1, yBot - yTop));
-      }
-      return;
-    }
     var grad = ctx.createLinearGradient(0, 2, 0, 2 + bodyH);
-    grad.addColorStop(0.00, "rgb(239,68,68)");   // 위: 빨강 (3배 이상)
-    grad.addColorStop(0.25, "rgb(234,179,8)");   // 노랑 (2배)
-    grad.addColorStop(0.50, "rgb(34,197,94)");   // 초록 (1배)
-    grad.addColorStop(0.75, "rgb(8,145,178)");   // 청록 (0.5배)
-    grad.addColorStop(1.00, "rgb(30,58,138)");   // 아래: 짙은 파랑 (0배)
+    grad.addColorStop(0.00, "rgb(239,68,68)");   // 위: 빨강
+    grad.addColorStop(0.25, "rgb(234,179,8)");   // 노랑
+    grad.addColorStop(0.50, "rgb(34,197,94)");   // 초록
+    grad.addColorStop(0.75, "rgb(8,145,178)");   // 청록
+    grad.addColorStop(1.00, "rgb(30,58,138)");   // 아래: 짙은 파랑
     ctx.fillStyle = grad;
     ctx.fillRect(0, 2, W, bodyH);
+    if (specSettings.mode === "zones") {
+      var b = specSettings.bounds;
+      for (var k = 0; k < b.length; k++) {
+        var by = volToSpecY(b[k], bodyH);
+        var dragging = (dragBound && dragBound.idx === k);
+        ctx.strokeStyle = dragging ? "#f59e0b" : "rgba(255,255,255,0.9)";
+        ctx.lineWidth = dragging ? 3 : 1.5;
+        ctx.beginPath(); ctx.moveTo(0, by); ctx.lineTo(W, by); ctx.stroke();
+      }
+    }
   }
   // ---- 스펙트럼 설정판 ----
   var specPanel = $("specPanel");
@@ -777,12 +820,88 @@
     cv.addEventListener("touchcancel", function () { t1 = null; pinch = null; tapStart = null; if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; } });
   }
 
+  // ---- 스펙트럼 바 경계선 드래그 (구간 모드 전용): 흰 선을 잡고 위아래로 밀면 숫자가 바뀜 ----
+  var dragLabel = $("dragVal");
+  function specBodyH(cv) {
+    var r = cv.getBoundingClientRect();
+    return Math.max(1, r.height);
+  }
+  function nearestBoundY(y, bodyH) {
+    // 터치 y에서 가장 가까운 경계선 인덱스 (18px 이내면 잡음)
+    var b = specSettings.bounds;
+    var best = -1, bestD = 18;
+    for (var k = 0; k < b.length; k++) {
+      var by = volToSpecY(b[k], bodyH);
+      var d = Math.abs(y - by);
+      if (d < bestD) { bestD = d; best = k; }
+    }
+    return best;
+  }
+  function showDragLabel(x, y, v) {
+    if (!dragLabel) return;
+    dragLabel.style.display = "block";
+    dragLabel.style.left = (x + 14) + "px";
+    dragLabel.style.top = (y - 12) + "px";
+    dragLabel.textContent = fmtNum(v) + " BTC";
+  }
+  function hideDragLabel() { if (dragLabel) dragLabel.style.display = "none"; }
+  function attachSpecDrag(tf) {
+    var cv = $(tf.sp);
+    if (!cv) return;
+    cv.addEventListener("touchstart", function (ev) {
+      if (specSettings.mode !== "zones") return;
+      if (ev.touches.length !== 1) return;
+      var t = ev.touches[0];
+      var r = cv.getBoundingClientRect();
+      var y = t.clientY - r.top;
+      var bodyH = specBodyH(cv);
+      var idx = nearestBoundY(y, bodyH);
+      if (idx < 0) return;
+      dragLogMax = specLogMax(); // 드래그 중 스케일 고정
+      dragBound = { idx: idx, cv: cv };
+      showDragLabel(t.clientX, t.clientY, specSettings.bounds[idx]);
+      ev.preventDefault();
+    }, { passive: false });
+    cv.addEventListener("touchmove", function (ev) {
+      if (!dragBound || ev.touches.length !== 1) return;
+      var t = ev.touches[0];
+      var r = dragBound.cv.getBoundingClientRect();
+      var y = t.clientY - r.top;
+      var bodyH = specBodyH(dragBound.cv);
+      var v = roundNice(specYToVol(y, bodyH));
+      var b = specSettings.bounds;
+      var idx = dragBound.idx;
+      var lo = idx === 0 ? 1 : b[idx - 1] + 1;
+      var hi = idx === b.length - 1 ? Infinity : b[idx + 1] - 1;
+      if (v < lo) v = lo;
+      if (v > hi) v = hi;
+      if (v !== b[idx]) {
+        b[idx] = v;
+        showDragLabel(t.clientX, t.clientY, v);
+        drawAll();
+      }
+      ev.preventDefault();
+    }, { passive: false });
+    function endDrag() {
+      if (!dragBound) return;
+      dragBound = null;
+      dragLogMax = null;
+      hideDragLabel();
+      saveSpecSettings();
+      renderZoneEditor();
+      drawAll();
+    }
+    cv.addEventListener("touchend", endDrag);
+    cv.addEventListener("touchcancel", endDrag);
+  }
+
   // ---- 시작 ----
   function resize() { drawAll(); }
   window.addEventListener("resize", resize);
   window.addEventListener("orientationchange", function () { setTimeout(resize, 300); });
   setStatus("poll", "불러오는 중…");
   TF.forEach(attachTouch);
+  TF.forEach(attachSpecDrag);
   setInterval(updateCountdowns, 1000);
   Promise.all(TF.map(loadRest)).then(function () {
     hideErr();
