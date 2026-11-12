@@ -125,6 +125,11 @@
       <div class="hint">선은 작도용이야. 특정 거래량 위치를 눈으로 확인하려고 바 위에 표시만 해. 색에는 영향 없어. 숫자를 바꾸면 바로 적용되고, 바에서 선을 잡고 밀 수도 있어. 선은 원하는 만큼 추가해.</div>
     </div>
     <div id="multHint" class="hint">배율 모드야. 거래량을 전체 평균 대비 몇 배냐로 색을 정해. (0배 파랑, 0.5배 청록, 1배 초록, 2배 노랑, 3배 이상 빨강)</div>
+    <div class="seg">
+      <button id="specExport" type="button">내보내기</button>
+      <button id="specImport" type="button">가져오기</button>
+    </div>
+    <input id="specFile" type="file" accept="application/json,.json" style="display:none">
     <button id="specClose" class="close" type="button">닫기</button>
   </div>
 </div>
@@ -547,6 +552,35 @@
     saveSpecSettings();
     renderZoneEditor();
     drawAll();
+  });
+  // 설정 파일 내보내기·가져오기 (모드·선·중간·최대, 15분·5분·1분봉 전부)
+  $("specExport").addEventListener("click", function () {
+    var blob = new Blob([JSON.stringify({ version: 4, settings: specSettings }, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "mtf-settings.json";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  });
+  $("specImport").addEventListener("click", function () { $("specFile").click(); });
+  $("specFile").addEventListener("change", function (ev) {
+    var f = ev.target.files && ev.target.files[0];
+    ev.target.value = ""; // 같은 파일 다시 고를 수 있게
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      try {
+        var parsed = JSON.parse(rd.result);
+        var data = (parsed && parsed.settings) || parsed;
+        if (!data || typeof data !== "object" || !(data["15m"] || data["5m"] || data["1m"])) { renderZoneEditor(); return; }
+        ["15m", "5m", "1m"].forEach(function (k) { if (data[k]) specSettings[k] = cleanOne(data[k], specSettings[k]); });
+        saveSpecSettings();
+        renderZoneEditor();
+        drawAll();
+      } catch (e) { renderZoneEditor(); }
+    };
+    rd.readAsText(f);
   });
   function draw(tf) {
     var cv = $(tf.cv);
