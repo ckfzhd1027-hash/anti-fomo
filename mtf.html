@@ -66,6 +66,8 @@
     font-variant-numeric: tabular-nums;
   }
   #specPanel .zrow .rm { background: none; border: none; color: #9ca3af; font-size: 16px; cursor: pointer; padding: 2px 4px; flex: none; }
+  #specPanel .zrow .ctr { background: none; border: 1px solid #4b5563; color: #9ca3af; font-size: 13px; cursor: pointer; padding: 2px 6px; border-radius: 6px; flex: none; }
+  #specPanel .zrow .ctr.on { background: #f59e0b; border-color: #f59e0b; color: #111827; }
   #specPanel .add {
     width: 100%; padding: 8px 0; border-radius: 8px; border: 1px dashed #4b5563;
     background: none; color: #d1d5db; font-size: 13px; font-weight: 700; cursor: pointer; margin-bottom: 12px;
@@ -104,13 +106,18 @@
   <div class="card">
     <h2>스펙트럼 설정</h2>
     <div class="seg">
+      <button id="tf15" type="button">15분봉</button>
+      <button id="tf5" type="button">5분봉</button>
+      <button id="tf1" type="button">1분봉</button>
+    </div>
+    <div class="seg">
       <button id="modeMult" type="button">배율</button>
       <button id="modeZones" type="button">구간</button>
     </div>
     <div id="zoneEditor">
       <div id="zoneList"></div>
       <button id="zoneAdd" class="add" type="button">+ 구간 추가</button>
-      <div class="hint">제일 아래 구간은 거래량 0부터, 제일 위 구간은 무한대까지야. 경계 숫자를 바꾸면 바로 적용돼.</div>
+      <div class="hint">제일 아래 구간은 거래량 0부터, 제일 위 구간은 무한대까지야. 경계 숫자를 바꾸면 바로 적용돼. ◎를 누르면 그 경계가 스펙트럼 가운데에 와.</div>
     </div>
     <div id="multHint" class="hint">배율 모드야. 거래량을 전체 평균 대비 몇 배냐로 색을 정해. (0배 파랑, 0.5배 청록, 1배 초록, 2배 노랑, 3배 이상 빨강)</div>
     <button id="specClose" class="close" type="button">닫기</button>
@@ -245,50 +252,94 @@
     return 1;
   }
   // ---- 스펙트럼 모드: 배율(평균 대비) / 구간(사용자 지정 거래량) ----
-  var SPEC_KEY = "mtf_spec_settings_v1";
-  var specSettings = { mode: "mult", bounds: [300, 600, 1500, 8000] }; // bounds: 경계 숫자 (BTC, 오름차순), 구간 수 = bounds.length + 1 (최대 5구간) — 15분봉 거래량 기준 (OKX 화면 BTC 단위)
-  try {
-    var saved = JSON.parse(localStorage.getItem(SPEC_KEY) || "null");
-    if (saved && (saved.mode === "mult" || saved.mode === "zones") && Array.isArray(saved.bounds)) {
-      var b = saved.bounds.filter(function (x) { return typeof x === "number" && isFinite(x) && x > 0; }).sort(function (x, y) { return x - y; }).slice(0, 4);
-      if (b.length >= 1) { specSettings.mode = saved.mode; specSettings.bounds = b; }
+  // ---- 스펙트럼 설정: 시간프레임별 개별 설정 (모드·경계·중심 따로) ----
+  var SPEC_KEY = "mtf_spec_settings_v2";
+  var specDefaults = {
+    "15m": { mode: "mult", bounds: [300, 600, 1500, 8000], centerIdx: 1 },
+    "5m": { mode: "mult", bounds: [100, 200, 500, 1500], centerIdx: 1 },
+    "1m": { mode: "mult", bounds: [10, 20, 50, 150], centerIdx: 1 }
+  };
+  function cleanBounds(b) {
+    return (b || []).filter(function (x) { return typeof x === "number" && isFinite(x) && x > 0; }).sort(function (x, y) { return x - y; }).slice(0, 4);
+  }
+  function cleanOne(raw, def) {
+    var s = { mode: def.mode, bounds: def.bounds.slice(), centerIdx: def.centerIdx };
+    if (raw && (raw.mode === "mult" || raw.mode === "zones")) s.mode = raw.mode;
+    if (raw && Array.isArray(raw.bounds)) {
+      var b = cleanBounds(raw.bounds);
+      if (b.length >= 1) s.bounds = b;
     }
-  } catch (e) {}
+    if (raw && typeof raw.centerIdx === "number" && isFinite(raw.centerIdx)) s.centerIdx = Math.floor(raw.centerIdx);
+    if (s.centerIdx < 0) s.centerIdx = 0;
+    if (s.centerIdx > s.bounds.length - 1) s.centerIdx = s.bounds.length - 1;
+    return s;
+  }
+  var specSettings = {};
+  (function loadSpec() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(SPEC_KEY) || "null");
+      if (saved) {
+        specSettings["15m"] = cleanOne(saved["15m"], specDefaults["15m"]);
+        specSettings["5m"] = cleanOne(saved["5m"], specDefaults["5m"]);
+        specSettings["1m"] = cleanOne(saved["1m"], specDefaults["1m"]);
+        return;
+      }
+      // v1 마이그레이션: 예전 전역 설정을 15분봉에 그대로 옮김
+      var old = JSON.parse(localStorage.getItem("mtf_spec_settings_v1") || "null");
+      if (old) {
+        specSettings["15m"] = cleanOne(old, specDefaults["15m"]);
+        specSettings["5m"] = cleanOne(null, specDefaults["5m"]);
+        specSettings["1m"] = cleanOne(null, specDefaults["1m"]);
+        return;
+      }
+    } catch (e) {}
+    specSettings["15m"] = cleanOne(null, specDefaults["15m"]);
+    specSettings["5m"] = cleanOne(null, specDefaults["5m"]);
+    specSettings["1m"] = cleanOne(null, specDefaults["1m"]);
+  })();
   function saveSpecSettings() {
     try { localStorage.setItem(SPEC_KEY, JSON.stringify(specSettings)); } catch (e) {}
   }
-  function zoneCount() { return specSettings.bounds.length + 1; }
-  function findZone(vol) {
-    var b = specSettings.bounds;
+  function specFor(tf) { return specSettings[tf.key]; }
+  function zoneCount(s) { return s.bounds.length + 1; }
+  function findZone(s, vol) {
+    var b = s.bounds;
     for (var i = 0; i < b.length; i++) { if (vol < b[i]) return i; }
     return b.length; // 최상위 구간 (무한대까지)
   }
   // ---- 스펙트럼 바 세로축 = 거래량 로그 스케일 (기본모드처럼 연속 그라디언트, 경계선은 로그 위치) ----
-  // 아래=10 BTC, 위=최상위 경계×2 또는 20000 중 큰 값. 경계선을 드래그하면 이 스케일로 숫자가 바뀜.
-  var dragLogMax = null; // 드래그 중 스케일 고정용 (최상위 경계가 바뀌어도 중간에 안 튐)
-  var dragBound = null; // 드래그 중인 경계선 { idx, cv }
-  function specLogMin() { return 1; } // log10(10)
-  function specLogMax() {
-    if (dragLogMax !== null) return dragLogMax;
-    var top = specSettings.bounds[specSettings.bounds.length - 1] || 8000;
-    return Math.log10(Math.max(top * 2, 20000));
+  // 고른 중심 경계가 바 정중앙(0.5)에 오게 스케일을 이동. 폭은 데이터 범위(최대 4.0).
+  var dragBound = null; // 드래그 중인 경계선 { idx, cv, tf }
+  var frozenScale = {}; // tfKey -> {lo, hi} (드래그 중 스케일 고정 — 최상위/중심 경계가 바뀌어도 중간에 안 튐)
+  function specScale(s, key) {
+    if (key && frozenScale[key]) return frozenScale[key];
+    var b = s.bounds;
+    var top = b[b.length - 1] || 8000;
+    var loNeed = 1; // log10(10)
+    var hiNeed = Math.log10(Math.max(top * 2, 20000));
+    var width = hiNeed - loNeed;
+    if (width > 4.0) width = 4.0;
+    if (width < 1.0) width = 1.0;
+    var c = b[s.centerIdx] || top;
+    var lc = Math.log10(Math.max(c, 1));
+    return { lo: lc - width / 2, hi: lc + width / 2 };
   }
-  function volFrac(vol) {
+  function volFrac(s, key, vol) {
     // 거래량 → 바 위치 비율 (0=맨 아래 파랑, 1=맨 위 빨강)
     if (!(vol > 0)) return 0;
-    var lo = specLogMin(), hi = specLogMax();
-    var f = (Math.log10(vol) - lo) / (hi - lo);
+    var sc = specScale(s, key);
+    var f = (Math.log10(vol) - sc.lo) / (sc.hi - sc.lo);
     return f < 0 ? 0 : (f > 1 ? 1 : f);
   }
-  function volToSpecY(vol, bodyH) {
-    return 2 + (1 - volFrac(vol)) * bodyH;
+  function volToSpecY(s, key, vol, bodyH) {
+    return 2 + (1 - volFrac(s, key, vol)) * bodyH;
   }
-  function specYToVol(y, bodyH) {
+  function specYToVol(s, key, y, bodyH) {
     var frac = 1 - (y - 2) / bodyH;
     if (frac < 0) frac = 0;
     if (frac > 1) frac = 1;
-    var lo = specLogMin(), hi = specLogMax();
-    return Math.pow(10, lo + frac * (hi - lo));
+    var sc = specScale(s, key);
+    return Math.pow(10, sc.lo + frac * (sc.hi - sc.lo));
   }
   function roundNice(v) {
     // 드래그 숫자를 깔끔하게 (유효숫자 2자리)
@@ -297,19 +348,19 @@
     var step = Math.pow(10, exp - 1);
     return Math.max(1, Math.round(v / step) * step);
   }
-  function zoneT(zi) {
+  function zoneT(s, key, zi) {
     // 구간 중심의 그라디언트 위치 (로그 스케일 중심) — 캔들 색이 바의 해당 위치 색과 일치
-    var b = specSettings.bounds;
-    var n = zoneCount();
+    var b = s.bounds;
+    var n = zoneCount(s);
     var lo = zi === 0 ? 0 : b[zi - 1];
     var hi = zi >= n - 1 ? Infinity : b[zi];
-    return (volFrac(lo) + volFrac(hi)) / 2;
+    return (volFrac(s, key, lo) + volFrac(s, key, hi)) / 2;
   }
-  function zoneCenterY(zi, bodyH) {
-    return 2 + (1 - zoneT(zi)) * bodyH;
+  function zoneCenterY(s, key, zi, bodyH) {
+    return 2 + (1 - zoneT(s, key, zi)) * bodyH;
   }
-  function volumeT(vol, refAvg) {
-    if (specSettings.mode === "zones") return zoneT(findZone(vol));
+  function volumeT(s, key, vol, refAvg) {
+    if (s.mode === "zones") return zoneT(s, key, findZone(s, vol));
     return multToT(refAvg > 0 ? vol / refAvg : 0);
   }
   function drawSpectrum(tf, bodyH) {
@@ -317,6 +368,7 @@
     // 구간 모드는 그 위에 경계선(흰 선)을 로그 위치에 그림 — 선을 잡고 드래그하면 숫자 변경.
     var cv = $(tf.sp);
     if (!cv) return;
+    var s = specFor(tf);
     var m = fitCanvas(cv);
     var ctx = cv.getContext("2d");
     ctx.setTransform(m.dpr, 0, 0, m.dpr, 0, 0);
@@ -330,10 +382,10 @@
     grad.addColorStop(1.00, "rgb(30,58,138)");   // 아래: 짙은 파랑
     ctx.fillStyle = grad;
     ctx.fillRect(0, 2, W, bodyH);
-    if (specSettings.mode === "zones") {
-      var b = specSettings.bounds;
+    if (s.mode === "zones") {
+      var b = s.bounds;
       for (var k = 0; k < b.length; k++) {
-        var by = volToSpecY(b[k], bodyH);
+        var by = volToSpecY(s, tf.key, b[k], bodyH);
         var dragging = (dragBound && dragBound.idx === k);
         ctx.strokeStyle = dragging ? "#f59e0b" : "rgba(255,255,255,0.9)";
         ctx.lineWidth = dragging ? 3 : 1.5;
@@ -341,8 +393,8 @@
       }
       // 드래그 중인 바에만 숫자 표시 (넓어진 바 위에 호박색 알약)
       if (dragBound && dragBound.cv === cv) {
-        var dv = specSettings.bounds[dragBound.idx];
-        var dy = volToSpecY(dv, bodyH);
+        var dv = s.bounds[dragBound.idx];
+        var dy = volToSpecY(s, tf.key, dv, bodyH);
         var label = fmtNum(dv) + " BTC";
         ctx.font = "bold 12px -apple-system, sans-serif";
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
@@ -363,15 +415,20 @@
     if (x >= 1000) return x.toLocaleString("en-US");
     return String(x);
   }
+  var panelTf = "15m"; // 설정판에서 편집 중인 시간프레임
   function renderZoneEditor() {
-    var mode = specSettings.mode;
+    var s = specSettings[panelTf];
+    var mode = s.mode;
+    $("tf15").classList.toggle("on", panelTf === "15m");
+    $("tf5").classList.toggle("on", panelTf === "5m");
+    $("tf1").classList.toggle("on", panelTf === "1m");
     $("modeMult").classList.toggle("on", mode === "mult");
     $("modeZones").classList.toggle("on", mode === "zones");
     $("zoneEditor").style.display = mode === "zones" ? "" : "none";
     $("multHint").style.display = mode === "mult" ? "" : "none";
     if (mode !== "zones") return;
-    var b = specSettings.bounds;
-    var n = zoneCount();
+    var b = s.bounds;
+    var n = zoneCount(s);
     var list = $("zoneList");
     list.innerHTML = "";
     for (var i = 0; i < n; i++) {
@@ -379,7 +436,7 @@
       row.className = "zrow";
       var sw = document.createElement("span");
       sw.className = "sw";
-      sw.style.background = spectrumColor(zoneT(i));
+      sw.style.background = spectrumColor(zoneT(s, panelTf, i));
       row.appendChild(sw);
       var rng = document.createElement("span");
       rng.className = "rng";
@@ -392,21 +449,38 @@
         inp.value = b[i];
         inp.setAttribute("data-bi", i);
         inp.addEventListener("change", function (ev) {
+          var s2 = specSettings[panelTf];
           var idx = parseInt(ev.target.getAttribute("data-bi"), 10);
           var v = Math.round(parseFloat(ev.target.value));
           if (!isFinite(v) || v <= 0) { renderZoneEditor(); return; }
-          var nb = specSettings.bounds.slice();
+          var nb = s2.bounds.slice();
           for (var k = 0; k < nb.length; k++) {
             if (k !== idx && nb[k] === v) { renderZoneEditor(); return; } // 중복이면 되돌림
           }
+          var centerVal = nb[s2.centerIdx]; // 중심 경계 값 기억 (정렬 후에도 같은 경계 유지)
           nb[idx] = v;
           nb.sort(function (x, y) { return x - y; });
-          specSettings.bounds = nb;
+          s2.bounds = nb;
+          s2.centerIdx = nb.indexOf(centerVal);
+          if (s2.centerIdx < 0) s2.centerIdx = 0;
           saveSpecSettings();
           renderZoneEditor();
           drawAll();
         });
         row.appendChild(inp);
+        // 중심 버튼: 이 경계를 스펙트럼 가운데로
+        var cb = document.createElement("button");
+        cb.className = "ctr" + (s.centerIdx === i ? " on" : "");
+        cb.type = "button"; cb.textContent = "◎";
+        cb.setAttribute("data-ci", i);
+        cb.addEventListener("click", function (ev) {
+          var s2 = specSettings[panelTf];
+          s2.centerIdx = parseInt(ev.target.getAttribute("data-ci"), 10);
+          saveSpecSettings();
+          renderZoneEditor();
+          drawAll();
+        });
+        row.appendChild(cb);
       } else {
         rng.textContent = fmtNum(lo) + " ~ ∞";
         row.appendChild(rng);
@@ -415,12 +489,16 @@
       rm.className = "rm"; rm.type = "button"; rm.textContent = "×";
       rm.setAttribute("data-zi", i);
       rm.addEventListener("click", function (ev) {
+        var s2 = specSettings[panelTf];
         var zi = parseInt(ev.target.getAttribute("data-zi"), 10);
-        if (zoneCount() <= 2) return; // 최소 2구간
-        var nb = specSettings.bounds.slice();
-        if (zi < nb.length) nb.splice(zi, 1);
-        else nb.splice(nb.length - 1, 1);
-        specSettings.bounds = nb;
+        if (zoneCount(s2) <= 2) return; // 최소 2구간
+        var nb = s2.bounds.slice();
+        var delIdx = zi < nb.length ? zi : nb.length - 1;
+        var centerVal = nb[s2.centerIdx];
+        nb.splice(delIdx, 1);
+        s2.bounds = nb;
+        var ni = nb.indexOf(centerVal);
+        s2.centerIdx = ni < 0 ? Math.min(delIdx, nb.length - 1) : ni;
         saveSpecSettings();
         renderZoneEditor();
         drawAll();
@@ -428,7 +506,7 @@
       row.appendChild(rm);
       list.appendChild(row);
     }
-    $("zoneAdd").disabled = zoneCount() >= 5;
+    $("zoneAdd").disabled = zoneCount(s) >= 5;
   }
   $("gearBtn").addEventListener("click", function () {
     renderZoneEditor();
@@ -440,25 +518,32 @@
   specPanel.addEventListener("click", function (ev) {
     if (ev.target === specPanel) specPanel.classList.remove("open");
   });
+  $("tf15").addEventListener("click", function () { panelTf = "15m"; renderZoneEditor(); });
+  $("tf5").addEventListener("click", function () { panelTf = "5m"; renderZoneEditor(); });
+  $("tf1").addEventListener("click", function () { panelTf = "1m"; renderZoneEditor(); });
   $("modeMult").addEventListener("click", function () {
-    specSettings.mode = "mult";
+    specSettings[panelTf].mode = "mult";
     saveSpecSettings();
     renderZoneEditor();
     drawAll();
   });
   $("modeZones").addEventListener("click", function () {
-    specSettings.mode = "zones";
+    specSettings[panelTf].mode = "zones";
     saveSpecSettings();
     renderZoneEditor();
     drawAll();
   });
   $("zoneAdd").addEventListener("click", function () {
-    if (zoneCount() >= 5) return;
-    var b = specSettings.bounds.slice();
+    var s2 = specSettings[panelTf];
+    if (zoneCount(s2) >= 5) return;
+    var b = s2.bounds.slice();
+    var centerVal = b[s2.centerIdx];
     var top = b[b.length - 1];
     b.push(Math.round(top * 2));
     b.sort(function (x, y) { return x - y; });
-    specSettings.bounds = b;
+    s2.bounds = b;
+    s2.centerIdx = b.indexOf(centerVal);
+    if (s2.centerIdx < 0) s2.centerIdx = 0;
     saveSpecSettings();
     renderZoneEditor();
     drawAll();
@@ -472,6 +557,7 @@
     ctx.clearRect(0, 0, W, H);
     var arr = data[tf.key];
     if (!arr.length) return;
+    var s = specFor(tf);
     var count = Math.max(8, Math.min(LIMIT, Math.round(MAX_SHOW / zoomLevel)));
     var endIdx = arr.length - 1;
     if (viewEndTs !== null) {
@@ -537,7 +623,7 @@
       ctx.strokeStyle = col; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(cx, y(c[2])); ctx.lineTo(cx, y(c[3])); ctx.stroke();
       // 몸통: 안쪽 색은 거래량으로 정함 (배율 모드=평균 대비, 구간 모드=사용자 구간 — 테두리는 양봉/음봉 방향 색)
-      ctx.fillStyle = spectrumColor(volumeT(c[5] || 0, refAvg));
+      ctx.fillStyle = spectrumColor(volumeT(s, tf.key, c[5] || 0, refAvg));
       ctx.fillRect(x, by, bw, bh);
       // 테두리
       ctx.strokeStyle = col; ctx.lineWidth = 1;
@@ -552,10 +638,10 @@
     var lastC = show[n - 1][4];
     var lastV = show[n - 1][5] || 0;
     var ly = y(lastC);
-    var liveT = volumeT(lastV, refAvg);
+    var liveT = volumeT(s, tf.key, lastV, refAvg);
     var lcol = spectrumColor(liveT);
     // 구간 모드는 해당 구역 가운데로, 배율 모드는 배율 높이로
-    var zoneY = specSettings.mode === "zones" ? zoneCenterY(findZone(lastV), bodyH) : 2 + (1 - liveT) * bodyH;
+    var zoneY = s.mode === "zones" ? zoneCenterY(s, tf.key, findZone(s, lastV), bodyH) : 2 + (1 - liveT) * bodyH;
     var lastCx = (n - 1) * step + step / 2; // 라이브 봉 중심 x
     ctx.strokeStyle = lcol; ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(lastCx, ly); ctx.lineTo(0, zoneY); ctx.stroke();
@@ -837,12 +923,12 @@
     var r = cv.getBoundingClientRect();
     return Math.max(1, r.height);
   }
-  function nearestBoundY(y, bodyH) {
-    // 터치 y에서 가장 가까운 경계선 인덱스 (18px 이내면 잡음)
-    var b = specSettings.bounds;
-    var best = -1, bestD = 18;
+  function nearestBoundY(s, key, y, bodyH) {
+    // 터치 y에서 가장 가까운 경계선 인덱스 — 바 어디를 눌러도 잡힘 (거리 제한 없음)
+    var b = s.bounds;
+    var best = 0, bestD = Infinity;
     for (var k = 0; k < b.length; k++) {
-      var by = volToSpecY(b[k], bodyH);
+      var by = volToSpecY(s, key, b[k], bodyH);
       var d = Math.abs(y - by);
       if (d < bestD) { bestD = d; best = k; }
     }
@@ -852,28 +938,29 @@
     var cv = $(tf.sp);
     if (!cv) return;
     cv.addEventListener("touchstart", function (ev) {
-      if (specSettings.mode !== "zones") return;
+      var s = specFor(tf);
+      if (s.mode !== "zones") return;
       if (ev.touches.length !== 1) return;
       var t = ev.touches[0];
       var r = cv.getBoundingClientRect();
       var y = t.clientY - r.top;
       var bodyH = specBodyH(cv);
-      var idx = nearestBoundY(y, bodyH);
-      if (idx < 0) return;
-      dragLogMax = specLogMax(); // 드래그 중 스케일 고정
-      dragBound = { idx: idx, cv: cv };
+      var idx = nearestBoundY(s, tf.key, y, bodyH);
+      frozenScale[tf.key] = specScale(s, tf.key); // 드래그 중 스케일 고정
+      dragBound = { idx: idx, cv: cv, tf: tf };
       cv.style.width = DRAG_WIDE + "px"; // 바 넓히기
       drawAll(); // 넓어진 바에 숫자 표시
       ev.preventDefault();
     }, { passive: false });
     cv.addEventListener("touchmove", function (ev) {
       if (!dragBound || ev.touches.length !== 1) return;
+      var s = specFor(dragBound.tf);
       var t = ev.touches[0];
       var r = dragBound.cv.getBoundingClientRect();
       var y = t.clientY - r.top;
       var bodyH = specBodyH(dragBound.cv);
-      var v = roundNice(specYToVol(y, bodyH));
-      var b = specSettings.bounds;
+      var v = roundNice(specYToVol(s, dragBound.tf.key, y, bodyH));
+      var b = s.bounds;
       var idx = dragBound.idx;
       var lo = idx === 0 ? 1 : b[idx - 1] + 1;
       var hi = idx === b.length - 1 ? Infinity : b[idx + 1] - 1;
@@ -888,8 +975,9 @@
     function endDrag() {
       if (!dragBound) return;
       var c = dragBound.cv;
+      var k = dragBound.tf.key;
       dragBound = null;
-      dragLogMax = null;
+      delete frozenScale[k];
       c.style.width = ""; // 원래 폭(22px)으로 복귀
       saveSpecSettings();
       renderZoneEditor();
