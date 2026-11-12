@@ -36,7 +36,10 @@
   .chart-label .ch { font-weight: 700; color: #9ca3af; font-variant-numeric: tabular-nums; }
   .chart-label .tm { margin-left: auto; color: #6b7280; font-size: 11px; font-variant-numeric: tabular-nums; }
   .chart-label .cd { color: #f59e0b; font-weight: 800; font-size: 11px; font-variant-numeric: tabular-nums; margin-left: 6px; }
-  canvas { flex: 1 1 auto; width: 100%; min-height: 0; display: block; touch-action: none; }
+  .chart-body { flex: 1; min-height: 0; display: flex; }
+  .chart-body canvas { display: block; touch-action: none; min-height: 0; }
+  .chart-body .spec { width: 22px; flex: none; }
+  .chart-body .main { flex: 1; min-width: 0; }
   #err {
     position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     display: none; padding: 10px 12px; border-radius: 10px; background: #7f1d1d; color: #fecaca;
@@ -53,15 +56,15 @@
   </header>
   <section class="chart" id="sec15">
     <div class="chart-label"><span class="tf">15분봉</span><span class="cp" id="cp15">—</span><span class="ch" id="ch15"></span><span class="tm" id="tm15"></span><span class="cd" id="cd15"></span></div>
-    <canvas id="cv15"></canvas>
+    <div class="chart-body"><canvas class="spec" id="sp15"></canvas><canvas class="main" id="cv15"></canvas></div>
   </section>
   <section class="chart" id="sec5">
     <div class="chart-label"><span class="tf">5분봉</span><span class="cp" id="cp5">—</span><span class="ch" id="ch5"></span><span class="tm" id="tm5"></span><span class="cd" id="cd5"></span></div>
-    <canvas id="cv5"></canvas>
+    <div class="chart-body"><canvas class="spec" id="sp5"></canvas><canvas class="main" id="cv5"></canvas></div>
   </section>
   <section class="chart" id="sec1">
     <div class="chart-label"><span class="tf">1분봉</span><span class="cp" id="cp1">—</span><span class="ch" id="ch1"></span><span class="tm" id="tm1"></span><span class="cd" id="cd1"></span></div>
-    <canvas id="cv1"></canvas>
+    <div class="chart-body"><canvas class="spec" id="sp1"></canvas><canvas class="main" id="cv1"></canvas></div>
   </section>
 </div>
 <div id="err"></div>
@@ -76,9 +79,9 @@
   var MAX_SHOW = 52;       // 화면에 그릴 봉 수
   var UP = "#22c55e", DOWN = "#ef4444", GRID = "#1f2937", TXT = "#9ca3af";
   var TF = [
-    { key: "15m", bar: "15m", ch: "candle15m", cv: "cv15", cp: "cp15", chg: "ch15", tm: "tm15", cd: "cd15", ms: 15 * 60 * 1000 },
-    { key: "5m",  bar: "5m",  ch: "candle5m",  cv: "cv5",  cp: "cp5",  chg: "ch5",  tm: "tm5",  cd: "cd5",  ms: 5 * 60 * 1000 },
-    { key: "1m",  bar: "1m",  ch: "candle1m",  cv: "cv1",  cp: "cp1",  chg: "ch1",  tm: "tm1",  cd: "cd1",  ms: 1 * 60 * 1000 }
+    { key: "15m", bar: "15m", ch: "candle15m", cv: "cv15", sp: "sp15", cp: "cp15", chg: "ch15", tm: "tm15", cd: "cd15", ms: 15 * 60 * 1000 },
+    { key: "5m",  bar: "5m",  ch: "candle5m",  cv: "cv5",  sp: "sp5",  cp: "cp5",  chg: "ch5",  tm: "tm5",  cd: "cd5",  ms: 5 * 60 * 1000 },
+    { key: "1m",  bar: "1m",  ch: "candle1m",  cv: "cv1",  sp: "sp1",  cp: "cp1",  chg: "ch1",  tm: "tm1",  cd: "cd1",  ms: 1 * 60 * 1000 }
   ];
   var data = { "15m": [], "5m": [], "1m": [] };   // 각 [ts,o,h,l,c,vol] (오름차순)
   var ws = null, wsLive = false, pollTimer = null, pingTimer = null, lastPx = null, resubDone = false;
@@ -86,6 +89,7 @@
   var viewEndTs = null;   // null이면 최신 따라감, 아니면 오른쪽 끝 시간(ms) — 세 시간대 공유
   var zoomLevel = 1;      // 1 = 52봉, 클수록 확대(봉 수 감소) — 세 시간대 공유
   var viewStep = {};      // 타임프레임별 px/봉 (팬 변환용)
+  var selTs = { "15m": null, "5m": null, "1m": null };  // 선택한 봉 타임스탬프 (스펙트럼 표시선)
 
   function $(id) { return document.getElementById(id); }
   function fmt(n) { return Number(n).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
@@ -158,6 +162,107 @@
     if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
     return { w: r.width, h: r.height, dpr: dpr };
   }
+  // ---- 거래량 스펙트럼 (왼쪽 세로줄): 가격대별 거래량 히트맵 ----
+  function spectrumColor(t) {
+    // t 0..1 → 스펙트럼 그라디언트 (짙은 파랑→청록→초록→노랑→빨강)
+    var stops = [
+      [0.00, 30, 58, 138],
+      [0.25, 8, 145, 178],
+      [0.50, 34, 197, 94],
+      [0.75, 234, 179, 8],
+      [1.00, 239, 68, 68]
+    ];
+    if (t <= 0) return "rgb(30,58,138)";
+    if (t >= 1) return "rgb(239,68,68)";
+    for (var i = 0; i < stops.length - 1; i++) {
+      var a = stops[i], b = stops[i + 1];
+      if (t >= a[0] && t <= b[0]) {
+        var f = (t - a[0]) / (b[0] - a[0]);
+        var r = Math.round(a[1] + (b[1] - a[1]) * f);
+        var g = Math.round(a[2] + (b[2] - a[2]) * f);
+        var bl = Math.round(a[3] + (b[3] - a[3]) * f);
+        return "rgb(" + r + "," + g + "," + bl + ")";
+      }
+    }
+    return "rgb(30,58,138)";
+  }
+  function drawSpectrum(tf, show, hi, lo, bodyH, selClose, liveClose) {
+    var cv = $(tf.sp);
+    if (!cv) return;
+    var m = fitCanvas(cv);
+    var ctx = cv.getContext("2d");
+    ctx.setTransform(m.dpr, 0, 0, m.dpr, 0, 0);
+    var W = m.w, H = m.h;
+    ctx.clearRect(0, 0, W, H);
+    var N = 24; // 가격 구간 수
+    var binVol = new Array(N).fill(0);
+    for (var i = 0; i < show.length; i++) {
+      var c = show[i];
+      var v = c[5] || 0;
+      if (v <= 0) continue;
+      var cLo = c[3], cHi = c[2];
+      if (cHi <= cLo) {
+        var b0 = Math.max(0, Math.min(N - 1, Math.floor((c[4] - lo) / (hi - lo) * N)));
+        binVol[b0] += v;
+        continue;
+      }
+      var bA = Math.max(0, Math.floor((cLo - lo) / (hi - lo) * N));
+      var bB = Math.min(N - 1, Math.floor((cHi - lo) / (hi - lo) * N));
+      for (var b = bA; b <= bB; b++) {
+        var binLo = lo + b / N * (hi - lo);
+        var binHi = lo + (b + 1) / N * (hi - lo);
+        var ov = Math.min(cHi, binHi) - Math.max(cLo, binLo);
+        if (ov > 0) binVol[b] += v * ov / (cHi - cLo);
+      }
+    }
+    var maxBin = 0;
+    for (var j = 0; j < N; j++) if (binVol[j] > maxBin) maxBin = binVol[j];
+    if (maxBin <= 0) return;
+    var active = 0, sumActive = 0;
+    for (var k = 0; k < N; k++) { if (binVol[k] > 0) { active++; sumActive += binVol[k]; } }
+    var avgBin = active ? sumActive / active : 0;
+    function y(p) { return 2 + (hi - p) / (hi - lo) * bodyH; }
+    var hotIdx = -1, hotMult = 0;
+    for (var b = 0; b < N; b++) {
+      var t = binVol[b] / maxBin;
+      var yTop = y(lo + (b + 1) / N * (hi - lo));
+      var yBot = y(lo + b / N * (hi - lo));
+      var hgt = Math.max(1, yBot - yTop);
+      ctx.fillStyle = t <= 0.02 ? "rgba(148,163,184,0.10)" : spectrumColor(t);
+      ctx.fillRect(0, yTop, W, hgt);
+      var mult = avgBin > 0 ? binVol[b] / avgBin : 0;
+      if (mult >= 3) {
+        ctx.strokeStyle = "#facc15"; ctx.lineWidth = 1;
+        ctx.strokeRect(0.5, yTop + 0.5, W - 1, hgt - 1);
+        if (mult > hotMult) { hotMult = mult; hotIdx = b; }
+      }
+    }
+    // 가장 뜨거운 구간에 배수 표시 (평균 대비 몇 배)
+    if (hotIdx >= 0 && hotMult >= 3) {
+      var yC = (y(lo + (hotIdx + 1) / N * (hi - lo)) + y(lo + hotIdx / N * (hi - lo))) / 2;
+      var txt = hotMult.toFixed(1) + "x";
+      ctx.font = "bold 9px -apple-system, sans-serif";
+      var tw = ctx.measureText(txt).width;
+      ctx.fillStyle = "rgba(0,0,0,0.65)";
+      ctx.fillRect((W - tw) / 2 - 2, yC - 7, tw + 4, 13);
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(txt, W / 2, yC);
+      ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+    }
+    // 표시선 마커 (선택한 봉 종가=호박, 없으면 실시간 가격=흰색)
+    var refPx = selClose !== null ? selClose : liveClose;
+    if (refPx !== null && refPx !== undefined && refPx >= lo && refPx <= hi) {
+      var yy = y(refPx);
+      ctx.beginPath();
+      ctx.arc(W / 2, yy, 4, 0, Math.PI * 2);
+      ctx.fillStyle = selClose !== null ? "#facc15" : "#ffffff";
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "#0b0e11";
+      ctx.stroke();
+    }
+  }
   function draw(tf) {
     var cv = $(tf.cv);
     var m = fitCanvas(cv);
@@ -183,13 +288,12 @@
     if (!show.length) return;
     var padR = 56;                       // 오른쪽 가격 눈금 폭
     var plotW = W - padR - 4, plotH = H - 4;
-    var volH = Math.max(18, Math.round(plotH * 0.22));
-    var bodyH = plotH - volH - 8;
-    var lo = Infinity, hi = -Infinity, vmax = 0;
+    var bodyH = plotH;                   // 거래량 막대 제거 — 가격 영역이 전체 높이
+    var lo = Infinity, hi = -Infinity, maxVol = 0;
     for (var i = 0; i < show.length; i++) {
       if (show[i][3] < lo) lo = show[i][3];
       if (show[i][2] > hi) hi = show[i][2];
-      if (show[i][5] > vmax) vmax = show[i][5];
+      if (show[i][5] > maxVol) maxVol = show[i][5];
     }
     if (hi <= lo) { hi = lo + 1; }
     var pad = (hi - lo) * 0.08 || 1;
@@ -209,7 +313,14 @@
       ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(plotW, yy); ctx.stroke();
       ctx.fillText(fmt(pv), plotW + 5, yy);
     }
-    // 캔들 + 거래량
+    // 선택한 봉 종가 (스펙트럼 표시선)
+    var selClose = null;
+    if (selTs[tf.key] !== null) {
+      for (var s = 0; s < arr.length; s++) {
+        if (arr[s][0] === selTs[tf.key]) { selClose = arr[s][4]; break; }
+      }
+    }
+    // 캔들: 테두리 + 안쪽 거래량 색칠 (거래량 막대 없음)
     for (var j = 0; j < n; j++) {
       var c = show[j];
       var x = j * step + (step - bw) / 2;
@@ -217,18 +328,25 @@
       var up = c[4] >= c[1];
       var col = up ? UP : DOWN;
       var top = Math.min(c[1], c[4]), bot = Math.max(c[1], c[4]);
+      var by = y(bot);
       var bh = Math.max(1, y(top) - y(bot));
       // 심지
       ctx.strokeStyle = col; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(cx, y(c[2])); ctx.lineTo(cx, y(c[3])); ctx.stroke();
-      // 몸통 (y(bot)=위쪽 끝, y(top)=아래쪽 끝 — fillRect는 위쪽부터 그린다)
+      // 몸통: 안쪽은 거래량 강도만큼 채움 (최대 거래량=0.9, 최소=0.15)
+      var volN = maxVol > 0 ? c[5] / maxVol : 0;
+      ctx.globalAlpha = 0.15 + 0.75 * volN;
       ctx.fillStyle = col;
-      ctx.fillRect(x, y(bot), bw, bh);
-      // 거래량 (하단)
-      var vh = vmax > 0 ? (c[5] / vmax) * volH : 0;
-      ctx.globalAlpha = 0.55;
-      ctx.fillRect(x, 2 + bodyH + 4 + (volH - vh), bw, vh);
+      ctx.fillRect(x, by, bw, bh);
       ctx.globalAlpha = 1;
+      // 테두리
+      ctx.strokeStyle = col; ctx.lineWidth = 1;
+      ctx.strokeRect(x + 0.5, by + 0.5, bw - 1, bh - 1);
+      // 선택한 봉은 흰 테두리로 강조
+      if (selTs[tf.key] !== null && c[0] === selTs[tf.key]) {
+        ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.5;
+        ctx.strokeRect(x - 1, by - 1, bw + 2, bh + 2);
+      }
     }
     // 현재가 점선 + 라벨
     var lastC = show[n - 1][4];
@@ -244,6 +362,17 @@
     ctx.fillStyle = "#0b0e11"; ctx.textAlign = "center";
     ctx.fillText(label, W - tw / 2 - 2, ly);
     ctx.textAlign = "left";
+    // 선택한 봉 종가 점선 (호박색)
+    if (selClose !== null && selClose >= lo && selClose <= hi) {
+      var sy = y(selClose);
+      ctx.strokeStyle = "#facc15"; ctx.setLineDash([4, 3]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(plotW, sy); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    // 스펙트럼 (왼쪽 세로줄)
+    drawSpectrum(tf, show, hi, lo, bodyH, selClose, lastC);
+    // 탭 선택용 뷰 정보 저장
+    tf.view = { step: step, show: show, endIdx: endIdx };
     return { last: show[n - 1], first: show[0] };
   }
   function drawAll() {
@@ -392,7 +521,23 @@
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   }
 
-  // ---- 터치: 한 손가락 팬 + 두 손가락 핀치 줌 + 더블탭 리셋 (세 시간대 동기화) ----
+  // ---- 캔들 탭 선택: 스펙트럼 표시선을 그 봉 종가로 이동 (같은 봉 다시 탭하면 해제) ----
+  function selectCandle(tf, clientX) {
+    var cv = $(tf.cv);
+    var rect = cv.getBoundingClientRect();
+    var x = clientX - rect.left;
+    var v = tf.view;
+    if (!v || !v.show || !v.show.length) return;
+    var step = v.step;
+    if (!step || step <= 0) return;
+    var idx = Math.floor(x / step);
+    if (idx < 0 || idx >= v.show.length) return;
+    var ts = v.show[idx][0];
+    if (selTs[tf.key] === ts) selTs[tf.key] = null;
+    else selTs[tf.key] = ts;
+    drawAll();
+  }
+  // ---- 터치: 한 손가락 팬 + 두 손가락 핀치 줌 + 더블탭 리셋 + 단일 탭 봉 선택 (세 시간대 동기화) ----
   function clampViewEnd() {
     if (viewEndTs === null) return;
     var latest = 0, earliest = Infinity;
@@ -410,21 +555,28 @@
     var t1 = null;
     var pinch = null;
     var lastTap = 0, lastTapX = 0, lastTapY = 0;
+    var tapStart = null, tapTimer = null, tapSuppressed = false;
     cv.addEventListener("touchstart", function (ev) {
       if (ev.touches.length === 1) {
         var t = ev.touches[0];
         t1 = { x: t.clientX, viewEndTs: viewEndTs };
+        tapStart = { x: t.clientX, y: t.clientY, t: Date.now(), moved: false };
         var now = Date.now();
         if (now - lastTap < 300 && Math.abs(t.clientX - lastTapX) < 30 && Math.abs(t.clientY - lastTapY) < 30) {
-          viewEndTs = null; zoomLevel = 1; drawAll();
+          // 더블탭: 뷰 리셋 + 선택 해제 (대기 중인 단일 탭 선택 취소)
+          if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
+          viewEndTs = null; zoomLevel = 1;
+          selTs["15m"] = null; selTs["5m"] = null; selTs["1m"] = null;
+          drawAll();
           lastTap = 0;
-        } else {
-          lastTap = now; lastTapX = t.clientX; lastTapY = t.clientY;
+          tapSuppressed = true;
         }
       } else if (ev.touches.length === 2) {
         var a = ev.touches[0], b = ev.touches[1];
         pinch = { d0: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), zoom0: zoomLevel };
         t1 = null;
+        tapStart = null;
+        if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
       }
       ev.preventDefault();
     }, { passive: false });
@@ -432,6 +584,7 @@
       if (ev.touches.length === 1 && t1) {
         var t = ev.touches[0];
         var dx = t.clientX - t1.x;
+        if (tapStart && (Math.abs(t.clientX - tapStart.x) > 12 || Math.abs(t.clientY - tapStart.y) > 12)) tapStart.moved = true;
         var step = viewStep[tf.key] || 10;
         if (step > 0) {
           var shiftMs = (dx / step) * tf.ms;
@@ -456,9 +609,19 @@
     }, { passive: false });
     cv.addEventListener("touchend", function (ev) {
       if (ev.touches.length < 2) pinch = null;
-      if (ev.touches.length === 0) t1 = null;
+      if (ev.touches.length === 0) {
+        if (tapSuppressed) { tapSuppressed = false; t1 = null; tapStart = null; return; }
+        if (tapStart && !tapStart.moved && Date.now() - tapStart.t < 350) {
+          // 단일 탭: 300ms 뒤 선택 (더블탭이면 취소됨)
+          var tx = tapStart.x;
+          lastTap = Date.now(); lastTapX = tapStart.x; lastTapY = tapStart.y;
+          if (tapTimer) clearTimeout(tapTimer);
+          tapTimer = setTimeout(function () { tapTimer = null; selectCandle(tf, tx); }, 300);
+        }
+        t1 = null; tapStart = null;
+      }
     });
-    cv.addEventListener("touchcancel", function () { t1 = null; pinch = null; });
+    cv.addEventListener("touchcancel", function () { t1 = null; pinch = null; tapStart = null; if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; } });
   }
 
   // ---- 시작 ----
