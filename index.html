@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v767 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v768 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -8029,8 +8029,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       esc: function(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); },
       // 2026-11-01: 사용자가 어제(11/1)도 스터디했음을 확인해줘서 기록에 포함
       // 2026-11-10: 사용자가 11/10도 스터디했음을 확인해줘서 기록에 포함 (2026-11-11 요청)
+      // 2026-11-12: 사용자가 11/12도 스터디했음을 확인해줘서 기록에 포함 (2026-11-13 요청)
       loadCalendar: function() {
-        try { var v = JSON.parse(localStorage.getItem(this.CAL_KEY) || "[]"); if (!Array.isArray(v)) v = []; var seed = ["2026-11-01", "2026-11-10"]; seed.forEach(function(d) { if (v.indexOf(d) < 0) v.push(d); }); return v; } catch (e) { return ["2026-11-01", "2026-11-10"]; }
+        try { var v = JSON.parse(localStorage.getItem(this.CAL_KEY) || "[]"); if (!Array.isArray(v)) v = []; var seed = ["2026-11-01", "2026-11-10", "2026-11-12"]; seed.forEach(function(d) { if (v.indexOf(d) < 0) v.push(d); }); return v; } catch (e) { return ["2026-11-01", "2026-11-10", "2026-11-12"]; }
       },
       saveCalendar: function(dates) { try { localStorage.setItem(this.CAL_KEY, JSON.stringify(dates)); } catch (e) {} },
       saveProgress: function() {
@@ -10384,7 +10385,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v767 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v768 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
