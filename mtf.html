@@ -946,6 +946,7 @@
       var y = t.clientY - r.top;
       var bodyH = specBodyH(cv);
       var idx = nearestBoundY(s, tf.key, y, bodyH);
+      if (idx === s.centerIdx) return; // 중심 경계는 드래그로 못 바꿈 (고정)
       frozenScale[tf.key] = specScale(s, tf.key); // 드래그 중 스케일 고정
       dragBound = { idx: idx, cv: cv, tf: tf };
       cv.style.width = DRAG_WIDE + "px"; // 바 넓히기
