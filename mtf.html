@@ -639,8 +639,8 @@
     // 선택한 봉 종가 (스펙트럼 표시선)
     var selClose = null;
     if (selTs[tf.key] !== null) {
-      for (var s = 0; s < arr.length; s++) {
-        if (arr[s][0] === selTs[tf.key]) { selClose = arr[s][4]; break; }
+      for (var si = 0; si < arr.length; si++) {
+        if (arr[si][0] === selTs[tf.key]) { selClose = arr[si][4]; break; }
       }
     }
     // 캔들: 테두리 + 안쪽 거래량 색칠 (거래량 막대 없음)
@@ -668,19 +668,30 @@
         ctx.strokeRect(x - 1, by - 1, bw + 2, bh + 2);
       }
     }
-    // 실시간 캔들 → 스펙트럼 구역 연결선 (사선 점선): 캔들 거래량 배율 구역으로 이동, 색은 배율 색
+    // 사선 점선: 선택한 봉이 있으면 그 봉에서 시작, 없으면 실시간 봉에서 시작
+    var lineIdx = n - 1;
+    if (selTs[tf.key] !== null) {
+      for (var q = 0; q < n; q++) {
+        if (show[q][0] === selTs[tf.key]) { lineIdx = q; break; }
+      }
+    }
+    var lineC = show[lineIdx][4];
+    var lineV = show[lineIdx][5] || 0;
+    var lineY = y(lineC);
+    var lineT = volumeT(s, tf.key, lineV, refAvg);
+    var lineCol = spectrumColor(lineT);
+    // 구간 모드는 거래량의 스케일 위치로, 배율 모드는 배율 높이로
+    var zoneY = s.mode === "zones" ? volToSpecY(s, tf.key, lineV, bodyH) : 2 + (1 - lineT) * bodyH;
+    var lineCx = lineIdx * step + step / 2; // 사선 시작 봉 중심 x
+    ctx.strokeStyle = lineCol; ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(lineCx, lineY); ctx.lineTo(0, zoneY); ctx.stroke();
+    ctx.setLineDash([]);
+    // 현재가 라벨 (오른쪽, 배율 색 배경) — 항상 실시간 봉 기준
     var lastC = show[n - 1][4];
     var lastV = show[n - 1][5] || 0;
     var ly = y(lastC);
     var liveT = volumeT(s, tf.key, lastV, refAvg);
     var lcol = spectrumColor(liveT);
-    // 구간 모드는 거래량의 스케일 위치로, 배율 모드는 배율 높이로
-    var zoneY = s.mode === "zones" ? volToSpecY(s, tf.key, lastV, bodyH) : 2 + (1 - liveT) * bodyH;
-    var lastCx = (n - 1) * step + step / 2; // 라이브 봉 중심 x
-    ctx.strokeStyle = lcol; ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(lastCx, ly); ctx.lineTo(0, zoneY); ctx.stroke();
-    ctx.setLineDash([]);
-    // 현재가 라벨 (오른쪽, 배율 색 배경)
     ctx.fillStyle = lcol;
     var label = fmt(lastC);
     var tw = ctx.measureText(label).width + 10;
