@@ -40,10 +40,41 @@
   .chart-body canvas { display: block; touch-action: none; min-height: 0; }
   .chart-body .spec { width: 22px; flex: none; }
   .chart-body .main { flex: 1; min-width: 0; }
-  #err {
-    position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-    display: none; padding: 10px 12px; border-radius: 10px; background: #7f1d1d; color: #fecaca;
-    font-size: 12px; font-weight: 700; z-index: 10;
+  header .gear { margin-left: 8px; background: none; border: none; color: #9ca3af; font-size: 16px; cursor: pointer; padding: 2px 4px; }
+  #specPanel {
+    position: fixed; inset: 0; display: none; z-index: 20;
+    background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
+  }
+  #specPanel.open { display: flex; }
+  #specPanel .card {
+    width: min(92vw, 340px); max-height: 82dvh; overflow-y: auto;
+    background: #111827; border: 1px solid #374151; border-radius: 14px; padding: 16px;
+  }
+  #specPanel h2 { margin: 0 0 12px; font-size: 15px; font-weight: 900; }
+  #specPanel .seg { display: flex; gap: 6px; margin-bottom: 12px; }
+  #specPanel .seg button {
+    flex: 1; padding: 8px 0; border-radius: 8px; border: 1px solid #374151;
+    background: #1f2937; color: #e5e7eb; font-size: 13px; font-weight: 800; cursor: pointer;
+  }
+  #specPanel .seg button.on { background: #f59e0b; border-color: #f59e0b; color: #111827; }
+  #specPanel .zrow { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  #specPanel .zrow .sw { width: 16px; height: 16px; border-radius: 4px; flex: none; }
+  #specPanel .zrow .rng { flex: 1; font-size: 12px; color: #d1d5db; font-variant-numeric: tabular-nums; }
+  #specPanel .zrow input {
+    width: 96px; padding: 6px 8px; border-radius: 8px; border: 1px solid #374151;
+    background: #0b0e11; color: #e5e7eb; font-size: 13px; text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  #specPanel .zrow .rm { background: none; border: none; color: #9ca3af; font-size: 16px; cursor: pointer; padding: 2px 4px; flex: none; }
+  #specPanel .add {
+    width: 100%; padding: 8px 0; border-radius: 8px; border: 1px dashed #4b5563;
+    background: none; color: #d1d5db; font-size: 13px; font-weight: 700; cursor: pointer; margin-bottom: 12px;
+  }
+  #specPanel .add:disabled { opacity: 0.4; cursor: default; }
+  #specPanel .hint { font-size: 11px; color: #9ca3af; line-height: 1.5; margin-bottom: 12px; }
+  #specPanel .close {
+    width: 100%; padding: 10px 0; border-radius: 10px; border: none;
+    background: #f59e0b; color: #111827; font-size: 14px; font-weight: 900; cursor: pointer;
   }
 </style>
 </head>
@@ -53,6 +84,7 @@
     <span class="sym">BTC-USDT</span>
     <span id="hdrPx" class="px">—</span>
     <span class="st"><span id="stDot" class="dot"></span><span id="stTxt">연결 중…</span></span>
+    <button id="gearBtn" class="gear" aria-label="스펙트럼 설정">⚙️</button>
   </header>
   <section class="chart" id="sec15">
     <div class="chart-label"><span class="tf">15분봉</span><span class="cp" id="cp15">—</span><span class="ch" id="ch15"></span><span class="tm" id="tm15"></span><span class="cd" id="cd15"></span></div>
@@ -68,6 +100,22 @@
   </section>
 </div>
 <div id="err"></div>
+<div id="specPanel">
+  <div class="card">
+    <h2>스펙트럼 설정</h2>
+    <div class="seg">
+      <button id="modeMult" type="button">배율</button>
+      <button id="modeZones" type="button">구간</button>
+    </div>
+    <div id="zoneEditor">
+      <div id="zoneList"></div>
+      <button id="zoneAdd" class="add" type="button">+ 구간 추가</button>
+      <div class="hint">제일 아래 구간은 거래량 0부터, 제일 위 구간은 무한대까지야. 경계 숫자를 바꾸면 바로 적용돼.</div>
+    </div>
+    <div id="multHint" class="hint">배율 모드야. 거래량을 전체 평균 대비 몇 배냐로 색을 정해. (0배 파랑, 0.5배 청록, 1배 초록, 2배 노랑, 3배 이상 빨강)</div>
+    <button id="specClose" class="close" type="button">닫기</button>
+  </div>
+</div>
 <script>
 (function () {
   "use strict";
@@ -107,7 +155,8 @@
 
   // ---- 데이터 ----
   function parseRow(r) {
-    return [Number(r[0]), Number(r[1]), Number(r[2]), Number(r[3]), Number(r[4]), Number(r[5])];
+    // 거래량: OKX API는 계약 단위, 앱은 OKX 화면과 같은 BTC 단위로 씀 (1계약 = 0.01 BTC)
+    return [Number(r[0]), Number(r[1]), Number(r[2]), Number(r[3]), Number(r[4]), Number(r[5]) / 100];
   }
   function loadRest(tf) {
     return fetch(REST + "?instId=" + INST + "&bar=" + tf.bar + "&limit=" + LIMIT)
@@ -195,9 +244,40 @@
     if (mult <= 3) return 0.75 + ((mult - 2) / 1) * 0.25;
     return 1;
   }
+  // ---- 스펙트럼 모드: 배율(평균 대비) / 구간(사용자 지정 거래량) ----
+  var SPEC_KEY = "mtf_spec_settings_v1";
+  var specSettings = { mode: "mult", bounds: [300, 600, 1500, 8000] }; // bounds: 경계 숫자 (BTC, 오름차순), 구간 수 = bounds.length + 1 (최대 5구간) — 15분봉 거래량 기준 (OKX 화면 BTC 단위)
+  try {
+    var saved = JSON.parse(localStorage.getItem(SPEC_KEY) || "null");
+    if (saved && (saved.mode === "mult" || saved.mode === "zones") && Array.isArray(saved.bounds)) {
+      var b = saved.bounds.filter(function (x) { return typeof x === "number" && isFinite(x) && x > 0; }).sort(function (x, y) { return x - y; }).slice(0, 4);
+      if (b.length >= 1) { specSettings.mode = saved.mode; specSettings.bounds = b; }
+    }
+  } catch (e) {}
+  function saveSpecSettings() {
+    try { localStorage.setItem(SPEC_KEY, JSON.stringify(specSettings)); } catch (e) {}
+  }
+  function zoneCount() { return specSettings.bounds.length + 1; }
+  function findZone(vol) {
+    var b = specSettings.bounds;
+    for (var i = 0; i < b.length; i++) { if (vol < b[i]) return i; }
+    return b.length; // 최상위 구간 (무한대까지)
+  }
+  function zoneT(zi) {
+    var n = zoneCount();
+    if (n <= 1) return 0;
+    return zi / (n - 1); // 아래=0 파랑, 위=1 빨강
+  }
+  function zoneCenterY(zi, bodyH) {
+    var n = zoneCount();
+    return 2 + (n - zi - 0.5) / n * bodyH;
+  }
+  function volumeT(vol, refAvg) {
+    if (specSettings.mode === "zones") return zoneT(findZone(vol));
+    return multToT(refAvg > 0 ? vol / refAvg : 0);
+  }
   function drawSpectrum(tf, bodyH) {
-    // 왼쪽 스펙트럼 바: 고정 무지개 그라디언트 (위=빨강 3배 이상, 아래=짙은 파랑 0배)
-    // 데이터·스와이프와 무관하게 항상 같은 색. 거래량 배율 기준표 역할.
+    // 왼쪽 스펙트럼 바: 배율 모드는 고정 무지개 그라디언트, 구간 모드는 구간별 색으로 나눔
     var cv = $(tf.sp);
     if (!cv) return;
     var m = fitCanvas(cv);
@@ -205,6 +285,16 @@
     ctx.setTransform(m.dpr, 0, 0, m.dpr, 0, 0);
     var W = m.w;
     ctx.clearRect(0, 0, W, m.h);
+    if (specSettings.mode === "zones") {
+      var n = zoneCount();
+      for (var i = 0; i < n; i++) {
+        var yTop = 2 + (n - 1 - i) / n * bodyH;
+        var yBot = 2 + (n - i) / n * bodyH;
+        ctx.fillStyle = spectrumColor(zoneT(i));
+        ctx.fillRect(0, yTop, W, Math.max(1, yBot - yTop));
+      }
+      return;
+    }
     var grad = ctx.createLinearGradient(0, 2, 0, 2 + bodyH);
     grad.addColorStop(0.00, "rgb(239,68,68)");   // 위: 빨강 (3배 이상)
     grad.addColorStop(0.25, "rgb(234,179,8)");   // 노랑 (2배)
@@ -214,6 +304,112 @@
     ctx.fillStyle = grad;
     ctx.fillRect(0, 2, W, bodyH);
   }
+  // ---- 스펙트럼 설정판 ----
+  var specPanel = $("specPanel");
+  function fmtNum(x) {
+    if (x >= 1000) return x.toLocaleString("en-US");
+    return String(x);
+  }
+  function renderZoneEditor() {
+    var mode = specSettings.mode;
+    $("modeMult").classList.toggle("on", mode === "mult");
+    $("modeZones").classList.toggle("on", mode === "zones");
+    $("zoneEditor").style.display = mode === "zones" ? "" : "none";
+    $("multHint").style.display = mode === "mult" ? "" : "none";
+    if (mode !== "zones") return;
+    var b = specSettings.bounds;
+    var n = zoneCount();
+    var list = $("zoneList");
+    list.innerHTML = "";
+    for (var i = 0; i < n; i++) {
+      var row = document.createElement("div");
+      row.className = "zrow";
+      var sw = document.createElement("span");
+      sw.className = "sw";
+      sw.style.background = spectrumColor(zoneT(i));
+      row.appendChild(sw);
+      var rng = document.createElement("span");
+      rng.className = "rng";
+      var lo = i === 0 ? 0 : b[i - 1];
+      if (i < n - 1) {
+        rng.textContent = fmtNum(lo) + " ~ ";
+        row.appendChild(rng);
+        var inp = document.createElement("input");
+        inp.type = "number"; inp.min = "1"; inp.step = "1";
+        inp.value = b[i];
+        inp.setAttribute("data-bi", i);
+        inp.addEventListener("change", function (ev) {
+          var idx = parseInt(ev.target.getAttribute("data-bi"), 10);
+          var v = Math.round(parseFloat(ev.target.value));
+          if (!isFinite(v) || v <= 0) { renderZoneEditor(); return; }
+          var nb = specSettings.bounds.slice();
+          for (var k = 0; k < nb.length; k++) {
+            if (k !== idx && nb[k] === v) { renderZoneEditor(); return; } // 중복이면 되돌림
+          }
+          nb[idx] = v;
+          nb.sort(function (x, y) { return x - y; });
+          specSettings.bounds = nb;
+          saveSpecSettings();
+          renderZoneEditor();
+          drawAll();
+        });
+        row.appendChild(inp);
+      } else {
+        rng.textContent = fmtNum(lo) + " ~ ∞";
+        row.appendChild(rng);
+      }
+      var rm = document.createElement("button");
+      rm.className = "rm"; rm.type = "button"; rm.textContent = "×";
+      rm.setAttribute("data-zi", i);
+      rm.addEventListener("click", function (ev) {
+        var zi = parseInt(ev.target.getAttribute("data-zi"), 10);
+        if (zoneCount() <= 2) return; // 최소 2구간
+        var nb = specSettings.bounds.slice();
+        if (zi < nb.length) nb.splice(zi, 1);
+        else nb.splice(nb.length - 1, 1);
+        specSettings.bounds = nb;
+        saveSpecSettings();
+        renderZoneEditor();
+        drawAll();
+      });
+      row.appendChild(rm);
+      list.appendChild(row);
+    }
+    $("zoneAdd").disabled = zoneCount() >= 5;
+  }
+  $("gearBtn").addEventListener("click", function () {
+    renderZoneEditor();
+    specPanel.classList.add("open");
+  });
+  $("specClose").addEventListener("click", function () {
+    specPanel.classList.remove("open");
+  });
+  specPanel.addEventListener("click", function (ev) {
+    if (ev.target === specPanel) specPanel.classList.remove("open");
+  });
+  $("modeMult").addEventListener("click", function () {
+    specSettings.mode = "mult";
+    saveSpecSettings();
+    renderZoneEditor();
+    drawAll();
+  });
+  $("modeZones").addEventListener("click", function () {
+    specSettings.mode = "zones";
+    saveSpecSettings();
+    renderZoneEditor();
+    drawAll();
+  });
+  $("zoneAdd").addEventListener("click", function () {
+    if (zoneCount() >= 5) return;
+    var b = specSettings.bounds.slice();
+    var top = b[b.length - 1];
+    b.push(Math.round(top * 2));
+    b.sort(function (x, y) { return x - y; });
+    specSettings.bounds = b;
+    saveSpecSettings();
+    renderZoneEditor();
+    drawAll();
+  });
   function draw(tf) {
     var cv = $(tf.cv);
     var m = fitCanvas(cv);
@@ -287,9 +483,8 @@
       // 심지
       ctx.strokeStyle = col; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(cx, y(c[2])); ctx.lineTo(cx, y(c[3])); ctx.stroke();
-      // 몸통: 안쪽 색은 거래량 배율로 정함 (고정 스케일 — 테두리는 양봉/음봉 방향 색)
-      var cMult = refAvg > 0 ? (c[5] || 0) / refAvg : 0;
-      ctx.fillStyle = spectrumColor(multToT(cMult));
+      // 몸통: 안쪽 색은 거래량으로 정함 (배율 모드=평균 대비, 구간 모드=사용자 구간 — 테두리는 양봉/음봉 방향 색)
+      ctx.fillStyle = spectrumColor(volumeT(c[5] || 0, refAvg));
       ctx.fillRect(x, by, bw, bh);
       // 테두리
       ctx.strokeStyle = col; ctx.lineWidth = 1;
@@ -304,10 +499,10 @@
     var lastC = show[n - 1][4];
     var lastV = show[n - 1][5] || 0;
     var ly = y(lastC);
-    var liveMult = refAvg > 0 ? lastV / refAvg : 0;
-    var liveT = multToT(liveMult);
+    var liveT = volumeT(lastV, refAvg);
     var lcol = spectrumColor(liveT);
-    var zoneY = 2 + (1 - liveT) * bodyH; // 배율 구역 높이 (위=고배율 빨강, 아래=저배율 파랑)
+    // 구간 모드는 해당 구역 가운데로, 배율 모드는 배율 높이로
+    var zoneY = specSettings.mode === "zones" ? zoneCenterY(findZone(lastV), bodyH) : 2 + (1 - liveT) * bodyH;
     var lastCx = (n - 1) * step + step / 2; // 라이브 봉 중심 x
     ctx.strokeStyle = lcol; ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(lastCx, ly); ctx.lineTo(0, zoneY); ctx.stroke();
