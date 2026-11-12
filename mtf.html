@@ -76,11 +76,6 @@
     width: 100%; padding: 10px 0; border-radius: 10px; border: none;
     background: #f59e0b; color: #111827; font-size: 14px; font-weight: 900; cursor: pointer;
   }
-  #dragVal {
-    position: fixed; z-index: 60; display: none; pointer-events: none;
-    background: #f59e0b; color: #111827; font-size: 12px; font-weight: 800;
-    padding: 3px 8px; border-radius: 6px; white-space: nowrap; font-variant-numeric: tabular-nums;
-  }
 </style>
 </head>
 <body>
@@ -121,7 +116,6 @@
     <button id="specClose" class="close" type="button">닫기</button>
   </div>
 </div>
-<div id="dragVal"></div>
 <script>
 (function () {
   "use strict";
@@ -344,6 +338,22 @@
         ctx.strokeStyle = dragging ? "#f59e0b" : "rgba(255,255,255,0.9)";
         ctx.lineWidth = dragging ? 3 : 1.5;
         ctx.beginPath(); ctx.moveTo(0, by); ctx.lineTo(W, by); ctx.stroke();
+      }
+      // 드래그 중인 바에만 숫자 표시 (넓어진 바 위에 호박색 알약)
+      if (dragBound && dragBound.cv === cv) {
+        var dv = specSettings.bounds[dragBound.idx];
+        var dy = volToSpecY(dv, bodyH);
+        var label = fmtNum(dv) + " BTC";
+        ctx.font = "bold 12px -apple-system, sans-serif";
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        var tw = ctx.measureText(label).width + 12;
+        if (tw > W) tw = W;
+        var px = Math.max(0, (W - tw) / 2);
+        ctx.fillStyle = "#f59e0b";
+        ctx.fillRect(px, dy - 9, tw, 18);
+        ctx.fillStyle = "#111827";
+        ctx.fillText(label, px + tw / 2, dy + 0.5);
+        ctx.textAlign = "left";
       }
     }
   }
@@ -821,7 +831,8 @@
   }
 
   // ---- 스펙트럼 바 경계선 드래그 (구간 모드 전용): 흰 선을 잡고 위아래로 밀면 숫자가 바뀜 ----
-  var dragLabel = $("dragVal");
+  // 드래그하는 동안만 해당 스펙트럼 바가 넓어지고(110px) 숫자가 바 위에 표시됨. 끝나면 원래 폭(22px)으로 복귀.
+  var DRAG_WIDE = 110;
   function specBodyH(cv) {
     var r = cv.getBoundingClientRect();
     return Math.max(1, r.height);
@@ -837,14 +848,6 @@
     }
     return best;
   }
-  function showDragLabel(x, y, v) {
-    if (!dragLabel) return;
-    dragLabel.style.display = "block";
-    dragLabel.style.left = (x + 14) + "px";
-    dragLabel.style.top = (y - 12) + "px";
-    dragLabel.textContent = fmtNum(v) + " BTC";
-  }
-  function hideDragLabel() { if (dragLabel) dragLabel.style.display = "none"; }
   function attachSpecDrag(tf) {
     var cv = $(tf.sp);
     if (!cv) return;
@@ -859,7 +862,8 @@
       if (idx < 0) return;
       dragLogMax = specLogMax(); // 드래그 중 스케일 고정
       dragBound = { idx: idx, cv: cv };
-      showDragLabel(t.clientX, t.clientY, specSettings.bounds[idx]);
+      cv.style.width = DRAG_WIDE + "px"; // 바 넓히기
+      drawAll(); // 넓어진 바에 숫자 표시
       ev.preventDefault();
     }, { passive: false });
     cv.addEventListener("touchmove", function (ev) {
@@ -877,16 +881,16 @@
       if (v > hi) v = hi;
       if (v !== b[idx]) {
         b[idx] = v;
-        showDragLabel(t.clientX, t.clientY, v);
         drawAll();
       }
       ev.preventDefault();
     }, { passive: false });
     function endDrag() {
       if (!dragBound) return;
+      var c = dragBound.cv;
       dragBound = null;
       dragLogMax = null;
-      hideDragLabel();
+      c.style.width = ""; // 원래 폭(22px)으로 복귀
       saveSpecSettings();
       renderZoneEditor();
       drawAll();
