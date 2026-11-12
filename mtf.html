@@ -66,8 +66,9 @@
     font-variant-numeric: tabular-nums;
   }
   #specPanel .zrow .rm { background: none; border: none; color: #9ca3af; font-size: 16px; cursor: pointer; padding: 2px 4px; flex: none; }
-  #specPanel .zrow .ctr { background: none; border: 1px solid #4b5563; color: #9ca3af; font-size: 13px; cursor: pointer; padding: 2px 6px; border-radius: 6px; flex: none; }
-  #specPanel .zrow .ctr.on { background: #f59e0b; border-color: #f59e0b; color: #111827; }
+  #specPanel .scalerow { display: flex; gap: 8px; margin-bottom: 10px; }
+  #specPanel .scalerow label { flex: 1; font-size: 12px; color: #d1d5db; display: flex; align-items: center; gap: 6px; }
+  #specPanel .scalerow input { flex: 1; min-width: 0; background: #111827; border: 1px solid #374151; color: #f9fafb; border-radius: 8px; padding: 7px 8px; font-size: 14px; text-align: right; font-variant-numeric: tabular-nums; }
   #specPanel .add {
     width: 100%; padding: 8px 0; border-radius: 8px; border: 1px dashed #4b5563;
     background: none; color: #d1d5db; font-size: 13px; font-weight: 700; cursor: pointer; margin-bottom: 12px;
@@ -115,9 +116,13 @@
       <button id="modeZones" type="button">구간</button>
     </div>
     <div id="zoneEditor">
+      <div class="scalerow">
+        <label>중간<input id="midInput" type="number" min="1" step="1"></label>
+        <label>최대<input id="maxInput" type="number" min="1" step="1"></label>
+      </div>
       <div id="zoneList"></div>
       <button id="zoneAdd" class="add" type="button">+ 구간 추가</button>
-      <div class="hint">제일 아래 구간은 거래량 0부터, 제일 위 구간은 무한대까지야. 경계 숫자를 바꾸면 바로 적용돼. ◎를 누르면 그 경계가 스펙트럼 가운데에 와.</div>
+      <div class="hint">중간은 스펙트럼 가운데, 최대는 맨 위에 와. 사이는 중간과 최대의 비율대로 움직여. 최대를 넘는 거래량은 최대 색(빨강)으로 보여. 경계 숫자를 바꾸면 바로 적용돼.</div>
     </div>
     <div id="multHint" class="hint">배율 모드야. 거래량을 전체 평균 대비 몇 배냐로 색을 정해. (0배 파랑, 0.5배 청록, 1배 초록, 2배 노랑, 3배 이상 빨강)</div>
     <button id="specClose" class="close" type="button">닫기</button>
@@ -252,26 +257,37 @@
     return 1;
   }
   // ---- 스펙트럼 모드: 배율(평균 대비) / 구간(사용자 지정 거래량) ----
-  // ---- 스펙트럼 설정: 시간프레임별 개별 설정 (모드·경계·중심 따로) ----
-  var SPEC_KEY = "mtf_spec_settings_v2";
+  // ---- 스펙트럼 설정: 시간프레임별 개별 설정 (모드·경계·중간·최대 따로) ----
+  // 스케일: 중간(mid)은 스펙트럼 가운데(0.5)에 고정, 최대(max)는 맨 위(1.0). 사이는 로그 비율.
+  // 최대를 넘는 거래량은 최대 색(빨강)으로 표시 (volFrac 클램프).
+  var SPEC_KEY = "mtf_spec_settings_v3";
   var specDefaults = {
-    "15m": { mode: "mult", bounds: [300, 600, 1500, 8000], centerIdx: 1 },
-    "5m": { mode: "mult", bounds: [100, 200, 500, 1500], centerIdx: 1 },
-    "1m": { mode: "mult", bounds: [10, 20, 50, 150], centerIdx: 1 }
+    "15m": { mode: "mult", bounds: [300, 600, 1500, 8000], mid: 600, max: 8000 },
+    "5m": { mode: "mult", bounds: [100, 200, 500, 1500], mid: 200, max: 1500 },
+    "1m": { mode: "mult", bounds: [10, 20, 50, 150], mid: 20, max: 150 }
   };
   function cleanBounds(b) {
     return (b || []).filter(function (x) { return typeof x === "number" && isFinite(x) && x > 0; }).sort(function (x, y) { return x - y; }).slice(0, 4);
   }
   function cleanOne(raw, def) {
-    var s = { mode: def.mode, bounds: def.bounds.slice(), centerIdx: def.centerIdx };
+    var s = { mode: def.mode, bounds: def.bounds.slice(), mid: def.mid, max: def.max };
     if (raw && (raw.mode === "mult" || raw.mode === "zones")) s.mode = raw.mode;
     if (raw && Array.isArray(raw.bounds)) {
       var b = cleanBounds(raw.bounds);
       if (b.length >= 1) s.bounds = b;
     }
-    if (raw && typeof raw.centerIdx === "number" && isFinite(raw.centerIdx)) s.centerIdx = Math.floor(raw.centerIdx);
-    if (s.centerIdx < 0) s.centerIdx = 0;
-    if (s.centerIdx > s.bounds.length - 1) s.centerIdx = s.bounds.length - 1;
+    if (raw && typeof raw.mid === "number" && isFinite(raw.mid) && raw.mid > 0) s.mid = Math.round(raw.mid);
+    if (raw && typeof raw.max === "number" && isFinite(raw.max) && raw.max > 0) s.max = Math.round(raw.max);
+    // v2 마이그레이션: 예전 중심 경계 → 중간, 최상위 경계 → 최대
+    if (raw && typeof raw.centerIdx === "number" && Array.isArray(raw.bounds)) {
+      var ob = cleanBounds(raw.bounds);
+      if (ob.length >= 1) {
+        var ci = Math.max(0, Math.min(Math.floor(raw.centerIdx), ob.length - 1));
+        if (typeof raw.mid !== "number") s.mid = ob[ci];
+        if (typeof raw.max !== "number") s.max = ob[ob.length - 1];
+      }
+    }
+    if (s.max <= s.mid) s.max = s.mid * 2;
     return s;
   }
   var specSettings = {};
@@ -282,6 +298,14 @@
         specSettings["15m"] = cleanOne(saved["15m"], specDefaults["15m"]);
         specSettings["5m"] = cleanOne(saved["5m"], specDefaults["5m"]);
         specSettings["1m"] = cleanOne(saved["1m"], specDefaults["1m"]);
+        return;
+      }
+      // v2 마이그레이션: 시간프레임별 설정 (중심 경계 → 중간, 최상위 경계 → 최대)
+      var old2 = JSON.parse(localStorage.getItem("mtf_spec_settings_v2") || "null");
+      if (old2) {
+        specSettings["15m"] = cleanOne(old2["15m"], specDefaults["15m"]);
+        specSettings["5m"] = cleanOne(old2["5m"], specDefaults["5m"]);
+        specSettings["1m"] = cleanOne(old2["1m"], specDefaults["1m"]);
         return;
       }
       // v1 마이그레이션: 예전 전역 설정을 15분봉에 그대로 옮김
@@ -313,16 +337,11 @@
   var frozenScale = {}; // tfKey -> {lo, hi} (드래그 중 스케일 고정 — 최상위/중심 경계가 바뀌어도 중간에 안 튐)
   function specScale(s, key) {
     if (key && frozenScale[key]) return frozenScale[key];
-    var b = s.bounds;
-    var top = b[b.length - 1] || 8000;
-    var loNeed = 1; // log10(10)
-    var hiNeed = Math.log10(Math.max(top * 2, 20000));
-    var width = hiNeed - loNeed;
-    if (width > 4.0) width = 4.0;
-    if (width < 1.0) width = 1.0;
-    var c = b[s.centerIdx] || top;
-    var lc = Math.log10(Math.max(c, 1));
-    return { lo: lc - width / 2, hi: lc + width / 2 };
+    // 중간(mid)은 가운데(0.5), 최대(max)는 맨 위(1.0). 사이는 로그 비율. 아래쪽은 대칭.
+    var mid = Math.max(s.mid || 1, 1);
+    var mx = Math.max(s.max || mid * 2, mid * 1.1);
+    var lm = Math.log10(mid), lx = Math.log10(mx);
+    return { lo: 2 * lm - lx, hi: lx };
   }
   function volFrac(s, key, vol) {
     // 거래량 → 바 위치 비율 (0=맨 아래 파랑, 1=맨 위 빨강)
@@ -427,6 +446,8 @@
     $("zoneEditor").style.display = mode === "zones" ? "" : "none";
     $("multHint").style.display = mode === "mult" ? "" : "none";
     if (mode !== "zones") return;
+    $("midInput").value = s.mid;
+    $("maxInput").value = s.max;
     var b = s.bounds;
     var n = zoneCount(s);
     var list = $("zoneList");
@@ -457,30 +478,14 @@
           for (var k = 0; k < nb.length; k++) {
             if (k !== idx && nb[k] === v) { renderZoneEditor(); return; } // 중복이면 되돌림
           }
-          var centerVal = nb[s2.centerIdx]; // 중심 경계 값 기억 (정렬 후에도 같은 경계 유지)
           nb[idx] = v;
           nb.sort(function (x, y) { return x - y; });
           s2.bounds = nb;
-          s2.centerIdx = nb.indexOf(centerVal);
-          if (s2.centerIdx < 0) s2.centerIdx = 0;
           saveSpecSettings();
           renderZoneEditor();
           drawAll();
         });
         row.appendChild(inp);
-        // 중심 버튼: 이 경계를 스펙트럼 가운데로
-        var cb = document.createElement("button");
-        cb.className = "ctr" + (s.centerIdx === i ? " on" : "");
-        cb.type = "button"; cb.textContent = "◎";
-        cb.setAttribute("data-ci", i);
-        cb.addEventListener("click", function (ev) {
-          var s2 = specSettings[panelTf];
-          s2.centerIdx = parseInt(ev.target.getAttribute("data-ci"), 10);
-          saveSpecSettings();
-          renderZoneEditor();
-          drawAll();
-        });
-        row.appendChild(cb);
       } else {
         rng.textContent = fmtNum(lo) + " ~ ∞";
         row.appendChild(rng);
@@ -494,11 +499,8 @@
         if (zoneCount(s2) <= 2) return; // 최소 2구간
         var nb = s2.bounds.slice();
         var delIdx = zi < nb.length ? zi : nb.length - 1;
-        var centerVal = nb[s2.centerIdx];
         nb.splice(delIdx, 1);
         s2.bounds = nb;
-        var ni = nb.indexOf(centerVal);
-        s2.centerIdx = ni < 0 ? Math.min(delIdx, nb.length - 1) : ni;
         saveSpecSettings();
         renderZoneEditor();
         drawAll();
@@ -537,13 +539,29 @@
     var s2 = specSettings[panelTf];
     if (zoneCount(s2) >= 5) return;
     var b = s2.bounds.slice();
-    var centerVal = b[s2.centerIdx];
     var top = b[b.length - 1];
     b.push(Math.round(top * 2));
     b.sort(function (x, y) { return x - y; });
     s2.bounds = b;
-    s2.centerIdx = b.indexOf(centerVal);
-    if (s2.centerIdx < 0) s2.centerIdx = 0;
+    saveSpecSettings();
+    renderZoneEditor();
+    drawAll();
+  });
+  // 중간·최대 입력 (스케일: 중간은 가운데, 최대는 맨 위)
+  $("midInput").addEventListener("change", function (ev) {
+    var s2 = specSettings[panelTf];
+    var v = Math.round(parseFloat(ev.target.value));
+    if (!isFinite(v) || v <= 0 || v >= s2.max) { renderZoneEditor(); return; }
+    s2.mid = v;
+    saveSpecSettings();
+    renderZoneEditor();
+    drawAll();
+  });
+  $("maxInput").addEventListener("change", function (ev) {
+    var s2 = specSettings[panelTf];
+    var v = Math.round(parseFloat(ev.target.value));
+    if (!isFinite(v) || v <= 0 || v <= s2.mid) { renderZoneEditor(); return; }
+    s2.max = v;
     saveSpecSettings();
     renderZoneEditor();
     drawAll();
@@ -946,7 +964,6 @@
       var y = t.clientY - r.top;
       var bodyH = specBodyH(cv);
       var idx = nearestBoundY(s, tf.key, y, bodyH);
-      if (idx === s.centerIdx) return; // 중심 경계는 드래그로 못 바꿈 (고정)
       frozenScale[tf.key] = specScale(s, tf.key); // 드래그 중 스케일 고정
       dragBound = { idx: idx, cv: cv, tf: tf };
       cv.style.width = DRAG_WIDE + "px"; // 바 넓히기
