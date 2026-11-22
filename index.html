@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v781 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v782 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -8003,7 +8003,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         {t: "연습을 많이 할수록 운이 좋아진다.", s: "아놀드 파머"}
       ],
       randomQuote737: function() { return this.quotes737[Math.floor(Math.random() * this.quotes737.length)]; },
-      TYPE_NAMES: { step_3: "크트키", step_3_fast: "다이버 롱", step_3_alt: "다이버 돌파 리테 롱", step_3_type_d: "리테 롱", step_3_type_f: "리테 숏", step_3_type_g: "1강", step_3_type_h: "빠른 1강 롱 진입", npc_manual: "npc 메뉴얼" },
+      TYPE_NAMES: { step_3: "크트키", step_3_fast: "다이버 롱", step_3_alt: "다이버 돌파 리테 롱", step_3_type_d: "리테 롱", step_3_type_f: "리테 숏", step_3_type_g: "1강", step_3_type_h: "빠른 1강 롱 진입", npc_manual: "npc 메뉴얼", missed: "차트 분석" },
       CAL_KEY: "antifomo_review_study_calendar_v1",
       PROG_KEY: "antifomo_review_study_progress_v1",
       types: [], typeIdx: 0, list: [], idx: 0, phase: "guess", revealed: {}, correct: 0, totalReviews: 0, lastActual: null, lastCorrect: false, masked: true, currentSrc: "",
@@ -8255,6 +8255,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
           if (!byType[r.setupKey]) byType[r.setupKey] = [];
           byType[r.setupKey].push(r);
         });
+        /* v782: 차트 분석(놓친 타점)도 스터디 대상 — 성공·실패 없이 이미지만 봄 (npc처럼 별도 유형) */
+        var missedReviews = reviews.filter(function(r) { return r.missed; });
+        if (missedReviews.length) byType["missed"] = missedReviews;
         /* v765: npc 메뉴얼은 43장 슬라이드 + 기존 npc 복기를 합친 풀에서 오늘 날짜 기준 한 장만.
            슬라이드가 뽑히면 크경 N장, 기존 복기가 뽑히면 npc 메뉴얼.
            슬라이드를 못 받았으면 기존 복기 중에서만 한 장 뽑음. */
@@ -8330,14 +8333,19 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         var src = (r.images && (r.images.priceOriginal || r.images.price)) || "";
         var h = "";
         /* v721: npc 메뉴얼은 퀴즈·의견 없이 이미지만 봄 */
-        if (key === "npc_manual") {
+        /* v782: 차트 분석도 퀴즈·의견 없이 이미지만 봄 */
+        if (key === "npc_manual" || key === "missed") {
           this.phase = "manual";
           this.saveProgress();
           if (src) h += this.plainImgHtml(src);
           else h += '<div class="w-full py-10 text-center text-sm text-slate-400 border rounded-xl mb-4">이미지가 없는 복기야</div>';
           var slideLabel = (r && r.slideNum) ? ("크경 " + r.slideNum + "장") : "npc 메뉴얼";
+          if (key === "missed") {
+            var _ms = (typeof REVIEW_SETUPS !== "undefined") ? REVIEW_SETUPS.find(function(x) { return x.key === r.setupKey; }) : null;
+            slideLabel = _ms ? _ms.name : "차트 분석";
+          }
           h += '<div class="text-base font-black text-slate-800 dark:text-white mb-2">' + slideLabel + '</div>';
-          h += '<div class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">성공·실패 맞히기 없이 이미지만 보는 메뉴얼이야. 이미지를 확인하고 다음으로 넘어가.</div>';
+          h += '<div class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">' + (key === "missed" ? "매매 안 한 차트 분석이야. 이미지를 확인하고 다음으로 넘어가." : "성공·실패 맞히기 없이 이미지만 보는 메뉴얼이야. 이미지를 확인하고 다음으로 넘어가.") + '</div>';
           h += '<div id="rs2Feedback" class="mt-4 hidden"></div>';
           h += this.nextButtonHtml();
           document.getElementById("rs2Body").innerHTML = h;
@@ -10401,7 +10409,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v781 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v782 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
