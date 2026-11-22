@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v780 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v781 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -2579,7 +2579,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       <div class="flex shrink-0 border-b border-slate-200 dark:border-slate-700">
         <button onclick="switchReviewTab('encyclopedia')" id="reviewTab-encyclopedia" class="flex-1 py-2.5 text-sm font-black text-amber-600 dark:text-amber-400 border-b-2 border-amber-500 cursor-pointer">도감</button>
         <button onclick="switchReviewTab('npc')" id="reviewTab-npc" class="flex-1 py-2.5 text-sm font-black text-slate-400 dark:text-slate-500 border-b-2 border-transparent cursor-pointer">npc 메뉴얼</button>
-        <button onclick="switchReviewTab('missed')" id="reviewTab-missed" class="flex-1 py-2.5 text-sm font-black text-slate-400 dark:text-slate-500 border-b-2 border-transparent cursor-pointer">놓친타점</button>
+        <button onclick="switchReviewTab('missed')" id="reviewTab-missed" class="flex-1 py-2.5 text-sm font-black text-slate-400 dark:text-slate-500 border-b-2 border-transparent cursor-pointer">차트 분석</button>
         <button onclick="switchReviewTab('compare')" id="reviewTab-compare" class="flex-1 py-2.5 text-sm font-black text-slate-400 dark:text-slate-500 border-b-2 border-transparent cursor-pointer">대조</button>
       </div>
 
@@ -6221,7 +6221,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     // ---- 도감: 타점별 실전 차트 ----
     // v245: 세로 섹션 나열 → 셋업 카드 대시보드(2열) + 셋업별 상세 화면으로 개편
     let encyclopediaSetup = null;
-    let encyclopediaMissed = false; // v583: 놓친 타점 모아보기 상태
+    let encyclopediaMissed = false; // v583: 차트 분석 모아보기 상태
 
     // v504: 복기 개수 헬퍼. win/loss(정수 >=0)가 있으면 그대로, 없으면 예전 result에서 도출(success->1/0, fail->0/1).
     function reviewCounts(r) {
@@ -6239,7 +6239,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       return null;
     }
     function reviewBadgeHtml(r, emeraldCls, redCls) {
-      if (r && r.missed) return '<span class="text-[10px] font-black text-amber-600 dark:text-amber-400">놓친 타점</span>'; // v583
+      if (r && r.missed) return '<span class="text-[10px] font-black text-amber-600 dark:text-amber-400">차트 분석</span>'; // v583
       const c = reviewCounts(r);
       if (c.win > 0 && c.loss === 0) return '<span class="text-[10px] font-black ' + emeraldCls + '">성공</span>';
       if (c.loss > 0 && c.win === 0) return '<span class="text-[10px] font-black ' + redCls + '">실패</span>';
@@ -6273,14 +6273,14 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       const total = ok + fail;
       const missedTotal = reviewDatabase.filter(function(r) { return r.missed; }).length; // v583: 승률·횟수에 안 잡힘
       let h = '<div class="flex items-center justify-between mb-3 px-0.5">';
-      h += '<span class="text-xs font-black text-slate-500 dark:text-slate-400">전체 ' + total + '회 · <span class="text-emerald-600 dark:text-emerald-400">성공 ' + ok + '</span> · <span class="text-red-500">실패 ' + fail + '</span>' + (missedTotal > 0 ? ' · <span class="text-amber-600 dark:text-amber-400">놓친 타점 ' + missedTotal + '건</span>' : '') + '</span>';
+      h += '<span class="text-xs font-black text-slate-500 dark:text-slate-400">전체 ' + total + '회 · <span class="text-emerald-600 dark:text-emerald-400">성공 ' + ok + '</span> · <span class="text-red-500">실패 ' + fail + '</span>' + (missedTotal > 0 ? ' · <span class="text-amber-600 dark:text-amber-400">차트 분석 ' + missedTotal + '건</span>' : '') + '</span>';
       if (total > 0) h += '<span class="text-xs font-black text-amber-600 dark:text-amber-400">승률 ' + Math.round(ok / total * 100) + '%</span>';
       h += '</div>';
-      if (missedTotal > 0) { // v583: 놓친 타점 모아보기 카드
+      if (missedTotal > 0) { // v583: 차트 분석 모아보기 카드
         const latestMissed = reviewDatabase.filter(function(r) { return r.missed; }).slice(-1)[0];
         h += '<button onclick="openReviewMissed()" class="w-full mb-3 text-left rounded-xl border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-950/40 overflow-hidden cursor-pointer">';
-        if (latestMissed && latestMissed.images && latestMissed.images.price) h += '<img src="' + latestMissed.images.price + '" class="w-full h-24 object-cover" alt="놓친 타점 차트">';
-        h += '<div class="p-2.5"><div class="font-black text-[13px] text-amber-700 dark:text-amber-300">놓친 타점 모아보기</div><div class="text-[11px] mt-0.5 text-slate-400">' + missedTotal + '건 · 승률·횟수에 안 잡힘</div></div>';
+        if (latestMissed && latestMissed.images && latestMissed.images.price) h += '<img src="' + latestMissed.images.price + '" class="w-full h-24 object-cover" alt="차트 분석 차트">';
+        h += '<div class="p-2.5"><div class="font-black text-[13px] text-amber-700 dark:text-amber-300">차트 분석 모아보기</div><div class="text-[11px] mt-0.5 text-slate-400">' + missedTotal + '건 · 승률·횟수에 안 잡힘</div></div>';
         h += '</button>';
       }
       const withData = [], empty = [];
@@ -6307,7 +6307,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         } else {
           h += '<div class="text-[11px] mt-0.5 text-slate-400">' + (okN + failN) + '회 · <span class="text-emerald-600 dark:text-emerald-400 font-bold">성공 ' + okN + '</span>';
           if (failN > 0) h += ' · <span class="text-red-500 font-bold">실패 ' + failN + '</span>';
-          if (missedN > 0) h += ' · <span class="text-amber-600 dark:text-amber-400 font-bold">놓친 ' + missedN + '건</span>'; // v583
+          if (missedN > 0) h += ' · <span class="text-amber-600 dark:text-amber-400 font-bold">차트 분석 ' + missedN + '건</span>'; // v583
           h += '</div>';
         }
         h += '</div>';
@@ -6352,16 +6352,16 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       const c = document.querySelector("#reviewModal .overflow-y-auto");
       if (c) c.scrollTop = 0;
     }
-    function renderReviewMissedDetail(el) { // v583: 놓친 타점만 모아보기 (전 타점)
+    function renderReviewMissedDetail(el) { // v583: 차트 분석만 모아보기 (전 타점)
       const reviews = reviewDatabase.filter(function(r) { return r.missed; });
       let h = '<div>';
       h += '<div class="flex items-center gap-2 mb-3">';
       h += '<button onclick="backToReviewDashboard()" class="flex items-center gap-0.5 text-xs font-black text-slate-500 dark:text-slate-300 border border-slate-300 dark:border-slate-600 rounded-lg px-2 py-1.5 cursor-pointer"><i class="ph-bold ph-caret-left"></i>도감</button>';
-      h += '<span class="font-black text-slate-800 dark:text-slate-100 text-sm flex-1 min-w-0">놓친 타점</span>';
+      h += '<span class="font-black text-slate-800 dark:text-slate-100 text-sm flex-1 min-w-0">차트 분석</span>';
       h += '<span class="text-xs text-slate-400 shrink-0">' + reviews.length + '건</span>';
       h += '</div>';
       if (!reviews.length) {
-        h += '<div class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-400 dark:border-slate-600 rounded-lg">놓친 타점이 없습니다.</div>';
+        h += '<div class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-400 dark:border-slate-600 rounded-lg">차트 분석이 없습니다.</div>';
       } else {
         h += '<div class="grid grid-cols-3 gap-2">';
         reviews.forEach(function(r) {
@@ -6383,7 +6383,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       h += '<span class="font-black text-slate-800 dark:text-slate-100 text-sm whitespace-normal break-keep flex-1 min-w-0">' + s.name + '</span>';
       const missedN = reviews.filter(function(r) { return r.missed; }).length; // v583
       const isNpc = (s.key === 'npc_manual'); // v613
-      h += '<span class="text-xs text-slate-400 shrink-0">' + reviews.length + '건' + ((!isNpc && missedN > 0) ? ' (놓친 ' + missedN + '건)' : '') + '</span>';
+      h += '<span class="text-xs text-slate-400 shrink-0">' + reviews.length + '건' + ((!isNpc && missedN > 0) ? ' (차트 분석 ' + missedN + '건)' : '') + '</span>';
       if (reviews.length) h += '<button onclick="openReviewMovePicker()" class="ml-auto shrink-0 text-[11px] font-black text-sky-600 dark:text-sky-400 border border-sky-300 dark:border-sky-600 rounded-lg px-2 py-1 cursor-pointer">이동</button>';
       h += '<button onclick="triggerImageUpload(\'' + s.key + '\')" class="shrink-0 text-[11px] font-black text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-600 rounded-lg px-2 py-1 cursor-pointer">+ 이미지 추가</button>';
       h += '</div>';
@@ -6398,7 +6398,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       el.innerHTML = h;
     }
 
-    // v613: npc 메뉴얼 탭 — 성공/실패/놓친 표기 없음
+    // v613: npc 메뉴얼 탭 — 성공/실패/차트 분석 표기 없음
     function renderReviewNpc() {
       const el = document.getElementById("reviewContent-npc");
       if (!el) return;
@@ -6419,18 +6419,18 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       h += '</div>';
       el.innerHTML = h;
     }
-    // v613: 놓친타점 탭 — 놓친 타점만 모아보기 (뒤로 버튼 없음, 탭이 곧 이동 수단)
+    // v613: 차트 분석 탭 — 차트 분석만 모아보기 (뒤로 버튼 없음, 탭이 곧 이동 수단)
     function renderReviewMissedTab() {
       const el = document.getElementById("reviewContent-missed");
       if (!el) return;
       const reviews = reviewDatabase.filter(function(r) { return r.missed; });
       let h = '<div>';
       h += '<div class="flex items-center gap-2 mb-3">';
-      h += '<span class="font-black text-slate-800 dark:text-slate-100 text-sm flex-1 min-w-0">놓친타점</span>';
+      h += '<span class="font-black text-slate-800 dark:text-slate-100 text-sm flex-1 min-w-0">차트 분석</span>';
       h += '<span class="text-xs text-slate-400 shrink-0">' + reviews.length + '건</span>';
       h += '</div>';
       if (!reviews.length) {
-        h += '<div class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-400 dark:border-slate-600 rounded-lg">놓친 타점이 없습니다.</div>';
+        h += '<div class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-400 dark:border-slate-600 rounded-lg">차트 분석이 없습니다.</div>';
       } else {
         h += '<div class="grid grid-cols-3 gap-2">';
         reviews.forEach(function(r) {
@@ -6598,7 +6598,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       const setupName = setup ? setup.name : pendingUploadSetup;
       pendingUploadFiles = files;
       if (pendingUploadSetup === 'npc_manual') {
-        // v613: npc 메뉴얼은 성공/실패/놓친 표기 없음 — 개수 입력 없이 중립(0/0)으로 바로 저장
+        // v613: npc 메뉴얼은 성공/실패/차트 분석 표기 없음 — 개수 입력 없이 중립(0/0)으로 바로 저장
         const npcFiles = files;
         let npcDone = 0;
         Array.from(npcFiles).forEach(function(file, idx) {
@@ -6651,8 +6651,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         let h = '<div class="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center p-4" style="z-index:120" onclick="if(event.target===this)closeReviewCountModal()">';
         h += '<div class="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">';
         h += '<div class="font-black text-slate-800 dark:text-slate-100 text-sm mb-1">' + setupName + '</div>';
-        h += '<div id="reviewCountSub" class="text-[11px] text-slate-400 mb-3">' + (window.__reviewMissed ? '놓친 타점으로 저장돼. 승률·횟수에는 안 잡혀.' : (window.__reviewEditId ? '이 복기의 성공·실패 횟수를 바꿔줘.' : '한 복기에 여러 번 진입했으면 성공·실패 횟수를 정해줘. 파일이 여러 개면 각 복기에 같은 횟수가 들어감.')) + '</div>'; // v583
-        h += '<label class="flex items-center gap-2 py-2 mb-1"><input type="checkbox" id="reviewMissedChk" onchange="reviewMissedToggle()" ' + (window.__reviewMissed ? 'checked' : '') + ' class="w-4 h-4 accent-amber-500 cursor-pointer"><span class="text-xs font-black text-amber-700 dark:text-amber-300">놓친 타점</span><span class="text-[11px] text-slate-400">매매 안 함 — 승률·횟수에 안 잡힘</span></label>'; // v583
+        h += '<div id="reviewCountSub" class="text-[11px] text-slate-400 mb-3">' + (window.__reviewMissed ? '차트 분석으로 저장돼. 승률·횟수에는 안 잡혀.' : (window.__reviewEditId ? '이 복기의 성공·실패 횟수를 바꿔줘.' : '한 복기에 여러 번 진입했으면 성공·실패 횟수를 정해줘. 파일이 여러 개면 각 복기에 같은 횟수가 들어감.')) + '</div>'; // v583
+        h += '<label class="flex items-center gap-2 py-2 mb-1"><input type="checkbox" id="reviewMissedChk" onchange="reviewMissedToggle()" ' + (window.__reviewMissed ? 'checked' : '') + ' class="w-4 h-4 accent-amber-500 cursor-pointer"><span class="text-xs font-black text-amber-700 dark:text-amber-300">차트 분석</span><span class="text-[11px] text-slate-400">매매 안 함 — 승률·횟수에 안 잡힘</span></label>'; // v583
         h += '<div id="reviewCountRows"' + (window.__reviewMissed ? ' style="display:none"' : '') + '>';
         h += '<div class="flex items-center justify-between py-2"><span class="text-xs font-black text-emerald-600">성공</span><span class="flex items-center gap-2"><button onclick="reviewCountStep(\'win\',-1)" class="w-8 h-8 rounded-full border border-slate-300 dark:border-slate-600 text-sm font-black cursor-pointer">−</button><span id="reviewWinN" class="w-8 text-center text-sm font-black">' + (window.__reviewWin || 0) + '</span><button onclick="reviewCountStep(\'win\',1)" class="w-8 h-8 rounded-full border border-slate-300 dark:border-slate-600 text-sm font-black cursor-pointer">+</button></span></div>';
         h += '<div class="flex items-center justify-between py-2"><span class="text-xs font-black text-red-500">실패</span><span class="flex items-center gap-2"><button onclick="reviewCountStep(\'loss\',-1)" class="w-8 h-8 rounded-full border border-slate-300 dark:border-slate-600 text-sm font-black cursor-pointer">−</button><span id="reviewLossN" class="w-8 text-center text-sm font-black">' + (window.__reviewLoss || 0) + '</span><button onclick="reviewCountStep(\'loss\',1)" class="w-8 h-8 rounded-full border border-slate-300 dark:border-slate-600 text-sm font-black cursor-pointer">+</button></span></div>';
@@ -6685,7 +6685,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         const rows = document.getElementById("reviewCountRows");
         if (rows) rows.style.display = window.__reviewMissed ? "none" : "";
         const sub = document.getElementById("reviewCountSub");
-        if (sub) sub.textContent = window.__reviewMissed ? "놓친 타점으로 저장돼. 승률·횟수에는 안 잡혀." : (window.__reviewEditId ? "이 복기의 성공·실패 횟수를 바꿔줘." : "한 복기에 여러 번 진입했으면 성공·실패 횟수를 정해줘. 파일이 여러 개면 각 복기에 같은 횟수가 들어감.");
+        if (sub) sub.textContent = window.__reviewMissed ? "차트 분석으로 저장돼. 승률·횟수에는 안 잡혀." : (window.__reviewEditId ? "이 복기의 성공·실패 횟수를 바꿔줘." : "한 복기에 여러 번 진입했으면 성공·실패 횟수를 정해줘. 파일이 여러 개면 각 복기에 같은 횟수가 들어감.");
         const saveBtn = document.getElementById("reviewCountSaveBtn");
         if (saveBtn) saveBtn.disabled = !window.__reviewMissed && (((window.__reviewWin || 0) + (window.__reviewLoss || 0)) === 0);
       } catch (e) {}
@@ -6902,7 +6902,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     function openReviewDetail(id, onlyMissed) {
       const r = reviewDatabase.find(function(x) { return x.id === id; });
       if (!r) return;
-      // 같은 셋업의 복기 목록 (스와이프 네비게이션용, 놓친 화면에서 들어오면 놓친 것만)
+      // 같은 셋업의 복기 목록 (스와이프 네비게이션용, 차트 분석 화면에서 들어오면 차트 분석만)
       const sameSetup = reviewDatabase.filter(function(x) { return x.setupKey === r.setupKey && (!onlyMissed || x.missed); });
       const idx = sameSetup.findIndex(function(x) { return x.id === id; });
       const originals = sameSetup.map(function(x) {
@@ -10401,7 +10401,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v780 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v781 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
