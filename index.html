@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v783 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v784 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -6360,6 +6360,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       h += '<button onclick="backToReviewDashboard()" class="flex items-center gap-0.5 text-xs font-black text-slate-500 dark:text-slate-300 border border-slate-300 dark:border-slate-600 rounded-lg px-2 py-1.5 cursor-pointer"><i class="ph-bold ph-caret-left"></i>도감</button>';
       h += '<span class="font-black text-slate-800 dark:text-slate-100 text-sm flex-1 min-w-0">차트 분석</span>';
       h += '<span class="text-xs text-slate-400 shrink-0">' + reviews.length + '건</span>';
+      h += '<button onclick="openMissedAddPicker()" class="shrink-0 text-[11px] font-black text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-600 rounded-lg px-2 py-1 cursor-pointer">+ 추가</button>'; // v784: 차트 분석 모아보기 추가 버튼
       h += '</div>';
       if (!reviews.length) {
         h += '<div class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-400 dark:border-slate-600 rounded-lg">차트 분석이 없습니다.</div>';
@@ -6429,6 +6430,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       h += '<div class="flex items-center gap-2 mb-3">';
       h += '<span class="font-black text-slate-800 dark:text-slate-100 text-sm flex-1 min-w-0">차트 분석</span>';
       h += '<span class="text-xs text-slate-400 shrink-0">' + reviews.length + '건</span>';
+      h += '<button onclick="openMissedAddPicker()" class="shrink-0 text-[11px] font-black text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-600 rounded-lg px-2 py-1 cursor-pointer">+ 추가</button>'; // v784: 차트 분석 탭 추가 버튼
       h += '</div>';
       if (!reviews.length) {
         h += '<div class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-400 dark:border-slate-600 rounded-lg">차트 분석이 없습니다.</div>';
@@ -6442,6 +6444,36 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       }
       h += '</div>';
       el.innerHTML = h;
+    }
+    // v784: 차트 분석 탭 추가 — 유형 고르면 이미지 선택창이 뜨고, 개수 창이 차트 분석으로 기본 체크돼 저장됨
+    function openMissedAddPicker() {
+      try {
+        closeMissedAddPicker();
+        let h = '<div class="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center p-4" style="z-index:120" onclick="if(event.target===this)closeMissedAddPicker()">';
+        h += '<div class="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 max-h-[80vh] overflow-y-auto">';
+        h += '<div class="font-black text-slate-800 dark:text-slate-100 text-sm mb-1">차트 분석 추가</div>';
+        h += '<div class="text-[11px] text-slate-400 mb-3">유형을 고르면 이미지 선택창이 떠. 차트 분석으로 저장돼 (승률·횟수에 안 잡힘).</div>';
+        h += '<div class="flex flex-col gap-2">';
+        REVIEW_SETUPS.forEach(function(s) {
+          if (s.key === 'npc_manual') return;
+          h += '<button onclick="pickMissedAddType(\'' + s.key + '\')" class="w-full text-left px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-sm font-black text-slate-700 dark:text-slate-200 cursor-pointer">' + s.name + '</button>';
+        });
+        h += '</div>';
+        h += '<button onclick="closeMissedAddPicker()" class="w-full py-2.5 rounded-xl text-xs font-black text-slate-500 dark:text-slate-300 border border-slate-300 dark:border-slate-600 cursor-pointer mt-3">취소</button>';
+        h += '</div></div>';
+        const wrap = document.createElement('div');
+        wrap.id = 'missedAddModal';
+        wrap.innerHTML = h;
+        document.body.appendChild(wrap);
+      } catch (e) {}
+    }
+    function closeMissedAddPicker() {
+      try { const m = document.getElementById("missedAddModal"); if (m) m.remove(); } catch (e) {}
+    }
+    function pickMissedAddType(setupKey) {
+      closeMissedAddPicker();
+      window.__reviewMissedDefault = true;
+      triggerImageUpload(setupKey);
     }
     // ---- 복기 이미지 업로드 ----
     let pendingUploadSetup = null;
@@ -6458,6 +6490,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         input.multiple = true;
         input.style.display = "none";
         input.onchange = handleImageSelect;
+        input.oncancel = function() { window.__reviewMissedDefault = false; }; // v784: 이미지 선택 취소하면 차트 분석 기본값 해제
         document.body.appendChild(input);
       }
       input.value = "";
@@ -6648,7 +6681,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         closeReviewCountModal();
         window.__reviewEditId = _editId;
         window.__reviewMissed = _missed;
-        if (!window.__reviewEditId) { window.__reviewWin = 1; window.__reviewLoss = 0; window.__reviewMissed = false; }
+        if (!window.__reviewEditId) { window.__reviewWin = 1; window.__reviewLoss = 0; window.__reviewMissed = !!window.__reviewMissedDefault; window.__reviewMissedDefault = false; } // v784: 차트 분석 탭에서 추가하면 차트 분석으로 기본 체크
         let h = '<div class="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center p-4" style="z-index:120" onclick="if(event.target===this)closeReviewCountModal()">';
         h += '<div class="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">';
         h += '<div class="font-black text-slate-800 dark:text-slate-100 text-sm mb-1">' + setupName + '</div>';
@@ -10410,7 +10443,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v783 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v784 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
