@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v784 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v785 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -6731,7 +6731,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         if (!missed && win + loss === 0) return;
         if (window.__reviewEditId) {
           const it = reviewDatabase.find(function(r) { return r.id === window.__reviewEditId; });
-          if (it) { it.missed = missed; it.win = missed ? 0 : win; it.loss = missed ? 0 : loss; delete it.result; saveReviewsToStorage(); renderReviewEncyclopedia(); } // v583
+          if (it) { it.missed = missed; it.win = missed ? 0 : win; it.loss = missed ? 0 : loss; delete it.result; saveReviewsToStorage(); switchReviewTab(currentReviewTab); } // v583
           window.__reviewEditId = null;
           closeReviewCountModal();
           return;
@@ -6757,7 +6757,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
               done++;
               if (done === files.length) {
                 saveReviewsToStorage();
-                renderReviewEncyclopedia();
+                switchReviewTab(currentReviewTab);
               }
             });
           };
@@ -6774,7 +6774,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       if (idx >= 0) {
         reviewDatabase.splice(idx, 1);
         saveReviewsToStorage();
-        renderReviewEncyclopedia();
+        switchReviewTab(currentReviewTab);
       }
     }
 
@@ -10443,7 +10443,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v784 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v785 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
