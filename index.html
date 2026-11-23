@@ -477,7 +477,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v795 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v796 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1553,12 +1553,12 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             </div>
             <div class="flex items-center gap-1.5 min-w-0 flex-1 whitespace-nowrap overflow-hidden">
                 <span class="text-[11px] sm:text-xs font-mono font-black text-rose-700 dark:text-rose-300 bg-rose-200 dark:bg-rose-950 px-1.5 py-0.5 rounded border border-rose-400 dark:border-rose-600 shrink-0">2강</span>
-                <p class="text-[15px] sm:text-lg font-black text-rose-900 dark:text-rose-200 leading-tight whitespace-normal tracking-tight">해당 봉이 가장 길때(뉴스로 인한 하락)</p>
+                <p class="text-[15px] sm:text-lg font-black text-rose-900 dark:text-rose-200 leading-tight whitespace-normal tracking-tight">해당 봉이 가장 길때(뉴스로 인한 급변동)</p>
             </div>
         </div>
 
         <div class="w-full h-24 sm:h-28 bg-white dark:bg-[#0a0508] rounded-xl border border-rose-200 dark:border-rose-500/50 overflow-hidden flex items-center justify-center shadow-inner relative transition-colors">
-                  <svg viewBox="0 0 340 88" class="w-full h-full" preserveAspectRatio="none">
+                  <svg viewBox="0 0 340 88" class="w-full h-full" preserveAspectRatio="none" style="animation: volLocAltDown 7s linear both infinite">
                     <line x1="0" y1="24" x2="340" y2="24" class="stroke-slate-200 dark:stroke-[#2a1018]" stroke-width="0.8" stroke-dasharray="2,2"/>
                     <line x1="0" y1="56" x2="340" y2="56" class="stroke-slate-200 dark:stroke-[#2a1018]" stroke-width="0.8" stroke-dasharray="2,2"/>
         
@@ -1606,6 +1606,38 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
                     <line x1="145" y1="54" x2="176" y2="64" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2,2" />
                     <rect x="178" y="50" width="152" height="20" rx="3.5" fill="#450a0a" fill-opacity="0.85" stroke="#ef4444" stroke-width="1.1" />
                     <text x="254" y="63" font-size="8.8" fill="#fca5a5" font-weight="900" font-family="Pretendard" text-anchor="middle">⚠️ 지지선 이탈 폭락! (청산 빔)</text>
+                  </svg>
+                  <svg viewBox="0 0 340 88" class="absolute inset-0 w-full h-full" preserveAspectRatio="none" style="animation: volLocAltUp 7s linear both infinite">
+                    <line x1="0" y1="64" x2="340" y2="64" class="stroke-slate-200 dark:stroke-[#2a1018]" stroke-width="0.8" stroke-dasharray="2,2"/>
+                    <line x1="0" y1="32" x2="340" y2="32" class="stroke-slate-200 dark:stroke-[#2a1018]" stroke-width="0.8" stroke-dasharray="2,2"/>
+                    <rect x="6" y="4" width="96" height="16" rx="2.5" fill="#334155" fill-opacity="0.78" stroke="#facc15" stroke-width="1" />
+                    <rect x="6" y="4" width="3.5" height="16" rx="1" fill="#facc15" />
+                    <text x="56" y="15" font-size="8.8" fill="#fef08a" font-weight="900" font-family="Pretendard" text-anchor="middle">1시간봉 이상 캔들</text>
+                    <line x1="10" y1="46" x2="330" y2="46" stroke="#22c55e" stroke-width="1.6" stroke-dasharray="3,2" />
+                    <rect x="174" y="6" width="122" height="16" rx="3" fill="#064e3b" fill-opacity="0.85" stroke="#22c55e" stroke-width="1" />
+                    <text x="235" y="17" font-size="8.8" fill="#86efac" font-weight="900" font-family="Pretendard" text-anchor="middle">박스권 천장 / 주요 저항선</text>
+                    <line x1="235" y1="22" x2="235" y2="46" stroke="#22c55e" stroke-width="1.3" stroke-dasharray="2,2" />
+                    <circle cx="235" cy="46" r="2.2" fill="#facc15" />
+                    <line x1="35" y1="49" x2="35" y2="64" stroke="#22c55e" stroke-width="1.2" />
+                    <rect x="31" y="52" width="8" height="9" rx="0.8" fill="#22c55e" />
+                    <line x1="51" y1="44" x2="51" y2="61" stroke="#ef4444" stroke-width="1.2" />
+                    <rect x="47" y="53" width="8" height="8" rx="0.8" fill="#ef4444" />
+                    <line x1="67" y1="43" x2="67" y2="58" stroke="#22c55e" stroke-width="1.2" />
+                    <rect x="63" y="53" width="8" height="2" rx="0.8" fill="#22c55e" />
+                    <line x1="83" y1="41" x2="83" y2="55" stroke="#ef4444" stroke-width="1.2" />
+                    <rect x="79" y="47" width="8" height="8" rx="0.8" fill="#ef4444" />
+                    <line x1="99" y1="40" x2="99" y2="52" stroke="#22c55e" stroke-width="1.2" />
+                    <rect x="95" y="47" width="8" height="2" rx="0.8" fill="#22c55e" />
+                    <line x1="115" y1="38" x2="115" y2="49" stroke="#ef4444" stroke-width="1.2" />
+                    <rect x="111" y="47" width="8" height="2" rx="0.8" fill="#ef4444" />
+                    <line x1="135" y1="6" x2="135" y2="58" stroke="#22c55e" stroke-width="2.4" />
+                    <rect x="128" y="14" width="14" height="33" rx="1.2" fill="#22c55e" stroke="#86efac" stroke-width="1.2" />
+                    <line x1="160" y1="2" x2="160" y2="16" stroke="#22c55e" stroke-width="1.6" />
+                    <rect x="156" y="3" width="8" height="11" rx="0.8" fill="#22c55e" />
+                    <circle cx="135" cy="46" r="5" fill="none" stroke="#facc15" stroke-width="1.6" stroke-dasharray="2,2" />
+                    <line x1="145" y1="34" x2="176" y2="24" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="2,2" />
+                    <rect x="178" y="18" width="152" height="20" rx="3.5" fill="#064e3b" fill-opacity="0.85" stroke="#22c55e" stroke-width="1.1" />
+                    <text x="254" y="31" font-size="8.8" fill="#86efac" font-weight="900" font-family="Pretendard" text-anchor="middle">⚠️ 저항선 돌파 폭등! (청산 빔)</text>
                   </svg>
                 </div>
 
@@ -1693,6 +1725,86 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
                     <rect x="306" y="58" width="10" height="10" rx="1" fill="#64748b" />
                     <rect x="208" y="70" width="96" height="15" rx="2.5" fill="#064e3b" fill-opacity="0.92" stroke="#10b981" stroke-width="0.8" />
                     <text x="256" y="80.5" font-size="8.8" fill="#6ee7b7" font-weight="900" font-family="Pretendard" text-anchor="middle">거래량 폭발</text>
+                  </svg>
+                </div>
+
+      </button>
+
+      <!-- 카드 2-1 (빨간색): 크트키 숏 — 장대양봉+거래량 폭발 후 음봉 장악 ➔ 숏 진입 -->
+      <button
+        id="branchCardH"
+        onclick="handleBranchSelect('H')"
+        class="w-full text-left p-3 sm:p-3.5 rounded-2xl border-2 border-rose-300 dark:border-rose-500 bg-rose-50 dark:bg-[#160b11] hover:border-rose-400 transition-all btn-touch shadow-md dark:shadow-xl flex flex-col group gap-2.5 cursor-pointer"
+      >
+        <div class="flex items-center space-x-2.5 sm:space-x-3 w-full">
+            <!-- 유형 H 맞춤 아이콘: 수평 저항선 아래 양봉 안착 후 음봉 반락 -->
+            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-rose-200 dark:bg-rose-900 border-2 border-rose-400 flex items-center justify-center text-rose-600 dark:text-rose-200 shrink-0 group-hover:scale-105 transition-transform">
+              <svg viewBox="0 0 28 28" fill="none" class="w-6 h-6">
+                <line x1="3" y1="6" x2="25" y2="6" stroke="currentColor" stroke-width="2" stroke-dasharray="2.5,2"/>
+                <rect x="6.5" y="9" width="5.5" height="12" rx="1" fill="#10b981"/>
+                <rect x="15.5" y="9" width="5.5" height="10" rx="1" fill="#ef4444" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M18.2 24 L18.2 21 M16 22 L18.2 24.2 L20.4 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="flex items-center gap-1.5 min-w-0 flex-1 whitespace-nowrap overflow-hidden">
+                <span class="text-[11px] sm:text-xs font-mono font-black text-rose-700 dark:text-rose-300 bg-rose-200 dark:bg-rose-950 px-1.5 py-0.5 rounded border border-rose-400 dark:border-rose-600 shrink-0">크트키 숏</span>
+                <p class="text-[15px] sm:text-lg font-black text-rose-900 dark:text-rose-200 leading-tight whitespace-normal break-keep tracking-tight">장대 거래량 양봉 후 음봉 컨펌</p>
+            </div>
+        </div>
+
+        <div class="w-full h-24 sm:h-28 bg-white dark:bg-[#0a0508] rounded-xl border border-rose-200 dark:border-rose-500/50 overflow-hidden flex items-center justify-center shadow-inner relative transition-colors">
+                  <svg viewBox="0 0 340 88" class="w-full h-full" preserveAspectRatio="none">
+                    <line x1="0" y1="64" x2="196" y2="64" class="stroke-slate-200 dark:stroke-[#2a1018]" stroke-width="0.8" stroke-dasharray="2,2"/>
+                    <line x1="0" y1="38" x2="196" y2="38" class="stroke-slate-200 dark:stroke-[#2a1018]" stroke-width="0.8" stroke-dasharray="2,2"/>
+                    <rect x="6" y="4" width="56" height="15" rx="2.5" fill="#334155" fill-opacity="0.78" stroke="#facc15" stroke-width="1"/>
+                    <rect x="6" y="4" width="3.5" height="15" rx="1" fill="#facc15" />
+                    <text x="35.5" y="14.5" font-size="8.8" fill="#fef08a" font-weight="900" font-family="Pretendard" text-anchor="middle">15m 캔들</text>
+                    <line x1="10" y1="16" x2="190" y2="16" stroke="#f43f5e" stroke-width="1.8" stroke-dasharray="3,2" />
+                    <rect x="8" y="8" width="118" height="16" rx="3" fill="#450a0a" fill-opacity="0.85" stroke="#f43f5e" stroke-width="1" />
+                    <text x="67" y="19" font-size="8.8" fill="#fca5a5" font-weight="900" font-family="Pretendard" text-anchor="middle">주요 수평 저항선 대기 중</text>
+                    <line x1="22" y1="59" x2="22" y2="69" stroke="#ef4444" stroke-width="1.1" />
+                    <rect x="19.5" y="61" width="5" height="6" rx="0.6" fill="#ef4444" />
+                    <line x1="34" y1="54" x2="34" y2="63" stroke="#ef4444" stroke-width="1.1" />
+                    <rect x="31.5" y="56" width="5" height="5" rx="0.6" fill="#ef4444" />
+                    <line x1="46" y1="54" x2="46" y2="64" stroke="#22c55e" stroke-width="1.1" />
+                    <rect x="43.5" y="56" width="5" height="6" rx="0.6" fill="#22c55e" />
+                    <line x1="58" y1="53" x2="58" y2="64" stroke="#ef4444" stroke-width="1.1" />
+                    <rect x="55.5" y="55" width="5" height="7" rx="0.6" fill="#ef4444" />
+                    <line x1="70" y1="53" x2="70" y2="62" stroke="#22c55e" stroke-width="1.1" />
+                    <rect x="67.5" y="55" width="5" height="5" rx="0.6" fill="#22c55e" />
+                    <line x1="82" y1="51" x2="82" y2="62" stroke="#ef4444" stroke-width="1.1" />
+                    <rect x="79.5" y="53" width="5" height="7" rx="0.6" fill="#ef4444" />
+                    <line x1="96" y1="45" x2="96" y2="55" stroke="#ef4444" stroke-width="1.2" />
+                    <rect x="93" y="47" width="6" height="6" rx="0.6" fill="#ef4444" />
+                    <line x1="114" y1="28" x2="114" y2="49" stroke="#22c55e" stroke-width="1.9" />
+                    <rect x="109" y="32" width="10" height="15" rx="1" fill="#22c55e" stroke="#86efac" stroke-width="1" />
+                    <circle cx="116.2" cy="28" r="2.2" fill="#facc15" />
+                    <line x1="130" y1="30" x2="130" y2="55" stroke="#ef4444" stroke-width="1.8" />
+                    <rect x="125" y="32" width="10" height="20" rx="1" fill="#ef4444" stroke="#f87171" stroke-width="1" />
+                    <line x1="145" y1="49" x2="145" y2="61" stroke="#ef4444" stroke-width="1.5" />
+                    <rect x="141" y="52" width="8" height="7" rx="0.8" fill="#ef4444" />
+                    <line x1="158" y1="57" x2="158" y2="68" stroke="#ef4444" stroke-width="1.5" />
+                    <rect x="154" y="59" width="8" height="7" rx="0.8" fill="#ef4444" />
+                    <line x1="171" y1="59" x2="171" y2="68" stroke="#22c55e" stroke-width="1.2" />
+                    <rect x="168" y="61" width="6" height="5" rx="0.6" fill="#22c55e" />
+                    <line x1="183" y1="59" x2="183" y2="71" stroke="#ef4444" stroke-width="1.3" />
+                    <rect x="180" y="61" width="6" height="8" rx="0.6" fill="#ef4444" />
+                    <line x1="196" y1="67" x2="196" y2="80" stroke="#ef4444" stroke-width="1.5" />
+                    <rect x="192" y="69" width="8" height="9" rx="0.8" fill="#ef4444" />
+                    <line x1="202" y1="0" x2="202" y2="88" class="stroke-slate-200 dark:stroke-[#2a1018]" stroke-width="1.2" stroke-dasharray="3,2" />
+                    <rect x="208" y="4" width="60" height="15" rx="2.5" fill="#334155" fill-opacity="0.78" stroke="#facc15" stroke-width="1"/>
+                    <rect x="208" y="4" width="3.5" height="15" rx="1" fill="#facc15" />
+                    <text x="238" y="14.5" font-size="8.8" fill="#fef08a" font-weight="900" font-family="Pretendard" text-anchor="middle">거래량</text>
+                    <rect x="208" y="56" width="10" height="12" rx="1" fill="#64748b" />
+                    <rect x="222" y="50" width="10" height="18" rx="1" fill="#64748b" />
+                    <rect x="236" y="42" width="10" height="26" rx="1" fill="#64748b" />
+                    <rect x="250" y="16" width="10" height="52" rx="1" fill="#22c55e" />
+                    <rect x="264" y="34" width="10" height="34" rx="1" fill="#ef4444" />
+                    <rect x="278" y="44" width="10" height="24" rx="1" fill="#ef4444" />
+                    <rect x="292" y="52" width="10" height="16" rx="1" fill="#64748b" />
+                    <rect x="306" y="58" width="10" height="10" rx="1" fill="#64748b" />
+                    <rect x="208" y="70" width="96" height="15" rx="2.5" fill="#450a0a" fill-opacity="0.92" stroke="#ef4444" stroke-width="0.8" />
+                    <text x="256" y="80.5" font-size="8.8" fill="#fca5a5" font-weight="900" font-family="Pretendard" text-anchor="middle">거래량 폭발</text>
                   </svg>
                 </div>
 
@@ -3099,7 +3211,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         nextTitle: "최종 진입 승인",
         nextDesc: "이전봉 상단 위 스탑로스를 걸고 수평지지 1차 TP(반익절)를 기계적으로 설정하세요.",
         showVolumeChart: false, showBreakoutChart: false, showCandleChart: false,
-        showStep3Chart: false, showStep3FastChart: false, showStep3FastDcaChart: false,
+        showStep3Chart: false, showStep3KrtkiShortChart: true, showStep3FastChart: false, showStep3FastDcaChart: false,
         noBtnSub: "뇌동매매 즉시 중단",
         items: [
           { title: "15분봉 RSI 과매수(70 이상) 진입 확인", desc: "정상 구간을 이탈하여 15m RSI(14) 지표가 70선 위로 완전히 진입했는지 확인", botCapable: true, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-emerald-500 dark:text-emerald-300" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="19" x2="25" y2="19" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="2.5,2" /><rect x="3" y="19" width="22" height="6" fill="#ef4444" fill-opacity="0.25" /><path d="M 4 8 C 9 7, 13 12, 17 14 L 22 22" stroke="#f59e0b" stroke-width="2.2" /><circle cx="22" cy="22" r="2.8" fill="#ef4444" stroke="#ffffff" stroke-width="1" /><text x="3" y="16.5" font-size="6" fill="#ef4444" font-weight="900" font-family="Pretendard">30</text></svg>` },
@@ -4721,6 +4833,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         {id: "doubleBottomExampleCard", flag: "showDoubleBottomChart"},
         {id: "candleExampleCard", flag: "showCandleChart"},
         {id: "step3ExampleCard", flag: "showStep3Chart"},
+        {id: "step3KrtkiShortExampleCard", flag: "showStep3KrtkiShortChart"},
         {id: "step3FastExampleCard", flag: "showStep3FastChart"},
         {id: "step3FastDcaExampleCard", flag: "showStep3FastDcaChart"},
         {id: "step2AltSlowExampleCard", flag: "showStep2AltSlowChart"},
@@ -5362,8 +5475,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       } catch (e) { return null; }
     }
     // v503: 진입대기순위 — 추천 유형 목록에서 고른 한 유형을 1강 바로 다음으로 (1강은 항상 맨 위). 다이버는 롱숏 둘 다 선택 가능. 순서만 바꿈. 상태는 메모리만(모달 닫기·분기 선택·장세 재선언·새로고침 시 해제).
-    var WAIT_PICK_NAMES = { B: "크트키", C: "다이버 롱", E: "다이버 숏", D: "리테 롱", F: "리테 숏" };
-    var WAIT_PICK_TITLES = { B: "장대 거래량 음봉 후 양봉 컨펌", C: "장대 과매도 이 후 거래량 줄은 하락 진입", E: "고점 갱신 음봉 마감 → 다음봉 윗꼬리 숏", D: "저항 상향 돌파 후 눌림 (돌파 롱)", F: "지지 하향 붕괴 후 되돌림 (돌파 숏)" };
+    var WAIT_PICK_NAMES = { B: "크트키", H: "크트키 숏", C: "다이버 롱", E: "다이버 숏", D: "리테 롱", F: "리테 숏" };
+    var WAIT_PICK_TITLES = { B: "장대 거래량 음봉 후 양봉 컨펌", H: "장대 거래량 양봉 후 음봉 컨펌", C: "장대 과매도 이 후 거래량 줄은 하락 진입", E: "고점 갱신 음봉 마감 → 다음봉 윗꼬리 숏", D: "저항 상향 돌파 후 눌림 (돌파 롱)", F: "지지 하향 붕괴 후 되돌림 (돌파 숏)" };
     function updateWaitPickBtn() {
       try {
         const btn = document.getElementById("waitPickBtn");
@@ -5385,11 +5498,11 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         const dir = (typeof branchRecommendation === "function") ? branchRecommendation() : null;
         let rec = [];
         if (dir === "long") rec = ["G", "B", "C", "D"];
-        else if (dir === "short") rec = ["E", "F"];
+        else if (dir === "short") rec = ["H", "E", "F"];
         const bCard = document.getElementById("branchCardB");
         const bBanned = !!(bCard && bCard.disabled);
         if (bBanned) rec = rec.filter(function (L) { return L !== "B"; });
-        const canon = ["G", "A", "B", "C", "E", "D", "F"];
+        const canon = ["G", "A", "B", "H", "C", "E", "D", "F"];
         const list = [];
         canon.forEach(function (L) {
           if (L === "G") return;
@@ -5439,10 +5552,10 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         const dir = (typeof branchRecommendation === "function") ? branchRecommendation() : null;
         const bCard = document.getElementById("branchCardB");
         const bBanned = !!(bCard && bCard.disabled);
-        const canon = ["G", "A", "B", "C", "E", "D", "F"];
+        const canon = ["G", "A", "B", "H", "C", "E", "D", "F"];
         let rec = [];
         if (dir === "long") rec = ["G", "B", "C", "D"];
-        else if (dir === "short") rec = ["E", "F"];
+        else if (dir === "short") rec = ["H", "E", "F"];
         if (bBanned) rec = rec.filter(function (L) { return L !== "B"; });
         const regData = (typeof Regime !== "undefined" && Regime._data) ? Regime._data() : null;
         const divVal = regData ? regData.div : null;
@@ -5851,6 +5964,11 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         stepHistory.push("__branch__");
         window.__bypassRegimeBlock2Gang = false; // v744: 2강 우회 1회용 소진
         loadStep("step_3", false);
+      } else if (branchType === 'H') {
+        playReadySound();
+        stepHistory.push("__branch__");
+        window.__bypassRegimeBlock2Gang = false;
+        loadStep("step_3_krtki_short", false); // v796: 크트키 숏 진입카드 → 크트키 숏 체크리스트
       } else if (branchType === 'C') {
         playBranchSound();
         stepHistory.push("__branch__");
@@ -8051,6 +8169,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
 
     // 1강 예시차트 카드 (팩토리 생성)
     createExampleChartCard({id: "step3TypeGExampleCard", color: "lime", insertAfter: "step3TypeFExampleCard"});
+    // 크트키 숏 예시차트 카드 (팩토리 생성, v796) — 크트키 롱(step3ExampleCard) 바로 뒤
+    createExampleChartCard({id: "step3KrtkiShortExampleCard", color: "rose", insertAfter: "step3ExampleCard"});
 
 
     // ===== 로드맵 스터디 모듈 (2026-10-18, 모듈 방식 원칙) =====
@@ -10767,7 +10887,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v795 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v796 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
