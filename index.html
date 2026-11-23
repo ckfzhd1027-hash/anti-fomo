@@ -274,6 +274,9 @@
       /* v751: 위치 확인 박스 무한반복 (11.4 7초 반복 — 완성 장면 머문 뒤 처음부터 다시) */
       @keyframes volLocInLoop { 0% { opacity: 0; } 10% { opacity: 1; } 68% { opacity: 1; } 85%, 100% { opacity: 0; } }
       @keyframes volLocGrowLoop { 0% { transform: scaleY(0.12); opacity: 1; } 20% { transform: scaleY(1); opacity: 1; } 68% { transform: scaleY(1); opacity: 1; } 85%, 100% { transform: scaleY(1); opacity: 0; } }
+      /* v795: 2강 카드 상하방 교대 (7초 주기, 3.5초마다 상/하방 전환 — 안쪽 3.5초 루프와 경계 일치) */
+      @keyframes volLocAltDown { 0%, 47% { opacity: 1; } 50%, 97% { opacity: 0; } 100% { opacity: 1; } }
+      @keyframes volLocAltUp { 0%, 47% { opacity: 0; } 50%, 97% { opacity: 1; } 100% { opacity: 0; } }
       /* v433: 추천 카드 테두리 점멸 (뱃지가 약하다는 지적 — 방향별 색상, 1.5s 무한) */
       /* v434: 점멸 강화 (글로우 확대 + 테두리 명암폭 확대) + 추천 아닌 카드 dim */
       @keyframes recBlinkLong { 0%,100% { border-color: #34d399; box-shadow: 0 0 0 0 rgba(16,185,129,0.6), 0 0 18px 3px rgba(16,185,129,0.45); } 50% { border-color: #047857; box-shadow: 0 0 0 5px rgba(16,185,129,0.25), 0 0 28px 8px rgba(16,185,129,0.75); } }
@@ -474,7 +477,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v794 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v795 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1241,21 +1244,6 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       </button>
     </div>
 
-    <!-- v794: 2강 방향 선택 — 하방(아래로 터짐) / 상방(위로 터짐). A 경고에서만 표시 -->
-    <div id="gang2DirWrap" class="hidden w-full max-w-lg mt-2">
-      <div class="grid grid-cols-2 gap-2">
-        <button
-          id="gang2DirDownBtn"
-          onclick="setGang2Dir('down')"
-          class="w-full py-3 rounded-2xl bg-slate-700 text-white font-black text-base sm:text-lg shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-slate-400"
-        >하방 2강 ↓</button>
-        <button
-          id="gang2DirUpBtn"
-          onclick="setGang2Dir('up')"
-          class="w-full py-3 rounded-2xl bg-slate-800/60 text-slate-400 font-black text-base sm:text-lg shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-slate-600"
-        >상방 2강 ↑</button>
-      </div>
-    </div>
     <!-- v744: 유형 A 전용 — 2강 뒤 반등 크트키 진입 경로 (A 경고에서만 표시, 진입 순서상 리테 숏보다 위) -->
     <div id="krtkiFrom2GangWrap" class="hidden w-full max-w-lg mt-2">
       <button
@@ -1406,8 +1394,11 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       <p class="text-base font-bold leading-snug mb-4 break-keep">차트와 같은 모양을 눌러주세요</p>
       <div class="grid grid-cols-2 gap-2.5">
         <button type="button" onclick="chooseVolLoc('breakdown')" class="rounded-xl border-2 border-rose-400 bg-rose-50/70 dark:bg-rose-950/30 p-2 cursor-pointer">
-          <svg viewBox="0 0 120 110" class="w-full h-auto block"><rect x="4" y="10" width="112" height="40" fill="none" stroke="#64748b" stroke-width="1.5" /><g style="animation: volLocInLoop 3.5s ease-in 0s both infinite"><line x1="12" y1="14" x2="12" y2="26" stroke="#ef4444" stroke-width="1.2" /><rect x="7" y="16" width="10" height="8" fill="#ef4444" /><rect x="7" y="100" width="10" height="8" fill="#ef4444" opacity="0.65" /></g><g style="animation: volLocInLoop 3.5s ease-in 0.12s both infinite"><line x1="30" y1="22" x2="30" y2="36" stroke="#ef4444" stroke-width="1.2" /><rect x="25" y="24" width="10" height="10" fill="#ef4444" /><rect x="25" y="98" width="10" height="10" fill="#ef4444" opacity="0.65" /></g><g style="animation: volLocInLoop 3.5s ease-in 0.24s both infinite"><line x1="48" y1="27" x2="48" y2="36" stroke="#22c55e" stroke-width="1.2" /><rect x="43" y="29" width="10" height="5" fill="#22c55e" /><rect x="43" y="100" width="10" height="8" fill="#22c55e" opacity="0.65" /></g><g style="animation: volLocInLoop 3.5s ease-in 0.36s both infinite"><line x1="66" y1="23" x2="66" y2="31" stroke="#22c55e" stroke-width="1.2" /><rect x="61" y="25" width="10" height="4" fill="#22c55e" /><rect x="61" y="98" width="10" height="10" fill="#22c55e" opacity="0.65" /></g><g style="transform-box: fill-box; transform-origin: 50% 0; animation: volLocGrowLoop 3.5s ease-in 0.55s both infinite"><line x1="84" y1="22" x2="84" y2="74" stroke="#ef4444" stroke-width="1.2" /><rect x="79" y="25" width="10" height="43" fill="#ef4444" /></g><rect x="79" y="78" width="10" height="30" fill="#ef4444" opacity="0.65" style="animation: volLocInLoop 3.5s ease-in 0.55s both infinite" /><g style="animation: volLocInLoop 3.5s ease-in 1.05s both infinite"><rect x="76" y="42" width="16" height="16" rx="3" fill="none" stroke="#f43f5e" stroke-width="1.5" /></g></svg>
-          <span class="block text-center font-black text-sm text-rose-700 dark:text-rose-300 break-keep mt-1">박스권 하단 수평 이탈</span>
+          <div class="relative">
+          <svg viewBox="0 0 120 110" class="w-full h-auto block" style="animation: volLocAltDown 7s linear both infinite"><rect x="4" y="10" width="112" height="40" fill="none" stroke="#64748b" stroke-width="1.5" /><g style="animation: volLocInLoop 3.5s ease-in 0s both infinite"><line x1="12" y1="14" x2="12" y2="26" stroke="#ef4444" stroke-width="1.2" /><rect x="7" y="16" width="10" height="8" fill="#ef4444" /><rect x="7" y="100" width="10" height="8" fill="#ef4444" opacity="0.65" /></g><g style="animation: volLocInLoop 3.5s ease-in 0.12s both infinite"><line x1="30" y1="22" x2="30" y2="36" stroke="#ef4444" stroke-width="1.2" /><rect x="25" y="24" width="10" height="10" fill="#ef4444" /><rect x="25" y="98" width="10" height="10" fill="#ef4444" opacity="0.65" /></g><g style="animation: volLocInLoop 3.5s ease-in 0.24s both infinite"><line x1="48" y1="27" x2="48" y2="36" stroke="#22c55e" stroke-width="1.2" /><rect x="43" y="29" width="10" height="5" fill="#22c55e" /><rect x="43" y="100" width="10" height="8" fill="#22c55e" opacity="0.65" /></g><g style="animation: volLocInLoop 3.5s ease-in 0.36s both infinite"><line x1="66" y1="23" x2="66" y2="31" stroke="#22c55e" stroke-width="1.2" /><rect x="61" y="25" width="10" height="4" fill="#22c55e" /><rect x="61" y="98" width="10" height="10" fill="#22c55e" opacity="0.65" /></g><g style="transform-box: fill-box; transform-origin: 50% 0; animation: volLocGrowLoop 3.5s ease-in 0.55s both infinite"><line x1="84" y1="22" x2="84" y2="74" stroke="#ef4444" stroke-width="1.2" /><rect x="79" y="25" width="10" height="43" fill="#ef4444" /></g><rect x="79" y="78" width="10" height="30" fill="#ef4444" opacity="0.65" style="animation: volLocInLoop 3.5s ease-in 0.55s both infinite" /><g style="animation: volLocInLoop 3.5s ease-in 1.05s both infinite"><rect x="76" y="42" width="16" height="16" rx="3" fill="none" stroke="#f43f5e" stroke-width="1.5" /></g></svg>
+          <svg viewBox="0 0 120 110" class="absolute inset-0 w-full h-auto" style="animation: volLocAltUp 7s linear both infinite"><rect x="4" y="50" width="112" height="38" fill="none" stroke="#64748b" stroke-width="1.5" /><g style="animation: volLocInLoop 3.5s ease-in 0s both infinite"><line x1="12" y1="62" x2="12" y2="74" stroke="#ef4444" stroke-width="1.2" /><rect x="7" y="64" width="10" height="8" fill="#ef4444" /><rect x="7" y="100" width="10" height="8" fill="#ef4444" opacity="0.65" /></g><g style="animation: volLocInLoop 3.5s ease-in 0.12s both infinite"><line x1="30" y1="68" x2="30" y2="80" stroke="#ef4444" stroke-width="1.2" /><rect x="25" y="70" width="10" height="10" fill="#ef4444" /><rect x="25" y="98" width="10" height="10" fill="#ef4444" opacity="0.65" /></g><g style="animation: volLocInLoop 3.5s ease-in 0.24s both infinite"><line x1="48" y1="72" x2="48" y2="80" stroke="#22c55e" stroke-width="1.2" /><rect x="43" y="74" width="10" height="5" fill="#22c55e" /><rect x="43" y="100" width="10" height="8" fill="#22c55e" opacity="0.65" /></g><g style="animation: volLocInLoop 3.5s ease-in 0.36s both infinite"><line x1="66" y1="70" x2="66" y2="78" stroke="#22c55e" stroke-width="1.2" /><rect x="61" y="72" width="10" height="4" fill="#22c55e" /><rect x="61" y="98" width="10" height="10" fill="#22c55e" opacity="0.65" /></g><g style="transform-box: fill-box; transform-origin: 50% 100%; animation: volLocGrowLoop 3.5s ease-in 0.55s both infinite"><line x1="84" y1="14" x2="84" y2="84" stroke="#22c55e" stroke-width="1.2" /><rect x="79" y="16" width="10" height="66" fill="#22c55e" /></g><rect x="79" y="88" width="10" height="20" fill="#22c55e" opacity="0.65" style="animation: volLocInLoop 3.5s ease-in 0.55s both infinite" /><g style="animation: volLocInLoop 3.5s ease-in 1.05s both infinite"><rect x="76" y="42" width="16" height="16" rx="3" fill="none" stroke="#22c55e" stroke-width="1.5" /></g></svg>
+          </div>
+          <span class="block text-center font-black text-sm text-rose-700 dark:text-rose-300 break-keep mt-1">박스권 수평 돌파·이탈</span>
           <span class="block text-center font-bold text-xs text-rose-600 dark:text-rose-400">2강</span>
         </button>
         <button type="button" onclick="chooseVolLoc('support')" class="rounded-xl border-2 border-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/30 p-2 cursor-pointer">
@@ -1417,6 +1408,18 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         </button>
       </div>
       <button type="button" onclick="closeVolLocModal()" class="w-full py-2 mt-2.5 rounded-xl text-slate-500 dark:text-slate-400 font-bold text-sm cursor-pointer">닫기</button>
+    </div>
+  </div>
+
+  <div id="gang2DirChoiceModal" class="fixed inset-0 z-[110] hidden flex-col items-center justify-center p-4 sm:p-6 bg-black/70" role="dialog" aria-modal="true">
+    <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-2xl border-2 border-amber-400">
+      <p class="text-lg font-black mb-1 text-amber-600 dark:text-amber-400">2강 방향 선택</p>
+      <p class="text-base font-bold leading-snug mb-4 break-keep">어느 방향으로 터졌어요?</p>
+      <div class="flex flex-col gap-2.5">
+        <button type="button" onclick="chooseGang2Dir('up')" class="w-full py-3 rounded-xl bg-emerald-500 text-white font-black text-base break-keep cursor-pointer">↑ 상방 2강 — 장대양봉으로 위로 터짐</button>
+        <button type="button" onclick="chooseGang2Dir('down')" class="w-full py-3 rounded-xl bg-rose-500 text-white font-black text-base break-keep cursor-pointer">↓ 하방 2강 — 장대음봉으로 아래로 터짐</button>
+      </div>
+      <button type="button" onclick="closeGang2DirChoice()" class="w-full py-2 mt-2.5 rounded-xl text-slate-500 dark:text-slate-400 font-bold text-sm cursor-pointer">닫기</button>
     </div>
   </div>
 
@@ -5794,6 +5797,31 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       m.classList.add("hidden");
       m.classList.remove("flex");
     }
+    // v795: 2강 방향 선택 박스 → 고른 방향으로 경고창
+    function openGang2DirChoice() {
+      const m = document.getElementById("gang2DirChoiceModal");
+      if (m) { m.classList.remove("hidden"); m.classList.add("flex"); }
+    }
+    function closeGang2DirChoice() {
+      const m = document.getElementById("gang2DirChoiceModal");
+      if (m) { m.classList.add("hidden"); m.classList.remove("flex"); }
+    }
+    function chooseGang2Dir(dir) {
+      closeGang2DirChoice();
+      openGang2Warning(dir);
+    }
+    function openGang2Warning(dir) {
+      playAlertSiren();
+      const body = document.getElementById("appBody");
+      body.classList.remove("animate-impact");
+      void body.offsetWidth;
+      body.classList.add("animate-impact");
+      const warningModal = document.getElementById("warningModal");
+      warningModal.classList.remove("hidden");
+      warningModal.classList.add("flex");
+      setGang2Dir(dir || 'down'); // 고른 방향으로 경고 문구·버튼 설정 (v748 상단 크트키 숨김 포함)
+      startEmergencyLockdown(5);
+    }
     function chooseVolLoc(loc) {
       closeVolLocModal();
       if (loc === "support") { playBranchSound(); openFastGang1Gate(); }
@@ -5816,19 +5844,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       }
       window.__divGatePassed = false;
       if (branchType === 'A') {
-        playAlertSiren();
-        const body = document.getElementById("appBody");
-        body.classList.remove("animate-impact");
-        void body.offsetWidth;
-        body.classList.add("animate-impact");
-
-        const warningModal = document.getElementById("warningModal");
-        warningModal.classList.remove("hidden");
-        warningModal.classList.add("flex");
-        const dirWrap = document.getElementById("gang2DirWrap");
-        if (dirWrap) dirWrap.classList.remove("hidden");
-        setGang2Dir('down'); // v794: 기본 하방(기존 동작 유지) — 경고 문구·버튼·v748 상단 크트키 숨김 포함
-        startEmergencyLockdown(5);
+        openGang2DirChoice(); // v795: 2강은 방향 선택 박스 먼저 → 고른 방향으로 경고창
       } else if (branchType === 'B') {
         playReadySound();
         // v671: 분기 선택 화면에서 들어온 표시 — 다음 단계에서 이전을 누르면 분기 선택 화면으로 돌아간다
@@ -5862,13 +5878,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     const GANG2_UP_TEXT = "🚨 [상방 2강 경고] 4시간봉 주요 저항선이나 장기 박스 상단을 상향 돌파하며 터진 장대양봉은 추격 매수 구간이 아니라 '숏 청산 연쇄반응' 구간입니다. 장대양봉이 떴다고 바로 숏을 잡지 마세요. 숏은 크트키 숏 체크(과매수·음봉 장악 컨펌·윗꼬리)를 다 확인한 뒤에만 위 크트키 숏 버튼으로 들어가세요. 뉴스로 인한 상승인지 확인하세요. 추가적인 상승이 있을 수 있습니다. 롱을 노린다면 돌파 직후 추격하지 말고, 하단 수평으로 되돌림이 와서 양봉으로 지지를 확인한 뒤 아래 '하단 수평 리테스트 롱 대기'로 들어가세요.";
     // v794: 2강 방향 전환 — 하방(크트키 롱 + 리테 숏) / 상방(크트키 숏 + 리테 롱)
     function setGang2Dir(dir) {
+      // v795: 방향은 2강 선택 박스에서 이미 정함 — 경고창에는 토글 없음. 여기서는 방향별 문구·버튼만 전환.
       window.__gang2Dir = dir;
-      const downBtn = document.getElementById("gang2DirDownBtn");
-      const upBtn = document.getElementById("gang2DirUpBtn");
-      const activeCls = "w-full py-3 rounded-2xl bg-slate-700 text-white font-black text-base sm:text-lg shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-slate-400";
-      const idleCls = "w-full py-3 rounded-2xl bg-slate-800/60 text-slate-400 font-black text-base sm:text-lg shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-slate-600";
-      if (downBtn) downBtn.className = dir === 'down' ? activeCls : idleCls;
-      if (upBtn) upBtn.className = dir === 'up' ? activeCls : idleCls;
       document.getElementById("warningDetailReason").innerText = dir === 'up' ? GANG2_UP_TEXT : GANG2_DOWN_TEXT;
       const krtkiWrap = document.getElementById("krtkiFrom2GangWrap");
       const retestWrap = document.getElementById("retestShortWrap");
@@ -10756,7 +10767,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v794 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v795 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -11572,8 +11583,6 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       if (retestWrap) retestWrap.classList.add("hidden");
       const krtkiWrap = document.getElementById("krtkiFrom2GangWrap");
       if (krtkiWrap) krtkiWrap.classList.add("hidden");
-      const dirWrap = document.getElementById("gang2DirWrap");
-      if (dirWrap) dirWrap.classList.add("hidden");
       const krtkiShortWrap = document.getElementById("krtkiShortFrom2GangWrap");
       if (krtkiShortWrap) krtkiShortWrap.classList.add("hidden");
       const retestLongWrap = document.getElementById("retestLongWrap");
