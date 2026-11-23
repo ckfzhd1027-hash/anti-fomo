@@ -477,7 +477,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v797 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v799 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -1252,7 +1252,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         class="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-black text-base sm:text-lg shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer border-2 border-emerald-300"
       >
         <i class="ph-bold ph-trend-up text-xl"></i>
-        <span>반등 확인 후 크트키 진입 →</span>
+        <span>반등 확인 후 크트키롱 진입 →</span>
       </button>
     </div>
     <!-- v237: 유형 A 전용 — 붕괴 리테스트 숏 대기 경로 (A 경고에서만 표시) -->
@@ -1368,9 +1368,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
   <div id="fastGang1MissedModal" class="fixed inset-0 z-[110] hidden flex-col items-center justify-center p-4 sm:p-6 bg-black/70" role="dialog" aria-modal="true">
     <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-2xl border-2 border-amber-400">
       <p class="text-lg font-black mb-1 text-amber-600 dark:text-amber-400">자리를 놓쳤나요?</p>
-      <p class="text-base font-bold leading-snug mb-4 break-keep">포모오지말고 크트키 진입 준비를 하세요.</p>
+      <p class="text-base font-bold leading-snug mb-4 break-keep">포모오지말고 크트키롱 진입 준비를 하세요.</p>
       <div class="flex flex-col gap-2.5">
-        <button type="button" onclick="chooseFastGang1Missed(true)" class="w-full py-3 rounded-xl bg-amber-500 text-white font-black text-base break-keep cursor-pointer">자리를 놓쳤다 · 포모오지말고 크트키 진입 준비</button>
+        <button type="button" onclick="chooseFastGang1Missed(true)" class="w-full py-3 rounded-xl bg-amber-500 text-white font-black text-base break-keep cursor-pointer">자리를 놓쳤다 · 포모오지말고 크트키롱 진입 준비</button>
         <button type="button" onclick="chooseFastGang1Missed(false)" class="w-full py-3 rounded-xl bg-emerald-500 text-white font-black text-base break-keep cursor-pointer">지금 바로 진입</button>
       </div>
     </div>
@@ -1667,7 +1667,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
               </svg>
             </div>
             <div class="flex items-center gap-1.5 min-w-0 flex-1 whitespace-nowrap overflow-hidden">
-                <span class="text-[11px] sm:text-xs font-mono font-black text-emerald-700 dark:text-emerald-300 bg-emerald-200 dark:bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-400 dark:border-emerald-600 shrink-0">크트키</span>
+                <span class="text-[11px] sm:text-xs font-mono font-black text-emerald-700 dark:text-emerald-300 bg-emerald-200 dark:bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-400 dark:border-emerald-600 shrink-0">크트키롱</span>
                 <p class="text-[15px] sm:text-lg font-black text-emerald-900 dark:text-emerald-200 leading-tight whitespace-normal break-keep tracking-tight">장대 거래량 음봉 후 양봉 컨펌</p>
             </div>
         </div>
@@ -3175,7 +3175,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         id: "step_3",
         stepNumDisplay: "STEP 3 / 4 (정석)",
         progressPercent: 85,
-        category: "크트키",
+        category: "크트키롱",
         categoryIcon: "ph-target",
         badgeStyle: "bg-emerald-500/10 dark:bg-emerald-400/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/40 dark:border-emerald-400/40",
         question: "주요 지지선 위 1차 장대음봉 후 15분 양봉 갱신이 확인되었고, 다음 캔들 꼬리에서 스탑로스 및 1차 TP 기준이 확보되었는가?",
@@ -4794,7 +4794,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       const HEADER_TYPE_BADGE = {
         "step_3_type_g": "1강",
         "step_3_type_h": "빠른 1강 롱 진입",
-        "step_3": "크트키",
+        "step_3": "크트키롱",
         "step_3_krtki_short": "크트키 숏",
         "step_3_fast": "다이버 롱",
         "step_3_fast_dca_entry": "다이버 롱 · 물타기 1차",
@@ -5475,7 +5475,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       } catch (e) { return null; }
     }
     // v503: 진입대기순위 — 추천 유형 목록에서 고른 한 유형을 1강 바로 다음으로 (1강은 항상 맨 위). 다이버는 롱숏 둘 다 선택 가능. 순서만 바꿈. 상태는 메모리만(모달 닫기·분기 선택·장세 재선언·새로고침 시 해제).
-    var WAIT_PICK_NAMES = { B: "크트키", H: "크트키 숏", C: "다이버 롱", E: "다이버 숏", D: "리테 롱", F: "리테 숏" };
+    var WAIT_PICK_NAMES = { B: "크트키롱", H: "크트키 숏", C: "다이버 롱", E: "다이버 숏", D: "리테 롱", F: "리테 숏" };
     var WAIT_PICK_TITLES = { B: "장대 거래량 음봉 후 양봉 컨펌", H: "장대 거래량 양봉 후 음봉 컨펌", C: "장대 과매도 이 후 거래량 줄은 하락 진입", E: "고점 갱신 음봉 마감 → 다음봉 윗꼬리 숏", D: "저항 상향 돌파 후 눌림 (돌파 롱)", F: "지지 하향 붕괴 후 되돌림 (돌파 숏)" };
     function updateWaitPickBtn() {
       try {
@@ -6182,7 +6182,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       "step_2_alt": "상승 다이버전스 파동 전환",
       "step_2_alt_db": "쌍바닥 구조",
       "step_3_alt": "다이버 돌파 리테 롱",
-      "step_3": "크트키",
+      "step_3": "크트키롱",
         "step_3_krtki_short": "크트키 숏",
       "step_3_fast": "다이버 롱",
       "step_3_fast_dca": "FAST-DCA",
@@ -6611,6 +6611,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       {key: "step_3_type_e", name: "다이버 숏"},
       {key: "step_3_type_f", name: "리테 숏"},
       {key: "step_3_type_g", name: "1강"},
+      {key: "gang2", name: "2강"},
       {key: "npc_manual", name: "npc 메뉴얼"}
     ];
 
@@ -10887,7 +10888,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v797 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v799 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
