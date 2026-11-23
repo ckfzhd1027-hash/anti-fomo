@@ -474,7 +474,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v792 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v793 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -2608,6 +2608,53 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
   </div>
 
 
+  <!-- ==================== 모달: 물타기 2차 진입 대기 ==================== -->
+  <div
+    id="dcaWaitModal"
+    class="fixed inset-0 z-[100] hidden flex-col items-center justify-center p-4 sm:p-6 bg-slate-50 dark:bg-[#080b11] text-slate-900 dark:text-white overflow-y-auto transition-colors duration-300"
+    style="padding-top: calc(env(safe-area-inset-top, 0px) + 24px); padding-bottom: max(16px, env(safe-area-inset-bottom));"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="w-full max-w-md flex flex-col items-center text-center gap-5">
+      <div class="flex items-center space-x-2 bg-lime-100 dark:bg-lime-950 border-2 border-lime-300 dark:border-lime-500 px-4 py-1.5 rounded-full shadow-md dark:shadow-lg">
+        <span class="text-sm sm:text-base font-black text-lime-800 dark:text-lime-200 tracking-tight">물타기 1차 진입 완료 · 2차 진입 대기</span>
+      </div>
+      <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
+        1차 진입했어. 이제 두 갈래야.
+      </h3>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold tracking-tight">
+        올라가면 TP로 청산하고, 내려오면 2차 지지선에서 지지 확인하고 2차 진입해.
+      </p>
+      <div class="w-full rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-[#0d1420] p-4 text-left space-y-2 shadow-md">
+        <div class="flex justify-between gap-3 text-sm font-bold"><span class="text-slate-500 dark:text-slate-400 shrink-0">2차 지지선 매수가</span><span class="text-right">게이트에서 정한 가격</span></div>
+        <div class="flex justify-between gap-3 text-sm font-bold"><span class="text-slate-500 dark:text-slate-400 shrink-0">최종 손절</span><span class="text-right">2차 지지선 아래</span></div>
+        <div class="flex justify-between gap-3 text-sm font-bold"><span class="text-slate-500 dark:text-slate-400 shrink-0">반등 시</span><span class="text-right">평단가 탈출 · 비중 축소</span></div>
+        <div class="flex justify-between gap-3 text-sm font-bold"><span class="text-slate-500 dark:text-slate-400 shrink-0">청산</span><span class="text-right">TP1 → TP2</span></div>
+      </div>
+      <div class="w-full flex flex-col gap-2.5">
+        <button
+          onclick="handleDcaWaitSecond()"
+          class="w-full py-3.5 rounded-2xl bg-lime-500 hover:bg-lime-600 text-white font-black text-base sm:text-lg shadow-lg transition-all btn-touch"
+        >
+          2차 지지선 지지 확인됨 → 2차 진입
+        </button>
+        <button
+          onclick="handleDcaWaitTp()"
+          class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm sm:text-base transition-all btn-touch"
+        >
+          TP 도달 · 청산 완료
+        </button>
+        <button
+          onclick="handleDcaWaitSl()"
+          class="w-full py-3 rounded-xl bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold text-sm sm:text-base transition-all btn-touch"
+        >
+          최종 손절 · 전량 손절
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== 모달: 티켓 다운로드 선택 (v221) ==================== -->
   <div
     id="ticketKindModal"
@@ -3004,7 +3051,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         category: "다이버 롱",
         categoryIcon: "",
         badgeStyle: "bg-green-500/10 dark:bg-green-400/15 text-green-700 dark:text-green-300 border-green-500/40 dark:border-green-400/40",
-        question: "5분봉에서 1차 음봉 대비 거래량이 줄어든 2차 음봉이며, 장대 풀음봉에서 매도가 더 이상 안 나오고 손익비 1:1 이상 확보되었는가?",
+        question: "5분봉에서 1차 음봉 대비 거래량이 줄어든 2차 음봉이며, 장대 풀음봉에서 매도가 더 이상 안 나오고 현재 캔들 저점에 스탑로스를 설정하고 손익비 1:1 이상 확보되었는가?",
         rejectAction: "warning",
         rejectReason: "5분봉 거래량 감소 다이버전스 확인 없는 성급한 진입은 손실로 이어집니다!",
         nextStepId: "step_final",
@@ -3014,7 +3061,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         items: [
           { title: "5분봉 거래량 감소 다이버전스 컨펌", desc: "1차 15분봉 내 최대 5분봉 거래량 대비 현재 2차 5분봉 거래량 현저히 감소 확인", botCapable: true, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-blue-500 dark:text-blue-300"><rect x="5" y="6" width="4.5" height="18" fill="#ef4444" rx="1"/><rect x="18" y="14" width="4.5" height="10" fill="#64748b" rx="1"/><line x1="7.5" y1="6" x2="20" y2="14" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round"/></svg>` },
           { title: "5분봉 장대 풀음봉에서 매도가 더 이상 안 나옴 & 포착 즉시 진입", desc: "음봉 바닥에서 추가 매도가 멈추는 체결 포착 즉시 진입", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-blue-500 dark:text-blue-300"><line x1="14" y1="4" x2="14" y2="24" stroke="#38bdf8" stroke-width="1.8"/><rect x="10.5" y="7" width="7" height="12" fill="#0284c7" stroke="#38bdf8" stroke-width="1.2" rx="1"/><circle cx="14" cy="21" r="3.5" fill="#facc15" stroke="#ffffff" stroke-width="1.2"/></svg>` },
-          { title: "손익비 1:1 이상 확보", desc: "진입가 대비 TP까지의 거리가 SL까지의 거리 이상인지 확인", iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-emerald-500 dark:text-emerald-300" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4 L14 24" stroke-width="1.5"/><path d="M6 8 L22 8" stroke-width="1.5"/><path d="M6 8 L3 16 L9 16 Z" fill="#10b981" fill-opacity="0.3" stroke-width="1.2"/><path d="M22 8 L19 16 L25 16 Z" fill="#ef4444" fill-opacity="0.3" stroke-width="1.2"/><circle cx="14" cy="4" r="1.5" fill="#fbbf24"/></svg>` }
+          { title: "손익비 1:1 이상 확보", desc: "진입가 대비 TP까지의 거리가 SL까지의 거리 이상인지 확인", iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-emerald-500 dark:text-emerald-300" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4 L14 24" stroke-width="1.5"/><path d="M6 8 L22 8" stroke-width="1.5"/><path d="M6 8 L3 16 L9 16 Z" fill="#10b981" fill-opacity="0.3" stroke-width="1.2"/><path d="M22 8 L19 16 L25 16 Z" fill="#ef4444" fill-opacity="0.3" stroke-width="1.2"/><circle cx="14" cy="4" r="1.5" fill="#fbbf24"/></svg>` },
+          { title: "현재 캔들 저점에 스탑로스 설정", desc: "진입한 캔들의 저점 아래에 스탑로스를 걸어 손절 기준 확정", iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-red-500 dark:text-red-300" stroke="currentColor" stroke-width="2"><rect x="10.5" y="7" width="7" height="12" fill="#ef4444" stroke="#ef4444" stroke-width="1.2" rx="1"/><line x1="14" y1="4" x2="14" y2="7" stroke="#ef4444"/><line x1="14" y1="19" x2="14" y2="22" stroke="#ef4444"/><line x1="4" y1="22" x2="24" y2="22" stroke="#ef4444" stroke-dasharray="2,2"/></svg>` }
         ]
       },
 
@@ -3029,9 +3077,9 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         question: "1차 진입 금액을 1% 로스로 계산된 비중대로 정했고, 하단 2차 지지선 매수가와 2차 지지선 이탈 시 전량 손절할 최종 SL을 설정했어?",
         rejectAction: "warning",
         rejectReason: "물타기 계획(1차 금액, 2차 매수가, 최종 손절선) 없는 무지성 물타기는 청산의 지름길입니다!",
-        nextStepId: "step_3_fast",
-        nextTitle: "3단계 변칙 진입 체크",
-        nextDesc: "물타기 계획이 정해졌으니 3단계 변칙 진입 조건을 확인하세요.",
+        nextStepId: "step_3_fast_dca_entry",
+        nextTitle: "물타기 1차 진입 체크",
+        nextDesc: "물타기 계획이 정해졌으니 1차 진입 조건을 확인하세요.",
         showVolumeChart: false, showBreakoutChart: false, showCandleChart: false,
         showStep3Chart: false, showStep3FastChart: false, showStep3FastDcaChart: true,
         noBtnSub: "뇌동매매 즉시 중단",
@@ -3043,6 +3091,50 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
           { title: "손익비 1:1 이상 확보", desc: "진입가 대비 TP까지의 거리가 SL까지의 거리 이상인지 확인", iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-emerald-500 dark:text-emerald-300" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4 L14 24" stroke-width="1.5"/><path d="M6 8 L22 8" stroke-width="1.5"/><path d="M6 8 L3 16 L9 16 Z" fill="#10b981" fill-opacity="0.3" stroke-width="1.2"/><path d="M22 8 L19 16 L25 16 Z" fill="#ef4444" fill-opacity="0.3" stroke-width="1.2"/><circle cx="14" cy="4" r="1.5" fill="#fbbf24"/></svg>` }
         ]
       },
+      // ----------------- STEP 3-FAST-DCA-ENTRY (물타기 1차 진입) -----------------
+      "step_3_fast_dca_entry": {
+        id: "step_3_fast_dca_entry",
+        stepNumDisplay: "STEP 3-FAST-DCA-ENTRY (물타기 1차 진입)",
+        progressPercent: 95,
+        category: "다이버 롱 · 물타기 1차 진입",
+        categoryIcon: "ph-stack",
+        badgeStyle: "bg-lime-500/10 dark:bg-lime-400/15 text-lime-700 dark:text-lime-300 border-lime-500/40 dark:border-lime-400/40",
+        question: "5분봉에서 1차 음봉 대비 거래량이 줄어든 2차 음봉이며, 장대 풀음봉에서 매도가 더 이상 안 나오고 1차 진입 손익비 1:1 이상 확보되었는가?",
+        rejectAction: "warning",
+        rejectReason: "5분봉 거래량 감소 다이버전스 확인 없는 성급한 1차 진입은 손실로 이어집니다!",
+        nextStepId: "step_final",
+        showVolumeChart: false, showBreakoutChart: false, showCandleChart: false,
+        showStep3Chart: false, showStep3FastChart: false, showStep3FastDcaChart: false,
+        noBtnSub: "뇌동매매 즉시 중단",
+        items: [
+          { title: "5분봉 거래량 감소 다이버전스 컨펌", desc: "1차 15분봉 내 최대 5분봉 거래량 대비 현재 2차 5분봉 거래량 현저히 감소 확인", botCapable: true, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-blue-500 dark:text-blue-300"><rect x="5" y="6" width="4.5" height="18" fill="#ef4444" rx="1"/><rect x="18" y="14" width="4.5" height="10" fill="#64748b" rx="1"/><line x1="7.5" y1="6" x2="20" y2="14" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round"/></svg>` },
+          { title: "5분봉 장대 풀음봉에서 매도가 더 이상 안 나옴 & 포착 즉시 1차 진입", desc: "음봉 바닥에서 추가 매도가 멈추는 체결 포착 즉시 1차 진입", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-blue-500 dark:text-blue-300"><line x1="14" y1="4" x2="14" y2="24" stroke="#38bdf8" stroke-width="1.8"/><rect x="10.5" y="7" width="7" height="12" fill="#0284c7" stroke="#38bdf8" stroke-width="1.2" rx="1"/><circle cx="14" cy="21" r="3.5" fill="#facc15" stroke="#ffffff" stroke-width="1.2"/></svg>` },
+          { title: "손익비 1:1 이상 확보", desc: "진입가 대비 TP까지의 거리가 SL까지의 거리 이상인지 확인", iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-emerald-500 dark:text-emerald-300" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4 L14 24" stroke-width="1.5"/><path d="M6 8 L22 8" stroke-width="1.5"/><path d="M6 8 L3 16 L9 16 Z" fill="#10b981" fill-opacity="0.3" stroke-width="1.2"/><path d="M22 8 L19 16 L25 16 Z" fill="#ef4444" fill-opacity="0.3" stroke-width="1.2"/><circle cx="14" cy="4" r="1.5" fill="#fbbf24"/></svg>` }
+        ]
+      },
+
+      // ----------------- STEP 3-FAST-DCA-ENTRY2 (물타기 2차 진입) -----------------
+      "step_3_fast_dca_entry2": {
+        id: "step_3_fast_dca_entry2",
+        stepNumDisplay: "STEP 3-FAST-DCA-ENTRY2 (물타기 2차 진입)",
+        progressPercent: 98,
+        category: "다이버 롱 · 물타기 2차 진입",
+        categoryIcon: "ph-stack",
+        badgeStyle: "bg-lime-500/10 dark:bg-lime-400/15 text-lime-700 dark:text-lime-300 border-lime-500/40 dark:border-lime-400/40",
+        question: "2차 지지선에 가격이 닿았고, 지지선 위 마감 또는 밑꼬리 반등으로 지지가 확인되었으며, 2차 진입 금액이 1% 로스로 계산된 비중인가?",
+        rejectAction: "warning",
+        rejectReason: "2차 지지선 확인 없는 무지성 물타기는 청산의 지름길입니다!",
+        nextStepId: "step_final",
+        showVolumeChart: false, showBreakoutChart: false, showCandleChart: false,
+        showStep3Chart: false, showStep3FastChart: false, showStep3FastDcaChart: false,
+        noBtnSub: "뇌동매매 즉시 중단",
+        items: [
+          { title: "2차 지지선에 가격 도달", desc: "가격이 게이트에서 정한 2차 지지선 매수가에 도달", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-purple-500 dark:text-purple-300" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="24" y2="20" stroke="#a855f7" stroke-dasharray="2,2"/><circle cx="14" cy="14" r="3" fill="#a855f7"/></svg>` },
+          { title: "2차 지지선 위 마감 또는 밑꼬리 반등 확인", desc: "5분봉으로 2차 지지선 위 마감이나 밑꼬리 달고 올라오는 반등 확인", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-blue-500 dark:text-blue-300"><line x1="14" y1="4" x2="14" y2="24" stroke="#38bdf8" stroke-width="1.8"/><rect x="10.5" y="7" width="7" height="12" fill="#0284c7" stroke="#38bdf8" stroke-width="1.2" rx="1"/><circle cx="14" cy="21" r="3.5" fill="#facc15" stroke="#ffffff" stroke-width="1.2"/></svg>` },
+          { title: "2차 진입 금액 확인 (1% 로스로 계산된 비중)", desc: "1% 로스로 계산된 비중으로 2차 진입하고 최종 손절선 유지", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-purple-500 dark:text-purple-300" stroke="currentColor" stroke-width="2"><circle cx="14" cy="14" r="10"/><path d="M14 4 A10 10 0 0 1 24 14 L14 14 Z" fill="#c084fc"/></svg>` }
+        ]
+      },
+
 
       // ----------------- STEP 3 TYPE D (Phase 1 추가) -----------------
       "step_3_type_d": {
@@ -4525,6 +4617,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         "step_3_type_h": "빠른 1강 롱 진입",
         "step_3": "크트키",
         "step_3_fast": "다이버 롱",
+        "step_3_fast_dca_entry": "다이버 롱 · 물타기 1차",
+        "step_3_fast_dca_entry2": "다이버 롱 · 물타기 2차",
         "step_3_type_e": "다이버 숏",
         "step_3_type_d": "리테 롱",
         "step_3_type_f": "리테 숏",
@@ -5855,6 +5949,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
       "step_3": "크트키",
       "step_3_fast": "다이버 롱",
       "step_3_fast_dca": "FAST-DCA",
+      "step_3_fast_dca_entry": "FAST-DCA 1차 진입",
+      "step_3_fast_dca_entry2": "FAST-DCA 2차 진입",
       "step_3_type_d": "리테 롱",
       "step_3_type_e": "다이버 숏",
       "step_3_type_e_long": "유형 E-롱 (저점 상승 다이버전스 롱)",
@@ -5928,6 +6024,41 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         modal.classList.add("hidden");
         modal.classList.remove("flex");
       }
+      // 물타기 1차 진입 티켓이면 2차 진입 대기 화면으로 (2차 진입 허가는 지지 확인 후 따로)
+      if (typeof currentStepKey !== "undefined" && currentStepKey === "step_3_fast_dca_entry") {
+        stepHistory = [];
+        openDcaWaitModal();
+        return;
+      }
+      stepHistory = [];
+      loadStep("step_1", false);
+    }
+
+    // ===== 물타기 2차 진입 대기 =====
+    function openDcaWaitModal() {
+      const modal = document.getElementById("dcaWaitModal");
+      if (!modal) { stepHistory = []; loadStep("step_1", false); return; }
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+    function closeDcaWaitModal() {
+      const modal = document.getElementById("dcaWaitModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+    function handleDcaWaitSecond() {
+      closeDcaWaitModal();
+      loadStep("step_3_fast_dca_entry2");
+    }
+    function handleDcaWaitTp() {
+      closeDcaWaitModal();
+      stepHistory = [];
+      loadStep("step_1", false);
+    }
+    function handleDcaWaitSl() {
+      closeDcaWaitModal();
       stepHistory = [];
       loadStep("step_1", false);
     }
@@ -7805,7 +7936,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
 
     // ===== 로드맵 스터디 모듈 (2026-10-18, 모듈 방식 원칙) =====
     const RoadmapStudy = {
-      tourData: [{"key": "step_1", "name": "1단계: 추세 확인", "question": "지금 진행되고 있는 차트의 4시간봉 이상 수평저항, 추세선, 채널, 피보나치가 작도되었고 각 타임프레임별 캔들 상태를 확인했어?", "items": [{"title": "4H 이상 수평 지지 / 저항선 (S/R Flip)", "desc": "주요 변곡 꼬리 및 지지/저항 반전 라인 확인"}, {"title": "주요 상승 / 하락 추세선 (Trendline)", "desc": "고점/저점 연결 추세선 및 이탈·반등 여부 확인"}, {"title": "평행 채널 / 박스권 상하단 레벨", "desc": "채널 하단 지지 및 상단 저항 경계선 파악"}, {"title": "피보나치 황금구간 중첩 (0.382 ~ 0.618)", "desc": "과거 매물대와 되돌림 비율 일치 여부 체크"}, {"title": "타임프레임별 캔들 상태 (4H / 1H / 15m)", "desc": "봉 마감 여부, 꼬리 길이 및 캔들 속도 관찰"}], "chartId": null}, {"key": "step_2", "name": "2단계: 거래량 폭발", "question": "현재 캔들의 거래량이 직전 캔들 평균 대비 평일 추세반전 최소충족 거래량 이상 터졌어?", "items": [{"title": "직전 캔들 평균 대비 평일 추세반전 최소충족 거래량 이상 폭발", "desc": "주변의 평이한 잔잔한 거래량 대비 월등한 거래량 발생"}, {"title": "거래량 지표 기준선 상향 돌파 확인", "desc": "위 예시 차트처럼 기준선을 뚫고 솟구친 초록색 장대 볼륨"}, {"title": "15m 기준 거래량 확인", "desc": "15분봉 기준 거래량 폭발 확인"}], "chartId": "volumeExampleCard"}, {"key": "step_2_alt", "name": "2단계 대안: 다이버", "question": "15분봉 이상 상승 다이버전스 생성 후, 저점을 올리는(HL) 파동 전환 구조가 형성되고 있는가?", "items": [{"title": "15분봉 이상 RSI 상승 다이버전스 확정", "desc": "하락 파동 끝에서 가격은 저점을 낮추는데 RSI는 저점을 올리는 상승 다이버전스 확인"}, {"title": "저점 올림(HL) 파동 전환 구조 확인", "desc": "상승 다이버전스 후 저점을 올리는(HL) 반등 파동 형성 확인"}], "chartId": "breakoutExampleCard"}, {"key": "step_2_alt_db", "name": "쌍바닥 트랙", "question": "비슷한 레벨에서 두 번의 저점(L1·L2)이 형성되고, 거래량이 현저히 감소하며 RSI 상승 다이버전스가 만들어지고 있는가?", "items": [{"title": "쌍바닥 저점 2회 형성 (L1·L2)", "desc": "비슷한 가격 레벨에서 두 번의 저점이 형성되고, 두 번째 저점이 첫 번째를 크게 이탈하지 않음"}, {"title": "거래량 현저히 감소 확인", "desc": "L1→L2 쌍바닥 형성 구간에서 거래량이 현저히 감소하며 매도세 약화"}, {"title": "15m 캔들 양봉 마감 확인", "desc": "쌍바닥 완성 후 15분봉이 양봉으로 마감되며 매수세 유입 확인"}, {"title": "다음 봉 밑꼬리 진입", "desc": "양봉 컨펌 후 다음 봉의 밑꼬리에서 진입 (추격 매수 금지)"}, {"title": "스탑로스 1차 바닥 저점", "desc": "SL은 L1 저점 하단에 설정 (전저점 이탈 시 손절)"}], "chartId": "doubleBottomExampleCard"}, {"key": "step_2_alt_slow", "name": "질질질 하락", "question": "거래량은 꾸준히 나오지만 특출난 폭발 없이 질질질 하락하다가, 15분봉 기준 대량 거래량이 터졌는가?", "items": [{"title": "질질질 하락 국면 확인", "desc": "거래량은 꾸준히 나오지만 특출나게 폭발적인 거래량 없이 질질질 하락하는 국면"}, {"title": "저항대 거래량 함정 주의", "desc": "유의미한 저항대에서 거래량이 나와도 성급 진입 금지 — 계속 질질질 내리는 함정 구간"}, {"title": "15m 대량 거래량 체크", "desc": "15분봉 기준 대량 거래량 발생 확인"}], "chartId": "step2AltSlowExampleCard"}, {"key": "step_3", "name": "3단계 정석", "question": "주요 지지선 위 1차 장대음봉 후 15분 양봉 갱신이 확인되었고, 다음 캔들 꼬리에서 스탑로스 및 1차 TP 기준이 확보되었는가?", "items": [{"title": "15분봉 RSI 과매도(30 이하) 진입 확인", "desc": "정상 구간을 이탈하여 15m RSI(14) 지표가 30선 아래로 완전히 진입했는지 확인"}, {"title": "15분 양봉 갱신 확인", "desc": "15분봉 종가 양봉 마감 및 캔들 흐름 갱신 확인"}, {"title": "다음 캔들 꼬리 진입", "desc": "추격 매수 금지, 눌림 꼬리에서 진입하여 평단가 및 스탑로스 확보"}, {"title": "이전봉 하단 아래 스탑로스 설정 및 수평저항 1차 TP", "desc": "이전 캔들 최저점 이탈 시 즉시 손절 기준 수립 및 수평저항 1차 TP(50% 반익절) 목표 설정"}], "chartId": "step3ExampleCard"}, {"key": "step_3_fast", "name": "3단계 변칙", "question": "5분봉에서 1차 음봉 대비 거래량이 줄어든 2차 음봉이며, 장대 풀음봉에서 매도가 더 이상 안 나오고 손익비 1:1 이상 확보되었는가?", "items": [{"title": "5분봉 거래량 감소 다이버전스 컨펌", "desc": "1차 15분봉 내 최대 5분봉 거래량 대비 현재 2차 5분봉 거래량 현저히 감소 확인"}, {"title": "5분봉 장대 풀음봉에서 매도가 더 이상 안 나옴 & 포착 즉시 진입", "desc": "음봉 바닥에서 추가 매도가 멈추는 체결 포착 즉시 진입"}], "chartId": "step3FastExampleCard"}, {"key": "step_3_fast_dca", "name": "변칙 DCA", "question": "1차 진입 금액을 1% 로스로 계산된 비중대로 정했고, 하단 2차 지지선 매수가와 2차 지지선 이탈 시 전량 손절할 최종 SL을 설정했어?", "items": [{"title": "1차 진입 금액 확인 (1% 로스로 계산된 비중 진입)", "desc": "1% 로스로 계산된 비중으로만 진입하고 물타기용 여유 시드를 남겨둠"}, {"title": "하단 2차 지지선 매수가 특정", "desc": "차트에 2차 매수를 받을 주요 수평 지지선 레벨을 정확히 작도 완료"}, {"title": "2차 지지선 이탈 시 전량 손절 (최종 SL 데드라인)", "desc": "2차 지지선마저 깨지면 무한 물타기 없이 전량 손절할 최종 손절선 설정"}, {"title": "반등 시 평단가 탈출 및 비중 축소 계획", "desc": "평단가 도달 시 본절로 비중을 덜어내고 리스크를 관리할 계획 수립"}], "chartId": "step3FastDcaExampleCard"}, {"key": "step_3_type_d", "name": "돌파 리테 롱", "question": "거래량이 실린 장대 양봉으로 주요 저항을 돌파한 후, 거래량이 급감하며 눌림(리테스트) 지지를 확인했는가?", "items": [{"title": "강력한 거래량을 동반한 주요 저항선 상향 돌파", "desc": "의미 있는 수평 저항이나 추세선을 대량의 거래량과 함께 장대 양봉으로 돌파"}, {"title": "돌파 후 이어지는 캔들에서 거래량 급감", "desc": "돌파 이후 캔들(음봉 등)에서 거래량이 확연히 줄어들며 매도세 고갈 확인"}, {"title": "저항선이 지지선으로 바뀌는(S/R Flip) 리테스트 타점 진입", "desc": "이전 저항선 부근까지 내려온 눌림목에서 밑꼬리를 잡고 진입"}], "chartId": "step3TypeDExampleCard"}, {"key": "step_3_type_e", "name": "유형 E", "question": "고점을 갱신하고 15분봉 음봉 다이버전스가 마감된 뒤, 다음 봉 윗꼬리에서 숏 진입이 확보되었는가?", "items": [{"title": "고점 갱신 확인", "desc": "직전 고점을 돌파해 신고점을 만들었는지 확인."}, {"title": "15분봉 음봉 다이버전스 마감 컨펌", "desc": "신고점 자리에서 15분봉이 음봉으로 마감되며 RSI는 고점을 낮추는 하락 다이버전스 확인 (마감 전 추격 숏 금지)."}, {"title": "다음 봉 윗꼬리 숏 진입", "desc": "음봉 마감 후 다음 봉이 위로 윗꼬리를 만들 때 숏 진입 (종가 추격 매도 금지)."}, {"title": "스탑로스 신고점 위 설정", "desc": "SL은 방금 만든 신고점 위에 설정 (신고점을 다시 넘기면 즉시 손절)."}, {"title": "손익비 1:1 이상 확보", "desc": "진입가 대비 TP까지의 거리가 SL까지의 거리 이상인지 확인."}], "chartId": "step3TypeEExampleCard"}, {"key": "step_3_type_e_long", "name": "유형 E 롱", "question": "최초 1차 장대 음봉 하락 이후, 2차 하락 시도에서 거래량이 급감하며 저점을 살짝 낮추거나 못 미치는 쌍바닥(상승 다이버전스)이 발생했는가?", "items": [{"title": "전저점 유지 확인 (L2가 L1 저점을 깨지 않음)", "desc": "2차 하락이 1차 저점을 하회하지 않고 쌍바닥 완성"}, {"title": "거래량 감소 확인 (쌍바닥 형성 중 거래량 줄어듦)", "desc": "L1→L2 구간에서 거래량이 점진적으로 감소하며 매도세 약화 확인"}, {"title": "15분봉 '양봉' 마감 컨펌 (확인 매매)", "desc": "쌍바닥 완성 후 첫 15분봉 양봉 마감으로 매수세 유입 확인"}, {"title": "다음 봉 '밑꼬리' 진입 & L2 저점 하단 스탑로스(SL)", "desc": "양봉 종가 추격 매수 금지! 다음 봉 밑꼬리에서 진입, SL은 L2 저점 하단 설정"}], "chartId": "step3TypeELongExampleCard"}, {"key": "step_3_alt", "name": "3단계 대안", "question": "수평저항 돌파 후 리테스트 음봉 발생 ➔ 지지 양봉 마감 컨펌 ➔ 다음 봉 밑꼬리에서 진입 자리가 확보되었는가?", "items": [{"title": "주변 평균보다 압도적인 거래량으로 수평 돌파 컨펌", "desc": "직전 캔들들의 평균 거래량 대비 압도적인 거래량으로 수평 저항선을 돌파하는 양봉 확인"}, {"title": "수평 리테스트 음봉 확인 후 양봉 컨펌", "desc": "돌파된 수평선이 지지로 작용하는지 음봉 리테스트 확인 후, 양봉으로 전환될 때 컨펌"}, {"title": "다음 봉 '밑꼬리' 진입 & 이전 양봉 하단 스탑로스(SL)", "desc": "양봉 종가 추격 매수 금지! 다음 봉 밑꼬리에서 잡고 SL은 직전 양봉 최저점 설정"}], "chartId": "step3AltExampleCard"}, {"key": "step_3_alt_short", "name": "3단계 대안 숏", "question": "수평지지 붕괴 후 리테스트 양봉 발생 ➔ 저항 음봉 마감 컨펌 ➔ 다음 봉 윗꼬리에서 진입 자리가 확보되었는가?", "items": [{"title": "수평지지(S/R Flip) 리테스트 양봉 저항 확인", "desc": "붕괴했던 수평 기준선을 캔들 종가상 위로 회복시키지 못하고 눌림"}, {"title": "저항 반등 15분봉 '음봉' 마감 컨펌 (확인 매매)", "desc": "리테스트 양봉 다음 매도세 유입으로 몸통이 확실한 음봉 마감 확인"}, {"title": "다음 봉 '윗꼬리' 진입 & 이전 음봉 고점 스탑로스(SL)", "desc": "음봉 종가 추격 매도 금지! 다음 봉 윗꼬리에서 잡고 SL은 직전 음봉 최고점 설정"}], "chartId": "step3AltShortExampleCard"}, {"key": "step_3_type_f", "name": "붕괴 리테 숏", "question": "거래량이 실린 장대 음봉으로 주요 지지를 붕괴한 후, 거래량이 급감하며 되돌림(리테스트) 저항을 확인했는가?", "items": [{"title": "강력한 거래량을 동반한 주요 지지선 하향 붕괴", "desc": "의미 있는 수평 지지나 추세선을 대량의 거래량과 함께 장대 음봉으로 붕괴"}, {"title": "붕괴 후 이어지는 캔들에서 거래량 급감", "desc": "붕괴 이후 캔들(양봉 등)에서 거래량이 확연히 줄어들며 매수세 고갈 확인"}, {"title": "지지선이 저항선으로 바뀌는(S/R Flip) 리테스트 타점 진입", "desc": "이전 지지선 부근까지 올라온 되돌림에서 윗꼬리를 잡고 진입"}], "chartId": "step3TypeFExampleCard"}, {"key": "step_3_type_g", "name": "1강", "question": "하락 채널 속 채널 하단이 아닌 장기 수평 지지대(숫자 지지선)에서, 거래량 동반 초장대 하락 후 지지선 근처 실시간 흡수 — 거래량 터지는데 가격 정체, 1~5분봉 매도 감소 + 양봉 전환, 지지선 아래 찍고 수 분 내 위로 복귀 — 가 확인되었는가? (15분봉 마감까지 기다리면 자리를 놓침)", "items": [{"title": "하락 채널 속 위치 확인 — 채널 하단이 아닌 자리", "desc": "하락 채널 안이지만 가격은 채널 하단선에 닿지 않은 자리인지 확인 (채널 하단 매수가 아님)"}, {"title": "숫자적 지지선 또는 장기 수평 지지대 일치 확인", "desc": "예: 80,000불 같은 숫자 지지선 또는 장기 수평 지지대인지 확인"}, {"title": "거래량을 동반한 초장대 하락 확인", "desc": "지지선 근처까지 거래량을 실은 초장대 음봉(하락)이 도달했는지 확인"}, {"title": "지지선 근처 실시간 흡수 확인 (15분봉 마감 기다리지 않음)", "desc": "거래량은 터지는데 저점 갱신 없이 지지선 근처에서 버티고, 1~5분봉 매도 거래량 감소 + 양봉 전환, 지지선 아래 찍고 수 분 내 위로 복귀 확인. 지지선 아래 머무르며 저점 계속 갱신하면 붕괴로 보고 1강 진입 금지"}], "chartId": "step3TypeGExampleCard"}],
+      tourData: [{"key": "step_1", "name": "1단계: 추세 확인", "question": "지금 진행되고 있는 차트의 4시간봉 이상 수평저항, 추세선, 채널, 피보나치가 작도되었고 각 타임프레임별 캔들 상태를 확인했어?", "items": [{"title": "4H 이상 수평 지지 / 저항선 (S/R Flip)", "desc": "주요 변곡 꼬리 및 지지/저항 반전 라인 확인"}, {"title": "주요 상승 / 하락 추세선 (Trendline)", "desc": "고점/저점 연결 추세선 및 이탈·반등 여부 확인"}, {"title": "평행 채널 / 박스권 상하단 레벨", "desc": "채널 하단 지지 및 상단 저항 경계선 파악"}, {"title": "피보나치 황금구간 중첩 (0.382 ~ 0.618)", "desc": "과거 매물대와 되돌림 비율 일치 여부 체크"}, {"title": "타임프레임별 캔들 상태 (4H / 1H / 15m)", "desc": "봉 마감 여부, 꼬리 길이 및 캔들 속도 관찰"}], "chartId": null}, {"key": "step_2", "name": "2단계: 거래량 폭발", "question": "현재 캔들의 거래량이 직전 캔들 평균 대비 평일 추세반전 최소충족 거래량 이상 터졌어?", "items": [{"title": "직전 캔들 평균 대비 평일 추세반전 최소충족 거래량 이상 폭발", "desc": "주변의 평이한 잔잔한 거래량 대비 월등한 거래량 발생"}, {"title": "거래량 지표 기준선 상향 돌파 확인", "desc": "위 예시 차트처럼 기준선을 뚫고 솟구친 초록색 장대 볼륨"}, {"title": "15m 기준 거래량 확인", "desc": "15분봉 기준 거래량 폭발 확인"}], "chartId": "volumeExampleCard"}, {"key": "step_2_alt", "name": "2단계 대안: 다이버", "question": "15분봉 이상 상승 다이버전스 생성 후, 저점을 올리는(HL) 파동 전환 구조가 형성되고 있는가?", "items": [{"title": "15분봉 이상 RSI 상승 다이버전스 확정", "desc": "하락 파동 끝에서 가격은 저점을 낮추는데 RSI는 저점을 올리는 상승 다이버전스 확인"}, {"title": "저점 올림(HL) 파동 전환 구조 확인", "desc": "상승 다이버전스 후 저점을 올리는(HL) 반등 파동 형성 확인"}], "chartId": "breakoutExampleCard"}, {"key": "step_2_alt_db", "name": "쌍바닥 트랙", "question": "비슷한 레벨에서 두 번의 저점(L1·L2)이 형성되고, 거래량이 현저히 감소하며 RSI 상승 다이버전스가 만들어지고 있는가?", "items": [{"title": "쌍바닥 저점 2회 형성 (L1·L2)", "desc": "비슷한 가격 레벨에서 두 번의 저점이 형성되고, 두 번째 저점이 첫 번째를 크게 이탈하지 않음"}, {"title": "거래량 현저히 감소 확인", "desc": "L1→L2 쌍바닥 형성 구간에서 거래량이 현저히 감소하며 매도세 약화"}, {"title": "15m 캔들 양봉 마감 확인", "desc": "쌍바닥 완성 후 15분봉이 양봉으로 마감되며 매수세 유입 확인"}, {"title": "다음 봉 밑꼬리 진입", "desc": "양봉 컨펌 후 다음 봉의 밑꼬리에서 진입 (추격 매수 금지)"}, {"title": "스탑로스 1차 바닥 저점", "desc": "SL은 L1 저점 하단에 설정 (전저점 이탈 시 손절)"}], "chartId": "doubleBottomExampleCard"}, {"key": "step_2_alt_slow", "name": "질질질 하락", "question": "거래량은 꾸준히 나오지만 특출난 폭발 없이 질질질 하락하다가, 15분봉 기준 대량 거래량이 터졌는가?", "items": [{"title": "질질질 하락 국면 확인", "desc": "거래량은 꾸준히 나오지만 특출나게 폭발적인 거래량 없이 질질질 하락하는 국면"}, {"title": "저항대 거래량 함정 주의", "desc": "유의미한 저항대에서 거래량이 나와도 성급 진입 금지 — 계속 질질질 내리는 함정 구간"}, {"title": "15m 대량 거래량 체크", "desc": "15분봉 기준 대량 거래량 발생 확인"}], "chartId": "step2AltSlowExampleCard"}, {"key": "step_3", "name": "3단계 정석", "question": "주요 지지선 위 1차 장대음봉 후 15분 양봉 갱신이 확인되었고, 다음 캔들 꼬리에서 스탑로스 및 1차 TP 기준이 확보되었는가?", "items": [{"title": "15분봉 RSI 과매도(30 이하) 진입 확인", "desc": "정상 구간을 이탈하여 15m RSI(14) 지표가 30선 아래로 완전히 진입했는지 확인"}, {"title": "15분 양봉 갱신 확인", "desc": "15분봉 종가 양봉 마감 및 캔들 흐름 갱신 확인"}, {"title": "다음 캔들 꼬리 진입", "desc": "추격 매수 금지, 눌림 꼬리에서 진입하여 평단가 및 스탑로스 확보"}, {"title": "이전봉 하단 아래 스탑로스 설정 및 수평저항 1차 TP", "desc": "이전 캔들 최저점 이탈 시 즉시 손절 기준 수립 및 수평저항 1차 TP(50% 반익절) 목표 설정"}], "chartId": "step3ExampleCard"}, {"key": "step_3_fast", "name": "3단계 변칙", "question": "5분봉에서 1차 음봉 대비 거래량이 줄어든 2차 음봉이며, 장대 풀음봉에서 매도가 더 이상 안 나오고 현재 캔들 저점에 스탑로스를 설정하고 손익비 1:1 이상 확보되었는가?", "items": [{"title": "5분봉 거래량 감소 다이버전스 컨펌", "desc": "1차 15분봉 내 최대 5분봉 거래량 대비 현재 2차 5분봉 거래량 현저히 감소 확인"}, {"title": "5분봉 장대 풀음봉에서 매도가 더 이상 안 나옴 & 포착 즉시 진입", "desc": "음봉 바닥에서 추가 매도가 멈추는 체결 포착 즉시 진입"}, {"title": "현재 캔들 저점에 스탑로스 설정", "desc": "진입한 캔들의 저점 아래에 스탑로스를 걸어 손절 기준 확정"}], "chartId": "step3FastExampleCard"}, {"key": "step_3_fast_dca", "name": "변칙 DCA", "question": "1차 진입 금액을 1% 로스로 계산된 비중대로 정했고, 하단 2차 지지선 매수가와 2차 지지선 이탈 시 전량 손절할 최종 SL을 설정했어?", "items": [{"title": "1차 진입 금액 확인 (1% 로스로 계산된 비중 진입)", "desc": "1% 로스로 계산된 비중으로만 진입하고 물타기용 여유 시드를 남겨둠"}, {"title": "하단 2차 지지선 매수가 특정", "desc": "차트에 2차 매수를 받을 주요 수평 지지선 레벨을 정확히 작도 완료"}, {"title": "2차 지지선 이탈 시 전량 손절 (최종 SL 데드라인)", "desc": "2차 지지선마저 깨지면 무한 물타기 없이 전량 손절할 최종 손절선 설정"}, {"title": "반등 시 평단가 탈출 및 비중 축소 계획", "desc": "평단가 도달 시 본절로 비중을 덜어내고 리스크를 관리할 계획 수립"}], "chartId": "step3FastDcaExampleCard"}, {"key": "step_3_fast_dca_entry", "name": "물타기 1차 진입", "question": "5분봉에서 1차 음봉 대비 거래량이 줄어든 2차 음봉이며, 장대 풀음봉에서 매도가 더 이상 안 나오고 1차 진입 손익비 1:1 이상 확보되었는가?", "items": [{"title": "5분봉 거래량 감소 다이버전스 컨펌", "desc": "1차 15분봉 내 최대 5분봉 거래량 대비 현재 2차 5분봉 거래량 현저히 감소 확인"}, {"title": "5분봉 장대 풀음봉에서 매도가 더 이상 안 나옴 & 포착 즉시 1차 진입", "desc": "음봉 바닥에서 추가 매도가 멈추는 체결 포착 즉시 1차 진입"}, {"title": "손익비 1:1 이상 확보", "desc": "진입가 대비 TP까지의 거리가 SL까지의 거리 이상인지 확인"}], "chartId": null}, {"key": "step_3_fast_dca_entry2", "name": "물타기 2차 진입", "question": "2차 지지선에 가격이 닿았고, 지지선 위 마감 또는 밑꼬리 반등으로 지지가 확인되었으며, 2차 진입 금액이 1% 로스로 계산된 비중인가?", "items": [{"title": "2차 지지선에 가격 도달", "desc": "가격이 게이트에서 정한 2차 지지선 매수가에 도달"}, {"title": "2차 지지선 위 마감 또는 밑꼬리 반등 확인", "desc": "5분봉으로 2차 지지선 위 마감이나 밑꼬리 달고 올라오는 반등 확인"}, {"title": "2차 진입 금액 확인 (1% 로스로 계산된 비중)", "desc": "1% 로스로 계산된 비중으로 2차 진입하고 최종 손절선 유지"}], "chartId": null}, {"key": "step_3_type_d", "name": "돌파 리테 롱", "question": "거래량이 실린 장대 양봉으로 주요 저항을 돌파한 후, 거래량이 급감하며 눌림(리테스트) 지지를 확인했는가?", "items": [{"title": "강력한 거래량을 동반한 주요 저항선 상향 돌파", "desc": "의미 있는 수평 저항이나 추세선을 대량의 거래량과 함께 장대 양봉으로 돌파"}, {"title": "돌파 후 이어지는 캔들에서 거래량 급감", "desc": "돌파 이후 캔들(음봉 등)에서 거래량이 확연히 줄어들며 매도세 고갈 확인"}, {"title": "저항선이 지지선으로 바뀌는(S/R Flip) 리테스트 타점 진입", "desc": "이전 저항선 부근까지 내려온 눌림목에서 밑꼬리를 잡고 진입"}], "chartId": "step3TypeDExampleCard"}, {"key": "step_3_type_e", "name": "유형 E", "question": "고점을 갱신하고 15분봉 음봉 다이버전스가 마감된 뒤, 다음 봉 윗꼬리에서 숏 진입이 확보되었는가?", "items": [{"title": "고점 갱신 확인", "desc": "직전 고점을 돌파해 신고점을 만들었는지 확인."}, {"title": "15분봉 음봉 다이버전스 마감 컨펌", "desc": "신고점 자리에서 15분봉이 음봉으로 마감되며 RSI는 고점을 낮추는 하락 다이버전스 확인 (마감 전 추격 숏 금지)."}, {"title": "다음 봉 윗꼬리 숏 진입", "desc": "음봉 마감 후 다음 봉이 위로 윗꼬리를 만들 때 숏 진입 (종가 추격 매도 금지)."}, {"title": "스탑로스 신고점 위 설정", "desc": "SL은 방금 만든 신고점 위에 설정 (신고점을 다시 넘기면 즉시 손절)."}, {"title": "손익비 1:1 이상 확보", "desc": "진입가 대비 TP까지의 거리가 SL까지의 거리 이상인지 확인."}], "chartId": "step3TypeEExampleCard"}, {"key": "step_3_type_e_long", "name": "유형 E 롱", "question": "최초 1차 장대 음봉 하락 이후, 2차 하락 시도에서 거래량이 급감하며 저점을 살짝 낮추거나 못 미치는 쌍바닥(상승 다이버전스)이 발생했는가?", "items": [{"title": "전저점 유지 확인 (L2가 L1 저점을 깨지 않음)", "desc": "2차 하락이 1차 저점을 하회하지 않고 쌍바닥 완성"}, {"title": "거래량 감소 확인 (쌍바닥 형성 중 거래량 줄어듦)", "desc": "L1→L2 구간에서 거래량이 점진적으로 감소하며 매도세 약화 확인"}, {"title": "15분봉 '양봉' 마감 컨펌 (확인 매매)", "desc": "쌍바닥 완성 후 첫 15분봉 양봉 마감으로 매수세 유입 확인"}, {"title": "다음 봉 '밑꼬리' 진입 & L2 저점 하단 스탑로스(SL)", "desc": "양봉 종가 추격 매수 금지! 다음 봉 밑꼬리에서 진입, SL은 L2 저점 하단 설정"}], "chartId": "step3TypeELongExampleCard"}, {"key": "step_3_alt", "name": "3단계 대안", "question": "수평저항 돌파 후 리테스트 음봉 발생 ➔ 지지 양봉 마감 컨펌 ➔ 다음 봉 밑꼬리에서 진입 자리가 확보되었는가?", "items": [{"title": "주변 평균보다 압도적인 거래량으로 수평 돌파 컨펌", "desc": "직전 캔들들의 평균 거래량 대비 압도적인 거래량으로 수평 저항선을 돌파하는 양봉 확인"}, {"title": "수평 리테스트 음봉 확인 후 양봉 컨펌", "desc": "돌파된 수평선이 지지로 작용하는지 음봉 리테스트 확인 후, 양봉으로 전환될 때 컨펌"}, {"title": "다음 봉 '밑꼬리' 진입 & 이전 양봉 하단 스탑로스(SL)", "desc": "양봉 종가 추격 매수 금지! 다음 봉 밑꼬리에서 잡고 SL은 직전 양봉 최저점 설정"}], "chartId": "step3AltExampleCard"}, {"key": "step_3_alt_short", "name": "3단계 대안 숏", "question": "수평지지 붕괴 후 리테스트 양봉 발생 ➔ 저항 음봉 마감 컨펌 ➔ 다음 봉 윗꼬리에서 진입 자리가 확보되었는가?", "items": [{"title": "수평지지(S/R Flip) 리테스트 양봉 저항 확인", "desc": "붕괴했던 수평 기준선을 캔들 종가상 위로 회복시키지 못하고 눌림"}, {"title": "저항 반등 15분봉 '음봉' 마감 컨펌 (확인 매매)", "desc": "리테스트 양봉 다음 매도세 유입으로 몸통이 확실한 음봉 마감 확인"}, {"title": "다음 봉 '윗꼬리' 진입 & 이전 음봉 고점 스탑로스(SL)", "desc": "음봉 종가 추격 매도 금지! 다음 봉 윗꼬리에서 잡고 SL은 직전 음봉 최고점 설정"}], "chartId": "step3AltShortExampleCard"}, {"key": "step_3_type_f", "name": "붕괴 리테 숏", "question": "거래량이 실린 장대 음봉으로 주요 지지를 붕괴한 후, 거래량이 급감하며 되돌림(리테스트) 저항을 확인했는가?", "items": [{"title": "강력한 거래량을 동반한 주요 지지선 하향 붕괴", "desc": "의미 있는 수평 지지나 추세선을 대량의 거래량과 함께 장대 음봉으로 붕괴"}, {"title": "붕괴 후 이어지는 캔들에서 거래량 급감", "desc": "붕괴 이후 캔들(양봉 등)에서 거래량이 확연히 줄어들며 매수세 고갈 확인"}, {"title": "지지선이 저항선으로 바뀌는(S/R Flip) 리테스트 타점 진입", "desc": "이전 지지선 부근까지 올라온 되돌림에서 윗꼬리를 잡고 진입"}], "chartId": "step3TypeFExampleCard"}, {"key": "step_3_type_g", "name": "1강", "question": "하락 채널 속 채널 하단이 아닌 장기 수평 지지대(숫자 지지선)에서, 거래량 동반 초장대 하락 후 지지선 근처 실시간 흡수 — 거래량 터지는데 가격 정체, 1~5분봉 매도 감소 + 양봉 전환, 지지선 아래 찍고 수 분 내 위로 복귀 — 가 확인되었는가? (15분봉 마감까지 기다리면 자리를 놓침)", "items": [{"title": "하락 채널 속 위치 확인 — 채널 하단이 아닌 자리", "desc": "하락 채널 안이지만 가격은 채널 하단선에 닿지 않은 자리인지 확인 (채널 하단 매수가 아님)"}, {"title": "숫자적 지지선 또는 장기 수평 지지대 일치 확인", "desc": "예: 80,000불 같은 숫자 지지선 또는 장기 수평 지지대인지 확인"}, {"title": "거래량을 동반한 초장대 하락 확인", "desc": "지지선 근처까지 거래량을 실은 초장대 음봉(하락)이 도달했는지 확인"}, {"title": "지지선 근처 실시간 흡수 확인 (15분봉 마감 기다리지 않음)", "desc": "거래량은 터지는데 저점 갱신 없이 지지선 근처에서 버티고, 1~5분봉 매도 거래량 감소 + 양봉 전환, 지지선 아래 찍고 수 분 내 위로 복귀 확인. 지지선 아래 머무르며 저점 계속 갱신하면 붕괴로 보고 1강 진입 금지"}], "chartId": "step3TypeGExampleCard"}],
       // 코스 정의 (2026-10-18: 한 매매를 구성하는 전체 페이즈 묶음)
       courses: [
         { id: "course_basic", name: "거래량 폭발 → 양봉 컨펌 롱", desc: "평일 추세반전 최소충족 거래량 이상 폭발 후 15분 양봉 컨펌 → 다음봉 밑꼬리 진입", steps: ["step_1", "step_2", "step_3"], iconSvg: `<svg viewBox="0 0 32 32" class="w-8 h-8"><rect x="4" y="20" width="4" height="8" rx="1" fill="#10b981" opacity="0.4"/><rect x="10" y="16" width="4" height="12" rx="1" fill="#10b981" opacity="0.6"/><rect x="16" y="10" width="4" height="18" rx="1" fill="#10b981"/><rect x="22" y="4" width="4" height="24" rx="1" fill="#10b981"><animate attributeName="height" values="24;18;24" dur="1.5s" repeatCount="indefinite"/><animate attributeName="y" values="4;10;4" dur="1.5s" repeatCount="indefinite"/></rect></svg>`, color: "emerald" },
@@ -10517,7 +10648,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v792 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v793 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
