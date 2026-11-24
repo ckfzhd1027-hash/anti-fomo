@@ -477,7 +477,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v803 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v804 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -10894,7 +10894,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v803 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v804 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
@@ -15464,7 +15464,30 @@ window.StepGuide = StepGuide;
       h += '<rect x="' + (x - 13) + '" y="' + (y - 76) + '" width="26" height="76" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>';
       h += '<text x="' + (x + 20) + '" y="' + (y - 80) + '" font-size="16">가장 긴 봉</text>';
     } else if (pt.type === "gang2") {
-      // v638: 2강은 타점이 아니므로 가이드(상승추세선·장대음봉)는 리테 숏에서만 그린다. 2강 단계에서는 아무것도 안 그린다 — 상단·중단 리테 숏 모두 동일.
+      // v804: 2강 단계에서도 상승추세선·지지 돌파 장대음봉을 그린다 — 리테 숏에서만 그리던(v638) 것을 2강부터 표시해 다음 장면과 이어지게 한다. 2강만 라벨만 보여서 안 이어진다는 사용자 지적.
+      // 상승추세선 (리테 숏이 그리는 것과 동일 위치 — 2강 지점 기준)
+      h += '<line x1="' + (x - 140) + '" y1="' + (y + 20) + '" x2="' + (x + 40) + '" y2="' + (y - 60) + '" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 4"/>';
+      h += '<text x="' + (x - 140) + '" y="' + (y + 36) + '" font-size="16">상승추세선</text>';
+      // 지지 돌파 장대음봉 (리테 숏과 동일: 수평선을 아래로 뚫는 지점 — 리테 숏의 수평선 기준)
+      (function () {
+        var rpt = null;
+        for (var gi2 = 0; gi2 < cfg.points.length; gi2++) if (cfg.points[gi2].type === "retestShort") { rpt = cfg.points[gi2]; break; }
+        var ly2 = (rpt && rpt.lineY != null) ? rpt.lineY : (cfg.horizY != null ? cfg.horizY : y);
+        var path = cfg.path || [];
+        var bx = null;
+        for (var s2 = 0; s2 + 1 < path.length; s2++) {
+          var y1 = path[s2][1], y2 = path[s2 + 1][1];
+          if (!(y1 < ly2 && y2 > ly2)) continue;
+          var t = (ly2 - y1) / (y2 - y1);
+          if (t < 0 || t > 1) continue;
+          bx = path[s2][0] + t * (path[s2 + 1][0] - path[s2][0]);
+          break;
+        }
+        if (bx == null) return;
+        h += '<line x1="' + bx + '" y1="' + (ly2 - 48) + '" x2="' + bx + '" y2="' + (ly2 + 38) + '" stroke="#94a3b8" stroke-width="2"/>';
+        h += '<rect x="' + (bx - 13) + '" y="' + (ly2 - 38) + '" width="26" height="76" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>';
+        h += '<text x="' + (bx + 20) + '" y="' + (ly2 - 42) + '" font-size="16">지지 돌파 장대음봉</text>';
+      })();
     } else if (pt.type === "retestLong" || pt.type === "retestShort") {
       var ly = pt.lineY != null ? pt.lineY : (cfg.horizY != null ? cfg.horizY : y);
       var lx0 = pt.lineX0 != null ? pt.lineX0 : (cfg.horizX0 != null ? cfg.horizX0 : x - 180);
