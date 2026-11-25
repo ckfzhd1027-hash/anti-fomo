@@ -477,7 +477,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v806 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v807 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -3135,7 +3135,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         nextTitle: "돌파리테 타점 컨펌",
         nextDesc: "거래량 돌파 후 리테스트 음봉, 지지 양봉 컨펌, 다음 봉 밑꼬리로 진입합니다.",
         showVolumeChart: false, showBreakoutChart: false, showCandleChart: false,
-        showStep3Chart: false, showStep3FastChart: false, showStep3FastDcaChart: false, showStep2AltSlowChart: true,
+        showStep3Chart: false, showStep3FastChart: false, showStep3FastDcaChart: false, showStep2AltSlowBoxChart: true,
         noBtnSub: "뇌동매매 즉시 중단",
         items: [
           { title: "저점 상승 확인", desc: "저점만 올리고 있는 상황 — 고점은 안 올라도 저점이 계속 올라옴", botCapable: false, iconSvg: `<svg viewBox="0 0 28 28" fill="none" class="w-5 h-5 text-emerald-500 dark:text-emerald-300"><path d="M4 22 L10 18 L16 14 L22 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="18" r="2" fill="currentColor"/><circle cx="16" cy="14" r="2" fill="currentColor"/><circle cx="22" cy="10" r="2" fill="currentColor"/></svg>` },
@@ -4839,6 +4839,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         {id: "step3FastDcaEntryExampleCard", flag: "showStep3FastDcaEntryChart"},
         {id: "step3FastDcaEntry2ExampleCard", flag: "showStep3FastDcaEntry2Chart"},
         {id: "step2AltSlowExampleCard", flag: "showStep2AltSlowChart"},
+        {id: "step2AltSlowBoxExampleCard", flag: "showStep2AltSlowBoxChart"},
         {id: "step3AltExampleCard", flag: "showStep3AltChart"},
         {id: "step3AltShortExampleCard", flag: "showStep3AltShortChart"},
         {id: "step3TypeDExampleCard", flag: "showStep3TypeDChart"},
@@ -8178,6 +8179,8 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
     createExampleChartCard({id: "step3FastDcaEntryExampleCard", color: "lime", insertAfter: "step3FastDcaExampleCard"});
     // 물타기 2차 진입 예시차트 틀 (팩토리 생성, v802) — 빈 틀만, 이미지는 사용자가 나중에 넣음
     createExampleChartCard({id: "step3FastDcaEntry2ExampleCard", color: "lime", insertAfter: "step3FastDcaEntryExampleCard"});
+    // 저점상승 다이버 전용 예시차트 틀 (팩토리 생성, v807) — 질질질 칸(step2AltSlowExampleCard)과 분리, 빈 틀만, 이미지는 사용자가 나중에 넣음
+    createExampleChartCard({id: "step2AltSlowBoxExampleCard", color: "lime", insertAfter: "step2AltSlowExampleCard"});
 
 
     // ===== 로드맵 스터디 모듈 (2026-10-18, 모듈 방식 원칙) =====
@@ -10894,7 +10897,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v806 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v807 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
