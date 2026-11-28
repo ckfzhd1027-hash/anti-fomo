@@ -477,7 +477,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         <span class="text-sm font-black text-white">복기 스터디</span>
       </button>
     </div>
-    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v814 · 로컬 파일</div>
+    <div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v815 · 로컬 파일</div>
   </div>
 </div>
 <!-- 차트 원래 위치로 복원 -->
@@ -6754,6 +6754,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
         } else {
           h += '<div class="text-[11px] mt-0.5 text-slate-400">' + (okN + failN) + '회 · <span class="text-emerald-600 dark:text-emerald-400 font-bold">성공 ' + okN + '</span>';
           if (failN > 0) h += ' · <span class="text-red-500 font-bold">실패 ' + failN + '</span>';
+          if (okN + failN > 0) h += ' · <span class="text-amber-600 dark:text-amber-400 font-bold">승률 ' + Math.round(okN / (okN + failN) * 100) + '%</span>'; // v815: 유형별 승률
           if (missedN > 0) h += ' · <span class="text-amber-600 dark:text-amber-400 font-bold">차트 분석 ' + missedN + '건</span>'; // v583
           h += '</div>';
         }
@@ -10897,7 +10898,7 @@ body.posanim-full section { flex:1 1 auto !important; overflow-y:auto !important
             '    </div>' +
             '</div>' +
             // 하단 정보
-            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v814 · 로컬 파일</div>' +
+            '<div class="text-center mt-8 text-[11px] text-slate-600 font-bold">v815 · 로컬 파일</div>' +
             '</div>';
           document.body.appendChild(overlay);
         }
